@@ -35,6 +35,12 @@ class YahooDataProvider:
             if hasattr(df.columns, "levels"):
                 df.columns = ["_".join([str(x) for x in col if x]) for col in df.columns]
             df = df.rename(columns={c: str(c).lower() for c in df.columns})
+            # Normalize close column if yfinance adds suffixes like close_spy
+            if "close" not in df.columns:
+                for c in df.columns:
+                    if c.startswith("close"):
+                        df["close"] = df[c]
+                        break
             df = df.reset_index().rename(columns={"Datetime": "datetime", "Date": "datetime"})
             df["datetime"] = pd.to_datetime(df["datetime"])
             data[sym] = MarketData(symbol=sym, df=df)
