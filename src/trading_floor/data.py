@@ -31,7 +31,10 @@ class YahooDataProvider:
             )
             if df is None or df.empty:
                 continue
-            df = df.rename(columns={c: c.lower() for c in df.columns})
+            # yfinance can return MultiIndex columns
+            if hasattr(df.columns, "levels"):
+                df.columns = ["_".join([str(x) for x in col if x]) for col in df.columns]
+            df = df.rename(columns={c: str(c).lower() for c in df.columns})
             df = df.reset_index().rename(columns={"Datetime": "datetime", "Date": "datetime"})
             df["datetime"] = pd.to_datetime(df["datetime"])
             data[sym] = MarketData(symbol=sym, df=df)
