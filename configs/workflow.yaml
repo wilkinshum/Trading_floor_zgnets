@@ -1,0 +1,24 @@
+universe: [SPY, QQQ]
+hours:
+  tz: America/New_York
+  start: "09:30"
+  end: "11:30"
+risk:
+  equity: 5000
+  daily_max_loss: 0.02
+  max_positions: 2
+data:
+  interval: "5m"
+  lookback: "5d"
+signals:
+  momentum_short: 5
+  meanrev_long: 20
+  breakout_lookback: 10
+  trade_threshold: 0.001
+logging:
+  trades_csv: trading_logs/trades.csv
+  events_csv: trading_logs/events.csv
+agent_lightning:
+  enabled: true
+  store_uri: "http://172.22.136.47:45993"
+  reward_keys: ["compliance_ok", "risk_ok", "approval_granted"]

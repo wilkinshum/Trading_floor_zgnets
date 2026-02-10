@@ -1,0 +1,7 @@
+agentlightning
+pydantic
+pyyaml
+pandas
+numpy
+yfinance
+rich
