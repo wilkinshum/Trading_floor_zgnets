@@ -90,7 +90,7 @@ class Portfolio:
             pos_value += pos.market_value
         self.state.equity = self.state.cash + pos_value
 
-    def execute(self, symbol: str, side: str, price: float, quantity: int = 0) -> float:
+    def execute(self, symbol: str, side: str, price: float, quantity: int = 0, target_value: float = 0.0) -> float:
         """
         Execute a trade with Short Selling + Execution Realism (Slippage/Comm).
         Returns realized PnL.
@@ -100,18 +100,23 @@ class Portfolio:
         slippage = exec_cfg.get("slippage_bps", 0) * 0.0001
         commission = exec_cfg.get("commission", 0.0)
 
-        # Apply slippage to execution price
-        # Buy at Ask (Higher), Sell at Bid (Lower)
+        # Apply slippage
         if side == "BUY":
             exec_price = price * (1 + slippage)
         else:
             exec_price = price * (1 - slippage)
 
-        max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
-        target_alloc = self.state.equity / max_pos
-        
+        # Sizing Logic
         if quantity == 0:
-            quantity = int(target_alloc // exec_price)
+            if target_value > 0:
+                # Use Volatility-Sized Target Value
+                quantity = int(target_value // exec_price)
+            else:
+                # Fallback to Equal Weight
+                max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
+                target_alloc = self.state.equity / max_pos
+                quantity = int(target_alloc // exec_price)
+            
             if quantity < 1: quantity = 1
 
         # Calculate commission cost

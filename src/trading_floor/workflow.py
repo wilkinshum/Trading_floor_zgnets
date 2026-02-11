@@ -169,12 +169,13 @@ class TradingFloor:
                     sym = p["symbol"]
                     side = p["side"]
                     score = p["score"]
+                    target_val = p.get("target_value", 0.0)
                     price = current_prices.get(sym, 0.0)
                     
                     # Execute in portfolio (updates cash/positions)
                     pnl = 0.0
                     if price > 0:
-                        pnl = self.portfolio.execute(sym, side, price)
+                        pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
                     
                     self.logger.log_trade({
                         "timestamp": context["timestamp"],
