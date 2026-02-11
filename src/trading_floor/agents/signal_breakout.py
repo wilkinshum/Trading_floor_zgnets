@@ -13,6 +13,11 @@ class BreakoutSignalAgent:
         self.tracer.emit_span("signal.breakout", {"rows": len(df)})
         if df.empty or len(df) < self.lookback:
             return 0.0
+        
+        # Optimize: direct max of last N elements instead of full series tail
         closes = df["close"]
-        recent_high = closes.tail(self.lookback).max()
+        recent = closes.iloc[-self.lookback:]
+        recent_high = recent.max()
+        
+        if recent_high == 0: return 0.0
         return float((closes.iloc[-1] - recent_high) / recent_high)

@@ -13,6 +13,11 @@ class MeanReversionSignalAgent:
         self.tracer.emit_span("signal.meanreversion", {"rows": len(df)})
         if df.empty or len(df) < self.long:
             return 0.0
+        
+        # Optimize: direct mean of last N elements instead of full series rolling
         closes = df["close"]
-        sma = closes.rolling(self.long).mean().iloc[-1]
+        last_closes = closes.iloc[-self.long:]
+        sma = last_closes.mean()
+        
+        if sma == 0: return 0.0
         return float((sma - closes.iloc[-1]) / sma)

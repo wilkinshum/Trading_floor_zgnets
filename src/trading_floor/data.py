@@ -20,31 +20,57 @@ class YahooDataProvider:
         self.lookback = lookback
 
     def fetch(self, symbols: List[str]) -> Dict[str, MarketData]:
+        if not symbols:
+            return {}
+
+        # Bulk download is much faster than sequential
+        raw_data = yf.download(
+            symbols,
+            period=self.lookback,
+            interval=self.interval,
+            progress=False,
+            auto_adjust=True,
+            group_by="ticker",
+            threads=True,
+        )
+
         data: Dict[str, MarketData] = {}
-        for sym in symbols:
-            df = yf.download(
-                sym,
-                period=self.lookback,
-                interval=self.interval,
-                progress=False,
-                auto_adjust=True,
-            )
-            if df is None or df.empty:
-                continue
-            # yfinance can return MultiIndex columns
-            if hasattr(df.columns, "levels"):
-                df.columns = ["_".join([str(x) for x in col if x]) for col in df.columns]
-            df = df.rename(columns={c: str(c).lower() for c in df.columns})
-            # Normalize close column if yfinance adds suffixes like close_spy
-            if "close" not in df.columns:
-                for c in df.columns:
-                    if c.startswith("close"):
-                        df["close"] = df[c]
-                        break
-            df = df.reset_index().rename(columns={"Datetime": "datetime", "Date": "datetime"})
-            df["datetime"] = pd.to_datetime(df["datetime"])
-            data[sym] = MarketData(symbol=sym, df=df)
+
+        if len(symbols) == 1:
+            sym = symbols[0]
+            if raw_data is not None and not raw_data.empty:
+                data[sym] = MarketData(symbol=sym, df=self._process_df(raw_data))
+        else:
+            # With group_by="ticker", top level columns are the symbols
+            for sym in symbols:
+                try:
+                    df = raw_data[sym].copy()
+                    # Skip if empty or all NaNs (failed download)
+                    if df.empty or df.isna().all().all():
+                        continue
+                    data[sym] = MarketData(symbol=sym, df=self._process_df(df))
+                except KeyError:
+                    continue
+
         return data
+
+    def _process_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        # yfinance can return MultiIndex columns
+        if hasattr(df.columns, "levels"):
+            df.columns = ["_".join([str(x) for x in col if x]) for col in df.columns]
+        
+        df = df.rename(columns={c: str(c).lower() for c in df.columns})
+        
+        # Normalize close column if yfinance adds suffixes like close_spy
+        if "close" not in df.columns:
+            for c in df.columns:
+                if c.startswith("close"):
+                    df["close"] = df[c]
+                    break
+        
+        df = df.reset_index().rename(columns={"Datetime": "datetime", "Date": "datetime"})
+        df["datetime"] = pd.to_datetime(df["datetime"])
+        return df
 
 
 def filter_trading_window(df: pd.DataFrame, tz: str, start: str, end: str) -> pd.DataFrame:

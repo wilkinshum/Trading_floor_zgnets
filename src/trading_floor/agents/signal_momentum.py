@@ -13,6 +13,16 @@ class MomentumSignalAgent:
         self.tracer.emit_span("signal.momentum", {"rows": len(df)})
         if df.empty or len(df) < self.short:
             return 0.0
+        
+        # Optimize: Only calculate rolling mean for the last window needed
+        # We need the last `short` elements to compute the rolling mean of the *last* point.
+        # But rolling().mean() computes it for everyone.
+        # Just taking the last `short` values and computing their mean is faster/simpler 
+        # for a single point scalar return.
+        
         closes = df["close"]
-        sma = closes.rolling(self.short).mean().iloc[-1]
+        last_closes = closes.iloc[-self.short:]
+        sma = last_closes.mean()
+        
+        if sma == 0: return 0.0
         return float((closes.iloc[-1] - sma) / sma)
