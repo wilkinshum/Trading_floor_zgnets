@@ -1,6 +1,7 @@
 import http.server
 import os
 import socketserver
+import subprocess
 import threading
 import time
 from pathlib import Path
@@ -24,6 +25,23 @@ def tail_lines(path: Path, max_lines: int) -> list[str]:
     return lines[-max_lines:]
 
 
+def read_openclaw_logs(max_lines: int) -> list[str]:
+    try:
+        proc = subprocess.run(
+            ["openclaw", "logs", "--limit", str(max_lines), "--plain"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        output = (proc.stdout or "") + (proc.stderr or "")
+        if not output.strip():
+            return ["(no openclaw logs)\n"]
+        return [line + "\n" for line in output.splitlines()]
+    except Exception as e:
+        return [f"(openclaw logs unavailable: {e})\n"]
+
+
 def write_combined_logs():
     sections = [
         ("report", LOGS_DIR / "report.log"),
@@ -35,6 +53,11 @@ def write_combined_logs():
         lines = tail_lines(path, LOG_TAIL_LINES)
         parts.extend(lines if lines else ["(no logs yet)\n"])
         parts.append("\n")
+
+    parts.append("===== openclaw (gateway logs) =====\n")
+    parts.extend(read_openclaw_logs(LOG_TAIL_LINES))
+    parts.append("\n")
+
     (WEB / "logs.txt").write_text("".join(parts), encoding="utf-8")
 
 
