@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 from trading_floor.data import YahooDataProvider, filter_trading_window, latest_timestamp
+from trading_floor.portfolio import Portfolio
 from trading_floor.agents.scout import ScoutAgent
 from trading_floor.agents.signal_momentum import MomentumSignalAgent
 from trading_floor.agents.signal_meanreversion import MeanReversionSignalAgent
@@ -24,6 +25,8 @@ class TradingFloor:
             interval=cfg.get("data", {}).get("interval", "5m"),
             lookback=cfg.get("data", {}).get("lookback", "5d"),
         )
+        self.portfolio = Portfolio(cfg)
+        
         self.scout = ScoutAgent(cfg, self.tracer)
         self.signal_mom = MomentumSignalAgent(cfg, self.tracer)
         self.signal_mean = MeanReversionSignalAgent(cfg, self.tracer)
@@ -67,6 +70,8 @@ class TradingFloor:
         with self.tracer.run_context("trading_floor.run", input_payload=context):
             md = self.data.fetch(self.cfg["universe"])
             windowed = {}
+            current_prices = {}
+            
             for sym, m in md.items():
                 windowed[sym] = filter_trading_window(
                     m.df,
@@ -74,6 +79,14 @@ class TradingFloor:
                     start=self.cfg["hours"]["start"],
                     end=self.cfg["hours"]["end"],
                 )
+                if not m.df.empty:
+                    current_prices[sym] = m.df["close"].iloc[-1]
+
+            # Mark portfolio to market
+            self.portfolio.mark_to_market(current_prices)
+            context["portfolio_equity"] = self.portfolio.state.equity
+            context["portfolio_cash"] = self.portfolio.state.cash
+            context["positions"] = list(self.portfolio.state.positions.keys())
 
             ranked = self.scout.rank(windowed)
             signals = {}
@@ -120,19 +133,33 @@ class TradingFloor:
 
             if approval_granted:
                 for p in plan.get("plans", []):
+                    sym = p["symbol"]
+                    side = p["side"]
+                    score = p["score"]
+                    price = current_prices.get(sym, 0.0)
+                    
+                    # Execute in portfolio (updates cash/positions)
+                    pnl = 0.0
+                    if price > 0:
+                        pnl = self.portfolio.execute(sym, side, price)
+                    
                     self.logger.log_trade({
                         "timestamp": context["timestamp"],
-                        "symbol": p["symbol"],
-                        "side": p["side"],
-                        "score": p["score"],
-                        "pnl": 0.0,
+                        "symbol": sym,
+                        "side": side,
+                        "score": score,
+                        "pnl": pnl,
                     })
+                
+                # Save portfolio state
+                self.portfolio.save()
 
             # reward signals for Agent Lightning
             self.tracer.emit_reward({
                 "risk_ok": int(risk_ok),
                 "compliance_ok": int(compliance_ok),
                 "approval_granted": int(approval_granted),
+                "equity_change": self.portfolio.state.equity - context.get("portfolio_equity", 0) # naive daily change
             })
 
             _ = self.reviewer.summarize()
