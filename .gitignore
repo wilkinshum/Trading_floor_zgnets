@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 logs/
 trading_logs/
+web/report.json
