@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trading Floor Logs</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 16px; background: #0f1115; color: #e6e6e6; }
+      pre { background: #141821; padding: 12px; border-radius: 8px; overflow: auto; height: 80vh; }
+      .meta { margin-bottom: 12px; color: #9aa3b2; }
+    </style>
+  </head>
+  <body>
+    <div class="meta">Auto-refreshing combined logs (every 10s)</div>
+    <pre id="log">Loading...</pre>
+    <script>
+      async function refresh() {
+        try {
+          const res = await fetch('logs.txt', { cache: 'no-store' });
+          const txt = await res.text();
+          document.getElementById('log').textContent = txt;
+        } catch (e) {
+          document.getElementById('log').textContent = 'Error loading logs.';
+        }
+      }
+      refresh();
+      setInterval(refresh, 10000);
+    </script>
+  </body>
+</html>

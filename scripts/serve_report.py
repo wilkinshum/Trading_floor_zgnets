@@ -1,4 +1,5 @@
 import http.server
+import os
 import socketserver
 import threading
 import time
@@ -8,15 +9,40 @@ from generate_report import main as generate
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
+LOGS_DIR = ROOT / "logs" / "watchdog"
 
 PORT = 8000
 REFRESH_SECONDS = 30
+LOG_TAIL_LINES = 200
+
+
+def tail_lines(path: Path, max_lines: int) -> list[str]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8", errors="replace") as f:
+        lines = f.readlines()
+    return lines[-max_lines:]
+
+
+def write_combined_logs():
+    sections = [
+        ("report", LOGS_DIR / "report.log"),
+        ("mission-control", LOGS_DIR / "mission-control.log"),
+    ]
+    parts = []
+    for name, path in sections:
+        parts.append(f"===== {name} ({path}) =====\n")
+        lines = tail_lines(path, LOG_TAIL_LINES)
+        parts.extend(lines if lines else ["(no logs yet)\n"])
+        parts.append("\n")
+    (WEB / "logs.txt").write_text("".join(parts), encoding="utf-8")
 
 
 def refresher():
     while True:
         try:
             generate()
+            write_combined_logs()
         except Exception as e:
             print(f"[report] generate error: {e}")
         time.sleep(REFRESH_SECONDS)

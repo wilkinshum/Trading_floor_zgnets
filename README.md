@@ -28,6 +28,7 @@ Serve live dashboard (auto refresh):
 .\.venv\Scripts\python scripts\serve_report.py
 ```
 Open: http://localhost:8000
+Logs: http://localhost:8000/logs.html
 
 ## Watchdog (always-on background)
 Keeps both the report server (8000) and Mission Control UI (3000) alive.
