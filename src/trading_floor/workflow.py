@@ -14,6 +14,7 @@ from trading_floor.agents.pm import PMAgent
 from trading_floor.agents.compliance import ComplianceAgent
 from trading_floor.agents.reviewer import NextDayReviewer
 from trading_floor.logging import TradeLogger
+from trading_floor.signal_log import SignalLogger
 from trading_floor.lightning import LightningTracer
 
 
@@ -21,6 +22,7 @@ class TradingFloor:
     def __init__(self, cfg):
         self.cfg = cfg
         self.logger = TradeLogger(cfg)
+        self.signal_logger = SignalLogger(cfg)
         self.tracer = LightningTracer(cfg)
 
         self.data = YahooDataProvider(
@@ -98,11 +100,12 @@ class TradingFloor:
             
             ranked = self.scout.rank(windowed)
             signals = {}
-            # Optim: Only compute signals for ranked/filtered symbols
-            # If we have 500 symbols but PM only buys top 10, we don't need signals for bottom 490.
-            # Assuming scout rank is good enough pre-filter.
-            # But here scout rank depends on trend/vol, not signal score.
-            # Let's keep computing all signals for now to be safe, but we can parallelize if needed.
+            signal_details = {} # Store components for logging
+            
+            # Load Weights
+            weights = self.cfg.get("signals", {}).get("weights", {
+                "momentum": 0.25, "meanrev": 0.25, "breakout": 0.25, "news": 0.25
+            })
             
             for sym, df in windowed.items():
                 if df.empty: continue
@@ -111,15 +114,22 @@ class TradingFloor:
                 mean = self.signal_mean.score(df)
                 brk = self.signal_break.score(df)
                 news = self.signal_news.get_sentiment(sym)
-                
-                # Weighting: Technicals 70%, News 30%
-                # Normalize news (-1 to 1) to match technical scale (approx -0.05 to 0.05 usually)
-                # Actually, technical scores are small raw returns.
-                # Let's scale news down to be comparable, e.g., divide by 100.
                 news_scaled = news * 0.01 
                 
-                score = (mom + mean + brk + news_scaled) / 4.0
+                # Weighted Sum
+                score = (
+                    (mom * weights.get("momentum", 0.25)) +
+                    (mean * weights.get("meanrev", 0.25)) +
+                    (brk * weights.get("breakout", 0.25)) +
+                    (news_scaled * weights.get("news", 0.25))
+                )
+                
                 signals[sym] = score
+                signal_details[sym] = {
+                    "components": {"momentum": mom, "meanrev": mean, "breakout": brk, "news": news},
+                    "weights": weights,
+                    "final_score": score
+                }
 
             context.update({"ranked": ranked, "signals": signals})
             plan, plan_notes = self.pm.create_plan(context)
@@ -184,6 +194,14 @@ class TradingFloor:
                         "score": score,
                         "pnl": pnl,
                     })
+                    
+                    # Log Signal Components for Optimizer
+                    if sym in signal_details:
+                        details = signal_details[sym]
+                        details["timestamp"] = context["timestamp"]
+                        details["symbol"] = sym
+                        details["side"] = side
+                        self.signal_logger.log_signal(details)
                 
                 # Save portfolio state
                 self.portfolio.save()

@@ -20,9 +20,15 @@ signals:
   meanrev_long: 20
   breakout_lookback: 10
   trade_threshold: 0.001
+  weights:
+    momentum: 0.25
+    meanrev: 0.25
+    breakout: 0.25
+    news: 0.25
 logging:
   trades_csv: trading_logs/trades.csv
   events_csv: trading_logs/events.csv
+  signals_csv: trading_logs/signals.csv
 approval:
   required: true
   file: approval.json
