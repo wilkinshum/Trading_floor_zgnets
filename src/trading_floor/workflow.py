@@ -77,12 +77,19 @@ class TradingFloor:
 
             ranked = self.scout.rank(windowed)
             signals = {}
+            # Optim: Only compute signals for ranked/filtered symbols
+            # If we have 500 symbols but PM only buys top 10, we don't need signals for bottom 490.
+            # Assuming scout rank is good enough pre-filter.
+            # But here scout rank depends on trend/vol, not signal score.
+            # Let's keep computing all signals for now to be safe, but we can parallelize if needed.
+            
             for sym, df in windowed.items():
-                score = (
-                    self.signal_mom.score(df)
-                    + self.signal_mean.score(df)
-                    + self.signal_break.score(df)
-                ) / 3.0
+                if df.empty: continue
+                # Could parallelize this loop if heavy
+                mom = self.signal_mom.score(df)
+                mean = self.signal_mean.score(df)
+                brk = self.signal_break.score(df)
+                score = (mom + mean + brk) / 3.0
                 signals[sym] = score
 
             context.update({"ranked": ranked, "signals": signals})
