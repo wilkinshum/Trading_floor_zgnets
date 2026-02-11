@@ -29,5 +29,20 @@ Serve live dashboard (auto refresh):
 ```
 Open: http://localhost:8000
 
+## Watchdog (always-on background)
+Keeps both the report server (8000) and Mission Control UI (3000) alive.
+
+Start watchdog:
+```bash
+scripts\\run_watchdog.cmd
+```
+
+Stop watchdog:
+- create an empty file `watchdog.stop` in repo root
+
+Logs:
+- `logs\\watchdog\\report.log`
+- `logs\\watchdog\\mission-control.log`
+
 ## Agent Lightning
 We instrument agents with `agentlightning` emit/tracing hooks so we can optimize prompts and decisions offline.
