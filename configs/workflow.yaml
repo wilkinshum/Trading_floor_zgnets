@@ -1,4 +1,4 @@
-universe: [SPY, QQQ]
+universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, HUT, TSLA, ORCL, CRWD, AMD]
 hours:
   tz: America/New_York
   start: "09:30"
