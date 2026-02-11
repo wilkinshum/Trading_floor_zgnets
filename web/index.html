@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Trading Floor — Daily Summary</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#0b0f14;color:#e6edf3;margin:0;padding:24px;}
+    h1{margin:0 0 8px 0;font-size:24px;}
+    .card{background:#111820;border:1px solid #202a36;border-radius:10px;padding:16px;margin:12px 0;}
+    .muted{color:#9fb0c0;font-size:12px;}
+    .tag{display:inline-block;background:#1f6feb;color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;margin-right:6px;}
+    ul{padding-left:18px;}
+  </style>
+</head>
+<body>
+  <h1>Trading Floor — Daily Summary</h1>
+  <div class="muted">Auto‑generated report. Refresh after each run.</div>
+
+  <div class="card">
+    <div class="tag">Run</div>
+    <strong id="ts">—</strong>
+    <div class="muted" id="status">—</div>
+  </div>
+
+  <div class="card">
+    <div class="tag">Plans</div>
+    <ul id="plans"></ul>
+  </div>
+
+  <div class="card">
+    <div class="tag">Notes</div>
+    <ul id="notes"></ul>
+  </div>
+
+<script>
+  // This page is rendered from a JSON payload embedded by generate_report.py
+  const payload = window.__REPORT__ || {};
+  document.getElementById('ts').textContent = payload.timestamp || '—';
+  document.getElementById('status').textContent = payload.status || '—';
+
+  const plans = document.getElementById('plans');
+  (payload.plans || []).forEach(p => {
+    const li = document.createElement('li');
+    li.textContent = `${p.symbol} ${p.side} (score ${p.score.toFixed(6)})`;
+    plans.appendChild(li);
+  });
+  if (!plans.children.length) plans.innerHTML = '<li>None</li>';
+
+  const notes = document.getElementById('notes');
+  (payload.notes || []).forEach(n => {
+    const li = document.createElement('li');
+    li.textContent = n;
+    notes.appendChild(li);
+  });
+  if (!notes.children.length) notes.innerHTML = '<li>—</li>';
+</script>
+</body>
+</html>

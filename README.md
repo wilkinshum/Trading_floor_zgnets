@@ -14,8 +14,15 @@ Bootstrap for a 7‑agent trading workflow with Agent Lightning instrumentation.
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
-python -m trading_floor.run --config configs/workflow.yaml
+scripts\\run_workflow.cmd
 ```
+
+## Report site
+Generate a local HTML report:
+```bash
+.\.venv\Scripts\python scripts\generate_report.py
+```
+Open: `web\index.html`
 
 ## Agent Lightning
 We instrument agents with `agentlightning` emit/tracing hooks so we can optimize prompts and decisions offline.
