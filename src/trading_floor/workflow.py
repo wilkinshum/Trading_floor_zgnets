@@ -16,6 +16,8 @@ from trading_floor.agents.reviewer import NextDayReviewer
 from trading_floor.logging import TradeLogger
 from trading_floor.signal_log import SignalLogger
 from trading_floor.lightning import LightningTracer
+from trading_floor.db import Database
+from pathlib import Path
 
 
 class TradingFloor:
@@ -24,6 +26,10 @@ class TradingFloor:
         self.logger = TradeLogger(cfg)
         self.signal_logger = SignalLogger(cfg)
         self.tracer = LightningTracer(cfg)
+        
+        # Init DB
+        db_path = Path(cfg["logging"].get("db_path", "trading.db"))
+        self.db = Database(db_path)
 
         self.data = YahooDataProvider(
             interval=cfg.get("data", {}).get("interval", "5m"),
@@ -187,13 +193,18 @@ class TradingFloor:
                     if price > 0:
                         pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
                     
-                    self.logger.log_trade({
+                    trade_record = {
                         "timestamp": context["timestamp"],
                         "symbol": sym,
                         "side": side,
+                        "quantity": p.get("target_value", 0), # Simplified for now
+                        "price": price,
                         "score": score,
                         "pnl": pnl,
-                    })
+                    }
+                    
+                    self.logger.log_trade(trade_record)
+                    self.db.log_trade(trade_record)
                     
                     # Log Signal Components for Optimizer
                     if sym in signal_details:
@@ -202,6 +213,7 @@ class TradingFloor:
                         details["symbol"] = sym
                         details["side"] = side
                         self.signal_logger.log_signal(details)
+                        self.db.log_signal(details)
                 
                 # Save portfolio state
                 self.portfolio.save()
