@@ -18,17 +18,20 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 STOP_FILE = REPO_ROOT / "watchdog.stop"
 STATE_FILE = LOG_DIR / "watchdog_state.json"
 
+NPM_CMD = Path(r"C:\Program Files\nodejs\npm.cmd")
+VENV_PY = REPO_ROOT / ".venv" / "Scripts" / "python.exe"
+
 SERVICES = {
     "report": {
         "name": "report",
-        "cmd": [sys.executable, str(REPO_ROOT / "scripts" / "serve_report.py")],
+        "cmd": [str(VENV_PY), str(REPO_ROOT / "scripts" / "serve_report.py")],
         "cwd": str(REPO_ROOT),
         "url": "http://127.0.0.1:8000/report.json",
         "log": LOG_DIR / "report.log",
     },
     "mission_control": {
         "name": "mission_control",
-        "cmd": ["npm", "run", "dev"],
+        "cmd": [str(NPM_CMD), "run", "dev"],
         "cwd": str(MC_ROOT),
         "url": "http://127.0.0.1:3000",
         "log": LOG_DIR / "mission-control.log",
