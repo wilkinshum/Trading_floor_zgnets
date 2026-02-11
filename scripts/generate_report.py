@@ -5,7 +5,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 EVENTS = ROOT / "trading_logs" / "events.csv"
 TRADES = ROOT / "trading_logs" / "trades.csv"
-OUT = ROOT / "web" / "index.html"
+OUT_JSON = ROOT / "web" / "report.json"
 
 
 def main():
@@ -42,15 +42,9 @@ def main():
                 for _, r in recent.iterrows()
             ]
 
-    html = OUT.read_text(encoding="utf-8")
-    script = f"\n<script>window.__REPORT__ = {json.dumps(payload)};</script>\n"
-    if "window.__REPORT__" not in html:
-        html = html.replace("</body>", script + "</body>")
-    else:
-        # replace existing payload
-        html = html.replace("window.__REPORT__ = {}", f"window.__REPORT__ = {json.dumps(payload)}")
-    OUT.write_text(html, encoding="utf-8")
-    print(f"Wrote {OUT}")
+    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    OUT_JSON.write_text(json.dumps(payload), encoding="utf-8")
+    print(f"Wrote {OUT_JSON}")
 
 
 if __name__ == "__main__":

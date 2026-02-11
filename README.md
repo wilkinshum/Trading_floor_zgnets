@@ -18,11 +18,16 @@ scripts\\run_workflow.cmd
 ```
 
 ## Report site
-Generate a local HTML report:
+Generate JSON report:
 ```bash
 .\.venv\Scripts\python scripts\generate_report.py
 ```
-Open: `web\index.html`
+
+Serve live dashboard (auto refresh):
+```bash
+.\.venv\Scripts\python scripts\serve_report.py
+```
+Open: http://localhost:8000
 
 ## Agent Lightning
 We instrument agents with `agentlightning` emit/tracing hooks so we can optimize prompts and decisions offline.

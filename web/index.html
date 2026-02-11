@@ -34,26 +34,37 @@
   </div>
 
 <script>
-  // This page is rendered from a JSON payload embedded by generate_report.py
-  const payload = window.__REPORT__ || {};
-  document.getElementById('ts').textContent = payload.timestamp || '—';
-  document.getElementById('status').textContent = payload.status || '—';
+  async function loadReport() {
+    try {
+      const res = await fetch('report.json', { cache: 'no-store' });
+      const payload = await res.json();
+      document.getElementById('ts').textContent = payload.timestamp || '—';
+      document.getElementById('status').textContent = payload.status || '—';
 
-  const plans = document.getElementById('plans');
-  (payload.plans || []).forEach(p => {
-    const li = document.createElement('li');
-    li.textContent = `${p.symbol} ${p.side} (score ${p.score.toFixed(6)})`;
-    plans.appendChild(li);
-  });
-  if (!plans.children.length) plans.innerHTML = '<li>None</li>';
+      const plans = document.getElementById('plans');
+      plans.innerHTML = '';
+      (payload.plans || []).forEach(p => {
+        const li = document.createElement('li');
+        li.textContent = `${p.symbol} ${p.side} (score ${Number(p.score).toFixed(6)})`;
+        plans.appendChild(li);
+      });
+      if (!plans.children.length) plans.innerHTML = '<li>None</li>';
 
-  const notes = document.getElementById('notes');
-  (payload.notes || []).forEach(n => {
-    const li = document.createElement('li');
-    li.textContent = n;
-    notes.appendChild(li);
-  });
-  if (!notes.children.length) notes.innerHTML = '<li>—</li>';
+      const notes = document.getElementById('notes');
+      notes.innerHTML = '';
+      (payload.notes || []).forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        notes.appendChild(li);
+      });
+      if (!notes.children.length) notes.innerHTML = '<li>—</li>';
+    } catch (e) {
+      document.getElementById('status').textContent = 'Error loading report.json';
+    }
+  }
+
+  loadReport();
+  setInterval(loadReport, 30000);
 </script>
 </body>
 </html>
