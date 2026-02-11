@@ -9,6 +9,12 @@ class Position:
     quantity: int
     avg_price: float
     current_price: float = 0.0
+    highest_price: float = 0.0 # For trailing stop (Longs)
+    lowest_price: float = 0.0  # For trailing stop (Shorts)
+
+    def __post_init__(self):
+        if self.highest_price == 0.0: self.highest_price = self.avg_price
+        if self.lowest_price == 0.0: self.lowest_price = self.avg_price
 
     @property
     def market_value(self) -> float:
@@ -42,7 +48,9 @@ class Portfolio:
                 positions[sym] = Position(
                     symbol=sym,
                     quantity=pos_data["quantity"],
-                    avg_price=pos_data["avg_price"]
+                    avg_price=pos_data["avg_price"],
+                    highest_price=pos_data.get("highest_price", 0.0),
+                    lowest_price=pos_data.get("lowest_price", 0.0)
                 )
             return PortfolioState(
                 cash=data.get("cash", 0.0),
@@ -60,7 +68,9 @@ class Portfolio:
             "positions": {
                 sym: {
                     "quantity": p.quantity,
-                    "avg_price": p.avg_price
+                    "avg_price": p.avg_price,
+                    "highest_price": p.highest_price,
+                    "lowest_price": p.lowest_price
                 } for sym, p in self.state.positions.items()
             }
         }
@@ -73,6 +83,10 @@ class Portfolio:
             price = prices.get(sym)
             if price:
                 pos.current_price = price
+                # Update High/Low watermarks for Trailing Stop
+                if price > pos.highest_price: pos.highest_price = price
+                if price < pos.lowest_price or pos.lowest_price == 0.0: pos.lowest_price = price
+            
             pos_value += pos.market_value
         self.state.equity = self.state.cash + pos_value
 
