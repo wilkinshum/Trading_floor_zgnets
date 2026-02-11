@@ -1,3 +1,6 @@
 @echo off
-set PYTHONPATH=%~dp0..\src
-"%~dp0..\.venv\Scripts\python.exe" -m trading_floor.run --config "%~dp0..\configs\workflow.yaml"
+setlocal
+pushd %~dp0..
+set PYTHONPATH=%CD%\src
+"%CD%\.venv\Scripts\python.exe" -m trading_floor.run --config "%CD%\configs\workflow.yaml"
+popd

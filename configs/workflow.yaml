@@ -18,6 +18,9 @@ signals:
 logging:
   trades_csv: trading_logs/trades.csv
   events_csv: trading_logs/events.csv
+approval:
+  required: true
+  file: approval.json
 agent_lightning:
   enabled: true
   store_uri: "http://172.22.136.47:45993"

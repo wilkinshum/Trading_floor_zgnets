@@ -4,3 +4,4 @@ __pycache__/
 logs/
 trading_logs/
 web/report.json
+approval.json
