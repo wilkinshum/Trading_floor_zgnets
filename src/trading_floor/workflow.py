@@ -7,6 +7,7 @@ from trading_floor.agents.scout import ScoutAgent
 from trading_floor.agents.signal_momentum import MomentumSignalAgent
 from trading_floor.agents.signal_meanreversion import MeanReversionSignalAgent
 from trading_floor.agents.signal_breakout import BreakoutSignalAgent
+from trading_floor.agents.news import NewsSentimentAgent
 from trading_floor.agents.risk import RiskAgent
 from trading_floor.agents.pm import PMAgent
 from trading_floor.agents.compliance import ComplianceAgent
@@ -31,6 +32,7 @@ class TradingFloor:
         self.signal_mom = MomentumSignalAgent(cfg, self.tracer)
         self.signal_mean = MeanReversionSignalAgent(cfg, self.tracer)
         self.signal_break = BreakoutSignalAgent(cfg, self.tracer)
+        self.signal_news = NewsSentimentAgent(cfg, self.tracer)
         self.risk = RiskAgent(cfg, self.tracer)
         self.pm = PMAgent(cfg, self.tracer)
         self.compliance = ComplianceAgent(cfg, self.tracer)
@@ -102,7 +104,15 @@ class TradingFloor:
                 mom = self.signal_mom.score(df)
                 mean = self.signal_mean.score(df)
                 brk = self.signal_break.score(df)
-                score = (mom + mean + brk) / 3.0
+                news = self.signal_news.get_sentiment(sym)
+                
+                # Weighting: Technicals 70%, News 30%
+                # Normalize news (-1 to 1) to match technical scale (approx -0.05 to 0.05 usually)
+                # Actually, technical scores are small raw returns.
+                # Let's scale news down to be comparable, e.g., divide by 100.
+                news_scaled = news * 0.01 
+                
+                score = (mom + mean + brk + news_scaled) / 4.0
                 signals[sym] = score
 
             context.update({"ranked": ranked, "signals": signals})

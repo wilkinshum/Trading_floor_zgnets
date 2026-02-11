@@ -5,3 +5,4 @@ pandas
 numpy
 yfinance
 rich
+textblob
