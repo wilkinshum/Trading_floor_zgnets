@@ -80,11 +80,32 @@ class TradingFloor:
         }
 
         with self.tracer.run_context("trading_floor.run", input_payload=context):
-            md = self.data.fetch(self.cfg["universe"])
+            # Fetch Universe + Market Indicators
+            fetch_list = list(set(self.cfg["universe"] + ["SPY", "^VIX"]))
+            md = self.data.fetch(fetch_list)
+            
+            # Market Regime Calculation
+            market_regime = {"is_downtrend": False, "is_fear": False}
+            
+            # SPY Trend Check (MA20)
+            if "SPY" in md and not md["SPY"].df.empty:
+                spy_series = md["SPY"].df["close"]
+                if len(spy_series) >= 20:
+                    ma20 = spy_series.rolling(20).mean().iloc[-1]
+                    market_regime["is_downtrend"] = spy_series.iloc[-1] < ma20
+            
+            # VIX Fear Check
+            if "^VIX" in md and not md["^VIX"].df.empty:
+                vix_val = md["^VIX"].df["close"].iloc[-1]
+                market_regime["is_fear"] = vix_val > 25.0
+            
+            context["market_regime"] = market_regime
+
             windowed = {}
             current_prices = {}
             
             for sym, m in md.items():
+                if sym not in self.cfg["universe"]: continue
                 windowed[sym] = filter_trading_window(
                     m.df,
                     tz=self.cfg["hours"]["tz"],
