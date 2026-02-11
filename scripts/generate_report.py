@@ -17,7 +17,7 @@ def main():
     }
 
     if EVENTS.exists():
-        df = pd.read_csv(EVENTS)
+        df = pd.read_csv(EVENTS, on_bad_lines="skip")
         if not df.empty:
             last = df.iloc[-1]
             payload["timestamp"] = str(last.get("timestamp", "—"))
@@ -29,7 +29,7 @@ def main():
             payload["notes"] = notes
 
     if TRADES.exists():
-        df = pd.read_csv(TRADES)
+        df = pd.read_csv(TRADES, on_bad_lines="skip")
         if not df.empty:
             last_ts = payload["timestamp"]
             recent = df[df["timestamp"] == last_ts] if last_ts != "—" else df.tail(5)
