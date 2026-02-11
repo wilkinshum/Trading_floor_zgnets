@@ -78,52 +78,125 @@ class Portfolio:
 
     def execute(self, symbol: str, side: str, price: float, quantity: int = 0) -> float:
         """
-        Execute a trade. 
-        Returns realized PnL for closing trades, 0.0 for opening.
-        Adjusts cash and positions.
+        Execute a trade with Short Selling support.
+        Returns realized PnL.
         """
-        # Default sizing if 0: rudimentary "max positions" sizing
-        if quantity == 0 and side == "BUY":
-            # Simple equal weight sizing: Equity / Max Positions
-            max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
-            target_alloc = self.state.equity / max_pos
+        max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
+        target_alloc = self.state.equity / max_pos
+        
+        # Determine quantity if not specified
+        if quantity == 0:
             quantity = int(target_alloc // price)
             if quantity < 1: quantity = 1
 
-        if quantity == 0 and side == "SELL":
-            # Assume full exit if quantity 0
-            if symbol in self.state.positions:
-                quantity = self.state.positions[symbol].quantity
-
         realized_pnl = 0.0
         
+        # --- BUY LOGIC ---
         if side == "BUY":
             cost = price * quantity
-            if self.state.cash >= cost:
-                self.state.cash -= cost
-                if symbol in self.state.positions:
-                    # Averaging up/down
-                    pos = self.state.positions[symbol]
-                    total_cost = (pos.quantity * pos.avg_price) + cost
-                    pos.quantity += quantity
-                    pos.avg_price = total_cost / pos.quantity
-                else:
-                    self.state.positions[symbol] = Position(symbol, quantity, price, price)
-        
-        elif side == "SELL":
-            if symbol in self.state.positions:
+            
+            # Check if we are covering a SHORT position
+            if symbol in self.state.positions and self.state.positions[symbol].quantity < 0:
                 pos = self.state.positions[symbol]
-                # If selling more than we have, just sell what we have (no shorts yet for simplicity)
+                qty_to_cover = min(quantity, abs(pos.quantity))
+                
+                # Realize PnL on cover
+                # Short Profit = (Entry Price - Exit Price) * Qty
+                entry_val = pos.avg_price * qty_to_cover
+                exit_val = price * qty_to_cover
+                
+                # Cash effect: We pay 'exit_val' to buy back.
+                # But we already got cash when we sold short. 
+                # Actually, simpler: 
+                # Cash balance was credited when shorted. 
+                # Now we debit cash to buy back.
+                self.state.cash -= exit_val
+                
+                trade_pnl = entry_val - exit_val
+                realized_pnl += trade_pnl
+                
+                pos.quantity += qty_to_cover # moving towards 0
+                
+                # If we bought more than needed to cover, flip to LONG
+                remaining_qty = quantity - qty_to_cover
+                if remaining_qty > 0:
+                    # Treat as new long
+                    cost_rem = price * remaining_qty
+                    # Margin check (simple cash check for now, can go negative cash if margin enabled in future)
+                    # For now, require cash for long side
+                    if self.state.cash >= cost_rem:
+                        self.state.cash -= cost_rem
+                        # Reset position to long
+                        if pos.quantity == 0:
+                             pos.quantity = remaining_qty
+                             pos.avg_price = price
+                    else:
+                        print(f"Not enough cash to flip long on {symbol}")
+
+                if pos.quantity == 0:
+                    del self.state.positions[symbol]
+                    
+            else:
+                # Normal Long Buy
+                if self.state.cash >= cost:
+                    self.state.cash -= cost
+                    if symbol in self.state.positions:
+                        pos = self.state.positions[symbol]
+                        total_cost = (pos.quantity * pos.avg_price) + cost
+                        pos.quantity += quantity
+                        pos.avg_price = total_cost / pos.quantity
+                    else:
+                        self.state.positions[symbol] = Position(symbol, quantity, price, price)
+                else:
+                    print(f"Not enough cash to buy {symbol}")
+
+        # --- SELL LOGIC ---
+        elif side == "SELL":
+            proceeds = price * quantity
+            
+            # Check if we are closing a LONG position
+            if symbol in self.state.positions and self.state.positions[symbol].quantity > 0:
+                pos = self.state.positions[symbol]
                 qty_to_sell = min(quantity, pos.quantity)
                 
-                proceeds = price * qty_to_sell
+                sale_val = price * qty_to_sell
                 cost_basis = pos.avg_price * qty_to_sell
                 
-                self.state.cash += proceeds
-                realized_pnl = proceeds - cost_basis
+                self.state.cash += sale_val
+                realized_pnl += (sale_val - cost_basis)
                 
-                pos.quantity -= qty_to_sell
-                if pos.quantity <= 0:
+                pos.quantity -= qty_to_sell # moving towards 0
+                
+                # If we sold more than we had, flip to SHORT
+                remaining_qty = quantity - qty_to_sell
+                if remaining_qty > 0:
+                     # Enter Short
+                     # Proceed adds to cash (margin debt tracked implicitly by negative qty)
+                     short_proceeds = price * remaining_qty
+                     self.state.cash += short_proceeds
+                     
+                     if pos.quantity == 0:
+                         pos.quantity = -remaining_qty
+                         pos.avg_price = price
+                         
+                if pos.quantity == 0:
                     del self.state.positions[symbol]
+            
+            else:
+                # Opening a new SHORT position
+                # Verify margin requirement? (For now, assume if we have equity, we can short)
+                if self.state.equity > 0:
+                     self.state.cash += proceeds # Receive cash from short sale
+                     if symbol in self.state.positions:
+                         # Adding to existing short (averaging price)
+                         pos = self.state.positions[symbol]
+                         # Weighted avg for short: ((abs(qty) * avg) + (new_qty * price)) / total
+                         total_val = (abs(pos.quantity) * pos.avg_price) + proceeds
+                         pos.quantity -= quantity # more negative
+                         pos.avg_price = total_val / abs(pos.quantity)
+                     else:
+                         self.state.positions[symbol] = Position(symbol, -quantity, price, price)
+                else:
+                    print(f"Equity too low to short {symbol}")
 
         return realized_pnl
