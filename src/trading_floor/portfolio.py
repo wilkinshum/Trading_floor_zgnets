@@ -78,58 +78,63 @@ class Portfolio:
 
     def execute(self, symbol: str, side: str, price: float, quantity: int = 0) -> float:
         """
-        Execute a trade with Short Selling support.
+        Execute a trade with Short Selling + Execution Realism (Slippage/Comm).
         Returns realized PnL.
         """
+        # Load execution config
+        exec_cfg = self.cfg.get("execution", {})
+        slippage = exec_cfg.get("slippage_bps", 0) * 0.0001
+        commission = exec_cfg.get("commission", 0.0)
+
+        # Apply slippage to execution price
+        # Buy at Ask (Higher), Sell at Bid (Lower)
+        if side == "BUY":
+            exec_price = price * (1 + slippage)
+        else:
+            exec_price = price * (1 - slippage)
+
         max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
         target_alloc = self.state.equity / max_pos
         
-        # Determine quantity if not specified
         if quantity == 0:
-            quantity = int(target_alloc // price)
+            quantity = int(target_alloc // exec_price)
             if quantity < 1: quantity = 1
 
+        # Calculate commission cost
+        comm_cost = float(quantity) * commission
+        
         realized_pnl = 0.0
         
         # --- BUY LOGIC ---
         if side == "BUY":
-            cost = price * quantity
+            cost = (exec_price * quantity) + comm_cost # Pay cost + comm
             
-            # Check if we are covering a SHORT position
             if symbol in self.state.positions and self.state.positions[symbol].quantity < 0:
+                # Covering Short
                 pos = self.state.positions[symbol]
                 qty_to_cover = min(quantity, abs(pos.quantity))
                 
-                # Realize PnL on cover
-                # Short Profit = (Entry Price - Exit Price) * Qty
                 entry_val = pos.avg_price * qty_to_cover
-                exit_val = price * qty_to_cover
+                exit_val = exec_price * qty_to_cover
                 
-                # Cash effect: We pay 'exit_val' to buy back.
-                # But we already got cash when we sold short. 
-                # Actually, simpler: 
-                # Cash balance was credited when shorted. 
-                # Now we debit cash to buy back.
-                self.state.cash -= exit_val
+                # Cash outflow: Buyback cost + commission
+                self.state.cash -= (exit_val + comm_cost)
                 
-                trade_pnl = entry_val - exit_val
+                # PnL = (ShortEntry - CoverExit) - Comm
+                trade_pnl = (entry_val - exit_val) - comm_cost
                 realized_pnl += trade_pnl
                 
-                pos.quantity += qty_to_cover # moving towards 0
+                pos.quantity += qty_to_cover
                 
-                # If we bought more than needed to cover, flip to LONG
                 remaining_qty = quantity - qty_to_cover
                 if remaining_qty > 0:
-                    # Treat as new long
-                    cost_rem = price * remaining_qty
-                    # Margin check (simple cash check for now, can go negative cash if margin enabled in future)
-                    # For now, require cash for long side
+                    # Flip to Long
+                    cost_rem = (exec_price * remaining_qty) + (remaining_qty * commission)
                     if self.state.cash >= cost_rem:
                         self.state.cash -= cost_rem
-                        # Reset position to long
                         if pos.quantity == 0:
                              pos.quantity = remaining_qty
-                             pos.avg_price = price
+                             pos.avg_price = exec_price # Slippage included in basis
                     else:
                         print(f"Not enough cash to flip long on {symbol}")
 
@@ -139,63 +144,75 @@ class Portfolio:
             else:
                 # Normal Long Buy
                 if self.state.cash >= cost:
-                    self.state.cash -= cost
+                    self.state.cash -= cost # Deduct total cost (inc comm)
                     if symbol in self.state.positions:
                         pos = self.state.positions[symbol]
-                        total_cost = (pos.quantity * pos.avg_price) + cost
+                        # Avg price logic typically includes basis but excludes comm (comm is expense)
+                        # But for simple PnL tracking, let's bake it in or treat as expense.
+                        # Standard: Basis = (Qty * Price) + Comm
+                        total_cost_basis = (pos.quantity * pos.avg_price) + (exec_price * quantity) + comm_cost
                         pos.quantity += quantity
-                        pos.avg_price = total_cost / pos.quantity
+                        pos.avg_price = total_cost_basis / pos.quantity
                     else:
-                        self.state.positions[symbol] = Position(symbol, quantity, price, price)
+                        # Initial basis includes commission
+                        basis_price = exec_price + (comm_cost / quantity)
+                        self.state.positions[symbol] = Position(symbol, quantity, basis_price, price)
                 else:
                     print(f"Not enough cash to buy {symbol}")
 
         # --- SELL LOGIC ---
         elif side == "SELL":
-            proceeds = price * quantity
+            proceeds = (exec_price * quantity) - comm_cost # Receive proceeds less comm
             
-            # Check if we are closing a LONG position
             if symbol in self.state.positions and self.state.positions[symbol].quantity > 0:
+                # Closing Long
                 pos = self.state.positions[symbol]
                 qty_to_sell = min(quantity, pos.quantity)
                 
-                sale_val = price * qty_to_sell
+                sale_val = exec_price * qty_to_sell
+                # Commission for this portion
+                part_comm = qty_to_sell * commission
+                net_proceeds = sale_val - part_comm
+                
                 cost_basis = pos.avg_price * qty_to_sell
                 
-                self.state.cash += sale_val
-                realized_pnl += (sale_val - cost_basis)
+                self.state.cash += net_proceeds
+                realized_pnl += (net_proceeds - cost_basis)
                 
-                pos.quantity -= qty_to_sell # moving towards 0
+                pos.quantity -= qty_to_sell
                 
-                # If we sold more than we had, flip to SHORT
                 remaining_qty = quantity - qty_to_sell
                 if remaining_qty > 0:
-                     # Enter Short
-                     # Proceed adds to cash (margin debt tracked implicitly by negative qty)
-                     short_proceeds = price * remaining_qty
+                     # Flip to Short
+                     short_proceeds = (exec_price * remaining_qty) - (remaining_qty * commission)
                      self.state.cash += short_proceeds
                      
                      if pos.quantity == 0:
                          pos.quantity = -remaining_qty
-                         pos.avg_price = price
+                         # Basis for short is Entry Price - (Comm/Qty) usually? 
+                         # Or just Entry Price. Net proceeds matters for Cash.
+                         # Let's track Entry Price as the Execution Price. Comm is expense.
+                         # For PnL calc later: (Entry - Exit) - Comm.
+                         # So let's store effective entry price: Price - (Comm/Qty)
+                         effective_entry = exec_price - (commission / remaining_qty)
+                         pos.avg_price = effective_entry
                          
                 if pos.quantity == 0:
                     del self.state.positions[symbol]
             
             else:
-                # Opening a new SHORT position
-                # Verify margin requirement? (For now, assume if we have equity, we can short)
+                # Opening Short
                 if self.state.equity > 0:
-                     self.state.cash += proceeds # Receive cash from short sale
+                     self.state.cash += proceeds
+                     effective_entry = exec_price - (commission / quantity)
+                     
                      if symbol in self.state.positions:
-                         # Adding to existing short (averaging price)
                          pos = self.state.positions[symbol]
-                         # Weighted avg for short: ((abs(qty) * avg) + (new_qty * price)) / total
-                         total_val = (abs(pos.quantity) * pos.avg_price) + proceeds
-                         pos.quantity -= quantity # more negative
+                         total_val = (abs(pos.quantity) * pos.avg_price) + (effective_entry * quantity)
+                         pos.quantity -= quantity
                          pos.avg_price = total_val / abs(pos.quantity)
                      else:
-                         self.state.positions[symbol] = Position(symbol, -quantity, price, price)
+                         self.state.positions[symbol] = Position(symbol, -quantity, effective_entry, price)
                 else:
                     print(f"Equity too low to short {symbol}")
 

@@ -8,6 +8,7 @@ from trading_floor.agents.signal_momentum import MomentumSignalAgent
 from trading_floor.agents.signal_meanreversion import MeanReversionSignalAgent
 from trading_floor.agents.signal_breakout import BreakoutSignalAgent
 from trading_floor.agents.news import NewsSentimentAgent
+from trading_floor.agents.exits import ExitManager
 from trading_floor.agents.risk import RiskAgent
 from trading_floor.agents.pm import PMAgent
 from trading_floor.agents.compliance import ComplianceAgent
@@ -33,6 +34,7 @@ class TradingFloor:
         self.signal_mean = MeanReversionSignalAgent(cfg, self.tracer)
         self.signal_break = BreakoutSignalAgent(cfg, self.tracer)
         self.signal_news = NewsSentimentAgent(cfg, self.tracer)
+        self.exit_manager = ExitManager(cfg, self.tracer)
         self.risk = RiskAgent(cfg, self.tracer)
         self.pm = PMAgent(cfg, self.tracer)
         self.compliance = ComplianceAgent(cfg, self.tracer)
@@ -89,7 +91,11 @@ class TradingFloor:
             context["portfolio_equity"] = self.portfolio.state.equity
             context["portfolio_cash"] = self.portfolio.state.cash
             context["positions"] = list(self.portfolio.state.positions.keys())
+            context["portfolio_obj"] = self.portfolio
 
+            # 1. Check Exits (Stop Loss / Take Profit)
+            forced_exits = self.exit_manager.check_exits(context)
+            
             ranked = self.scout.rank(windowed)
             signals = {}
             # Optim: Only compute signals for ranked/filtered symbols
@@ -117,6 +123,23 @@ class TradingFloor:
 
             context.update({"ranked": ranked, "signals": signals})
             plan, plan_notes = self.pm.create_plan(context)
+            
+            # Merge forced exits into plan
+            if forced_exits:
+                # If exit manager says close, we override PM entry signals for that symbol
+                final_plans = []
+                # Add forced exits first
+                for sym, side in forced_exits.items():
+                    final_plans.append({"symbol": sym, "side": side, "score": 999.9}) # High score for priority
+                
+                # Add PM plans if not conflicting
+                for p in plan.get("plans", []):
+                    if p["symbol"] not in forced_exits:
+                        final_plans.append(p)
+                
+                plan["plans"] = final_plans
+                plan_notes = f"{plan_notes} + {len(forced_exits)} forced exits"
+
             context["plan"] = plan
 
             risk_ok, risk_notes = self.risk.evaluate(context)

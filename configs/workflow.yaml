@@ -7,6 +7,11 @@ risk:
   equity: 5000
   daily_max_loss: 0.02
   max_positions: 2
+  stop_loss: 0.02       # 2% max loss per trade
+  take_profit: 0.05     # 5% target gain
+execution:
+  slippage_bps: 5       # 5 basis points (0.05%)
+  commission: 0.005     # $0.005 per share
 data:
   interval: "5m"
   lookback: "5d"
