@@ -59,6 +59,54 @@ class Database:
             )
         """)
         
+        # Agent Memory Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS agent_memory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_name TEXT NOT NULL,
+                symbol TEXT,
+                signal_type TEXT,
+                signal_value REAL,
+                outcome TEXT,
+                pnl REAL DEFAULT 0,
+                regime_spy TEXT,
+                regime_vix TEXT,
+                regime_label TEXT,
+                confidence REAL,
+                memory_influenced BOOLEAN DEFAULT 0,
+                timestamp TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_memory_agent ON agent_memory(agent_name)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_memory_regime ON agent_memory(regime_label)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_agent_memory_timestamp ON agent_memory(timestamp)")
+
+        # Shadow Predictions Table (Kalman + HMM shadow mode)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS shadow_predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                symbol TEXT,
+                kalman_signal REAL,
+                kalman_level REAL,
+                kalman_trend REAL,
+                kalman_uncertainty REAL,
+                existing_signal REAL,
+                hmm_state TEXT,
+                hmm_bull_prob REAL,
+                hmm_bear_prob REAL,
+                hmm_transition_prob REAL,
+                hmm_transition_risk REAL,
+                existing_regime TEXT,
+                actual_return_1h REAL,
+                actual_return_1d REAL,
+                outcome_filled BOOLEAN DEFAULT 0
+            )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_timestamp ON shadow_predictions(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_shadow_symbol ON shadow_predictions(symbol)")
+
         conn.commit()
         conn.close()
 

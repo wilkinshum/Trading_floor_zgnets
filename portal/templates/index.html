@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZG Nets | Trading Floor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0ea5e9', // Sky 500
+                        success: '#10b981', // Emerald 500
+                        danger: '#ef4444', // Red 500
+                        dark: '#0f172a' // Slate 900
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark text-gray-200 font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="border-b border-gray-800 bg-slate-900/90 sticky top-0 z-50 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="cpu" class="text-brand w-6 h-6"></i>
+                    <span class="font-bold text-xl tracking-tight text-white">ZG Nets <span class="text-brand">Portal</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="/reports" class="flex items-center gap-2 text-sm text-gray-400 hover:text-brand transition-colors">
+                        <i data-lucide="file-bar-chart" class="w-4 h-4"></i>
+                        <span>Reports</span>
+                    </a>
+                    <div id="connection-status" class="flex items-center gap-2 text-xs font-mono text-gray-500">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse" id="status-dot"></span>
+                        <span id="status-text">DISCONNECTED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Portfolio & Stats -->
+        <div class="space-y-6 lg:col-span-1">
+            <!-- Equity Card -->
+            <div class="glass-panel rounded-xl p-6 shadow-lg relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                    <i data-lucide="wallet" class="w-24 h-24 text-brand"></i>
+                </div>
+                <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider">Total Equity</h3>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-4xl font-bold text-white" id="equity-val">---</span>
+                    <span class="text-sm font-medium text-gray-400">USD</span>
+                </div>
+                <div class="mt-4 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Cash: <span id="cash-val" class="text-gray-200">---</span></span>
+                        <span id="pnl-val" class="font-bold">---</span>
+                    </div>
+                    <div id="liability-row" class="flex justify-between hidden">
+                        <span class="text-gray-400">Short Liability: <span id="liability-val" class="text-danger">---</span></span>
+                    </div>
+                    <div class="flex justify-between border-t border-slate-700 pt-2 mt-2">
+                        <span class="text-gray-400">Pot. Gain <span class="text-[10px]">(all TPs)</span>: <span id="pot-gain" class="text-success">---</span></span>
+                        <span class="text-gray-400">Pot. Loss <span class="text-[10px]">(all SLs)</span>: <span id="pot-loss" class="text-danger">---</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Positions List -->
+            <div class="glass-panel rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                        <i data-lucide="layers" class="w-5 h-5 text-gray-400"></i> Active Positions
+                    </h3>
+                    <span class="px-2 py-0.5 rounded text-xs bg-slate-800 border border-slate-700 text-gray-400" id="pos-count">0</span>
+                </div>
+                <div id="positions-list" class="space-y-3">
+                    <!-- Dynamic Items -->
+                    <div class="text-center py-8 text-gray-500 italic text-sm">Loading positions...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle/Right: Charts & Feed -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Chart Area -->
+            <div class="glass-panel rounded-xl p-6 shadow-lg min-h-[300px] relative">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5 text-gray-400"></i> Performance
+                </h3>
+                <div class="absolute inset-0 top-16 px-6 pb-6">
+                    <canvas id="pnlChart" class="w-full h-full"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity (Logs/Signals) -->
+            <div class="glass-panel rounded-xl p-0 shadow-lg overflow-hidden">
+                <div class="bg-slate-800/50 px-6 py-4 border-b border-gray-700 flex justify-between items-center">
+                    <h3 class="font-semibold text-white flex items-center gap-2">
+                        <i data-lucide="terminal" class="w-5 h-5 text-gray-400"></i> Live Feed
+                    </h3>
+                    <div class="flex gap-2 text-xs">
+                        <button onclick="loadTab('trades')" class="px-3 py-1 rounded bg-brand/20 text-brand hover:bg-brand/30 transition">Trades</button>
+                        <button onclick="loadTab('signals')" class="px-3 py-1 rounded bg-slate-700 hover:bg-slate-600 transition">Signals</button>
+                    </div>
+                </div>
+                <div class="h-96 overflow-y-auto p-0" id="activity-feed">
+                    <!-- Dynamic Rows -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // --- WebSocket & Polling ---
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/feed`);
+
+        ws.onopen = () => {
+            document.getElementById('status-dot').classList.remove('bg-red-500');
+            document.getElementById('status-dot').classList.add('bg-success');
+            document.getElementById('status-text').textContent = 'LIVE';
+            document.getElementById('status-text').classList.add('text-success');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'status_update') {
+                updatePortfolio(data.portfolio);
+            }
+        };
+
+        async function fetchInitialData() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                if (data.portfolio) updatePortfolio(data.portfolio);
+                loadTab('trades'); // Default load
+            } catch (e) { console.error(e); }
+        }
+
+        function updatePortfolio(pf) {
+            if (!pf || !pf.equity) return;
+            
+            // Format Numbers
+            const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+            
+            document.getElementById('equity-val').textContent = fmt(pf.equity).replace('$', ''); // Show number
+            document.getElementById('cash-val').textContent = fmt(pf.cash);
+            
+            // Calc PnL (vs $5000 start)
+            const pnl = pf.equity - 5000;
+            const pnlEl = document.getElementById('pnl-val');
+            pnlEl.textContent = (pnl >= 0 ? '+' : '') + fmt(pnl);
+            pnlEl.className = pnl >= 0 ? 'font-bold text-success' : 'font-bold text-danger';
+
+            // Short Liability + Potential Gain/Loss
+            let shortLiability = 0;
+            let potGain = 0;
+            let potLoss = 0;
+            const positions = pf.positions || {};
+            Object.keys(positions).forEach(sym => {
+                const pos = positions[sym];
+                const isLong = pos.quantity > 0;
+                const qty = Math.abs(pos.quantity);
+                const estPrice = isLong ? pos.highest_price : pos.lowest_price;
+                
+                if (!isLong) {
+                    shortLiability += estPrice * qty;
+                }
+                
+                // TP/SL prices (matching the badge logic below)
+                const tpPrice = estPrice * (isLong ? 1.05 : 0.95);
+                const slPrice = estPrice * (isLong ? 0.98 : 1.02);
+                
+                if (isLong) {
+                    potGain += (tpPrice - pos.avg_price) * qty;
+                    potLoss += (slPrice - pos.avg_price) * qty;
+                } else {
+                    potGain += (pos.avg_price - tpPrice) * qty;
+                    potLoss += (pos.avg_price - slPrice) * qty;
+                }
+            });
+            
+            const liabilityRow = document.getElementById('liability-row');
+            if (shortLiability > 0) {
+                liabilityRow.classList.remove('hidden');
+                document.getElementById('liability-val').textContent = '-' + fmt(shortLiability);
+            } else {
+                liabilityRow.classList.add('hidden');
+            }
+            document.getElementById('pot-gain').textContent = '+' + fmt(potGain);
+            const potLossEl = document.getElementById('pot-loss');
+            potLossEl.textContent = fmt(potLoss);
+
+            // Positions
+            const list = document.getElementById('positions-list');
+            list.innerHTML = '';
+            const symbols = Object.keys(pf.positions || {});
+            document.getElementById('pos-count').textContent = symbols.length;
+
+            if (symbols.length === 0) {
+                list.innerHTML = '<div class="text-center py-4 text-gray-500 text-sm">No active positions</div>';
+            } else {
+                symbols.forEach(sym => {
+                    const pos = pf.positions[sym];
+                    const isLong = pos.quantity > 0;
+                    
+                    // Estimate current price from lowest/highest seen (proxy)
+                    // In a real app we'd fetch live quotes here
+                    const estimatedPrice = isLong ? pos.highest_price : pos.lowest_price; 
+                    const pnl = (estimatedPrice - pos.avg_price) * pos.quantity;
+
+                    const el = document.createElement('div');
+                    el.className = 'flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800 transition';
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center font-bold text-gray-300">
+                                ${sym.substring(0,2)}
+                            </div>
+                            <div>
+                                <div class="font-bold text-white flex gap-2 items-center">
+                                    ${sym}
+                                    <span class="text-xs font-normal text-gray-500">Cur: ${fmt(estimatedPrice)}</span>
+                                </div>
+                                <div class="text-xs text-gray-400">${isLong ? 'LONG' : 'SHORT'} ${Math.abs(pos.quantity)} shares</div>
+                                <div class="flex gap-2 mt-1">
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-success/20 text-success border border-success/30">TP: ${fmt(estimatedPrice * (isLong ? 1.05 : 0.95))}</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-danger/20 text-danger border border-danger/30">SL: ${fmt(estimatedPrice * (isLong ? 0.98 : 1.02))}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-300">Avg: ${fmt(pos.avg_price)}</div>
+                            <div class="text-xs ${pnl >= 0 ? 'text-success' : 'text-danger'} font-bold">
+                                ${pnl >= 0 ? '+' : ''}${fmt(pnl)}
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+            }
+        }
+
+        async function loadTab(type) {
+            const feed = document.getElementById('activity-feed');
+            feed.innerHTML = '<div class="p-6 text-center text-gray-500">Fetching data...</div>';
+            
+            try {
+                const res = await fetch(`/api/${type}`);
+                const rows = await res.json();
+                
+                if (rows.length === 0) {
+                    feed.innerHTML = '<div class="p-6 text-center text-gray-500">No recent activity</div>';
+                    return;
+                }
+
+                feed.innerHTML = '';
+                rows.forEach(row => {
+                    const el = document.createElement('div');
+                    el.className = 'px-6 py-3 border-b border-slate-700/50 text-sm flex justify-between items-start hover:bg-slate-800/30';
+                    
+                    // Simple formatting based on type
+                    let content = '';
+                    if (type === 'trades') {
+                        const side = row.side || row.action || '';
+                        const isBuy = side.includes('BUY');
+                        content = `
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs text-gray-500">${new Date(row.timestamp).toLocaleTimeString()}</span>
+                                <span class="font-bold ${isBuy ? 'text-success' : 'text-danger'}">${side}</span>
+                                <span class="text-white">${row.symbol}</span>
+                            </div>
+                            <div class="text-gray-400">
+                                ${Math.round(row.quantity)} @ $${Number(row.price).toFixed(2)}
+                            </div>
+                        `;
+                    } else {
+                        content = `
+                             <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs text-gray-500">${new Date(row.timestamp).toLocaleTimeString()}</span>
+                                <span class="font-bold text-brand">${row.symbol}</span>
+                            </div>
+                             <div class="text-gray-400 truncate max-w-xs">
+                                ${JSON.stringify(row).substring(0, 50)}...
+                            </div>
+                        `;
+                    }
+                    
+                    el.innerHTML = content;
+                    feed.appendChild(el);
+                });
+            } catch (e) {
+                feed.innerHTML = '<div class="p-6 text-center text-danger">Failed to load feed</div>';
+            }
+        }
+
+        // Init
+        fetchInitialData();
+        
+        // Setup Chart from DB equity history
+        const ctx = document.getElementById('pnlChart').getContext('2d');
+        let equityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Equity Curve',
+                    data: [],
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false, color: '#334155' }, ticks: { color: '#94a3b8', maxTicksLimit: 10 } },
+                    y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+
+        async function loadEquityCurve() {
+            try {
+                const res = await fetch('/api/equity_history');
+                const data = await res.json();
+                if (data.length > 0) {
+                    equityChart.data.labels = data.map(d => {
+                        if (d.timestamp === 'start') return 'Start';
+                        const dt = new Date(d.timestamp);
+                        return dt.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' ' + dt.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                    });
+                    equityChart.data.datasets[0].data = data.map(d => d.equity);
+                    equityChart.update();
+                }
+            } catch(e) { console.error('Equity curve load failed', e); }
+        }
+        loadEquityCurve();
+
+    </script>
+</body>
+</html>

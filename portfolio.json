@@ -1,0 +1,42 @@
+{
+  "cash": 99837.7150687868,
+  "equity": 5917.370007351099,
+  "positions": {
+    "HUT": {
+      "quantity": -155,
+      "avg_price": 53.137383429733205,
+      "highest_price": 54.189998626708984,
+      "lowest_price": 52.856723240547986
+    },
+    "META": {
+      "quantity": -14,
+      "avg_price": 668.1778818373906,
+      "highest_price": 668.7122802734375,
+      "lowest_price": 643.219970703125
+    },
+    "RDW": {
+      "quantity": -3513,
+      "avg_price": 8.103691508421017,
+      "highest_price": 8.16090416399976,
+      "lowest_price": 8.024999618530273
+    },
+    "IONQ": {
+      "quantity": -1156,
+      "avg_price": 34.1403303418044,
+      "highest_price": 34.31159973144531,
+      "lowest_price": 33.87630081176758
+    },
+    "ANET": {
+      "quantity": -31,
+      "avg_price": 140.18021699794647,
+      "highest_price": 140.18021699794647,
+      "lowest_price": 140.18021699794647
+    },
+    "IDR": {
+      "quantity": -114,
+      "avg_price": 38.74107775099235,
+      "highest_price": 38.74107775099235,
+      "lowest_price": 38.74107775099235
+    }
+  }
+}

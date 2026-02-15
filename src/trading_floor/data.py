@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
 
+import time
+
 import pandas as pd
 import yfinance as yf
 
@@ -15,11 +17,24 @@ class MarketData:
 
 
 class YahooDataProvider:
+    _cache: Dict[str, Dict] = {}  # {cache_key: {"ts": float, "data": Dict[str, MarketData]}}
+    CACHE_TTL = 60  # seconds
+
     def __init__(self, interval: str = "5m", lookback: str = "5d"):
         self.interval = interval
         self.lookback = lookback
 
     def fetch(self, symbols: List[str]) -> Dict[str, MarketData]:
+        cache_key = f"{','.join(sorted(symbols))}|{self.interval}|{self.lookback}"
+        cached = YahooDataProvider._cache.get(cache_key)
+        if cached and (time.time() - cached["ts"]) < self.CACHE_TTL:
+            return cached["data"]
+
+        result = self._fetch_from_yahoo(symbols)
+        YahooDataProvider._cache[cache_key] = {"ts": time.time(), "data": result}
+        return result
+
+    def _fetch_from_yahoo(self, symbols: List[str]) -> Dict[str, MarketData]:
         if not symbols:
             return {}
 

@@ -1,7 +1,11 @@
 import json
+import math
+import logging
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Position:
@@ -106,15 +110,26 @@ class Portfolio:
         else:
             exec_price = price * (1 - slippage)
 
+        # Guard: skip trade if exec_price is invalid
+        if not exec_price or exec_price <= 0 or math.isnan(exec_price) or math.isinf(exec_price):
+            logger.warning("Skipping trade for %s: invalid exec_price=%s", symbol, exec_price)
+            return 0.0
+
         # Sizing Logic
         if quantity == 0:
             if target_value > 0:
+                if math.isnan(target_value) or math.isinf(target_value):
+                    logger.warning("Skipping trade for %s: invalid target_value=%s", symbol, target_value)
+                    return 0.0
                 # Use Volatility-Sized Target Value
                 quantity = int(target_value // exec_price)
             else:
                 # Fallback to Equal Weight
                 max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
                 target_alloc = self.state.equity / max_pos
+                if not target_alloc or math.isnan(target_alloc) or math.isinf(target_alloc) or target_alloc <= 0:
+                    logger.warning("Skipping trade for %s: invalid target_alloc=%s (equity=%s)", symbol, target_alloc, self.state.equity)
+                    return 0.0
                 quantity = int(target_alloc // exec_price)
             
             if quantity < 1: quantity = 1

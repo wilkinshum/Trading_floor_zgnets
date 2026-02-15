@@ -12,10 +12,17 @@ class ScoutAgent:
 
     def rank(self, market_data: Dict[str, pd.DataFrame]) -> List[Dict]:
         self.tracer.emit_span("scout.rank", {"symbols": list(market_data.keys())})
+        min_avg_volume = self.cfg.get("min_avg_volume", 100_000)
         ranked = []
         for sym, df in market_data.items():
             if df.empty or len(df) < 2:
                 continue
+
+            # Early exit: skip low-volume stocks
+            if "volume" in df.columns:
+                avg_vol = df["volume"].mean()
+                if avg_vol < min_avg_volume:
+                    continue
             
             # Vectorized calculations are faster, but here we work on single series.
             # Avoid full pct_change series if we just need vol of the whole window.

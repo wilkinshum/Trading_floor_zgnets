@@ -1,17 +1,30 @@
-universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, HUT, TSLA, ORCL, CRWD, AMD]
+universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, HUT, TSLA, ORCL, CRWD, AMD, NBIS, IREN, TSM, ASML, RKLB, ASTS, LUNR, RDW, GEV, CEG, ONDS, CCJ, OKLO, VST, KTOS, AVAV, AMTM, SYM, ISRG, TE, EOSE, ELVA, FLNC, QBTS, IONQ, RGTI, GH, GRAL, MIRM, VRT, ANET, CRML, TMC, IDR, MTZ, AGX, POWL, TMQ, UUUU]
+scout_top_n: 5
+min_avg_volume: 100000
 hours:
   tz: America/New_York
   start: "09:30"
   end: "11:30"
+  holidays:
+    - "2026-02-16"  # Presidents' Day
+    - "2026-04-03"  # Good Friday
+    - "2026-05-25"  # Memorial Day
+    - "2026-07-03"  # Independence Day (observed)
+    - "2026-09-07"  # Labor Day
+    - "2026-11-26"  # Thanksgiving
+    - "2026-12-25"  # Christmas
 risk:
   equity: 5000
   daily_max_loss: 0.02
   max_positions: 2
-  stop_loss: 0.02       # 2% max loss per trade
-  take_profit: 0.05     # 5% target gain
+  stop_loss: 0.02                    # 2% hard stop
+  take_profit: 0.05                  # 5% target
+  trailing_breakeven_trigger: 0.02   # move stop to breakeven at +2%
+  trailing_trigger: 0.03             # start trailing at +3%
+  trailing_pct: 0.015                # trail 1.5% below HWM
 execution:
-  slippage_bps: 5       # 5 basis points (0.05%)
-  commission: 0.005     # $0.005 per share
+  slippage_bps: 5
+  commission: 0.005
 data:
   interval: "5m"
   lookback: "5d"
@@ -19,7 +32,12 @@ signals:
   momentum_short: 5
   meanrev_long: 20
   breakout_lookback: 10
-  trade_threshold: 0.001
+  trade_threshold: 0.05              # raised: signals now normalized to [-1,+1]
+  norm_lookback: 100                 # rolling window for z-score normalization
+  max_trades_per_cycle: 2            # only top N conviction trades
+  correlation_threshold: 0.7         # drop correlated candidates above this
+  sizing_method: volatility          # volatility | kelly | fixed_fractional
+  fixed_fraction: 0.02               # for fixed_fractional sizing
   weights:
     momentum: 0.25
     meanrev: 0.25
@@ -29,10 +47,29 @@ logging:
   trades_csv: trading_logs/trades.csv
   events_csv: trading_logs/events.csv
   signals_csv: trading_logs/signals.csv
+  db_path: trading.db
 approval:
   required: true
   file: approval.json
+agent_memory:
+  enabled: true
+  rolling_window: 50
+  max_age_days: 90
+  min_samples: 10
+  max_adjustment: 0.20
+  underperform_threshold: 0.10
+  decay_halflife_days: 14
+  regime_matching: true
 agent_lightning:
   enabled: true
   store_uri: "http://172.22.136.47:45993"
   reward_keys: ["compliance_ok", "risk_ok", "approval_granted"]
+shadow_mode:
+  enabled: true
+  kalman:
+    process_variance: 1e-5
+    measurement_variance: 1e-3
+  hmm:
+    n_states: 3
+    lookback: 60
+    refit_interval: 5

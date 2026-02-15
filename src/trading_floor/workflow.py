@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from trading_floor.data import YahooDataProvider, filter_trading_window, latest_timestamp
 from trading_floor.portfolio import Portfolio
@@ -15,9 +16,10 @@ from trading_floor.agents.compliance import ComplianceAgent
 from trading_floor.agents.reviewer import NextDayReviewer
 from trading_floor.logging import TradeLogger
 from trading_floor.signal_log import SignalLogger
+from trading_floor.signal_normalizer import SignalNormalizer
 from trading_floor.lightning import LightningTracer
 from trading_floor.db import Database
-from pathlib import Path
+from trading_floor.shadow import ShadowRunner
 
 
 class TradingFloor:
@@ -26,7 +28,7 @@ class TradingFloor:
         self.logger = TradeLogger(cfg)
         self.signal_logger = SignalLogger(cfg)
         self.tracer = LightningTracer(cfg)
-        
+
         # Init DB
         db_path = Path(cfg["logging"].get("db_path", "trading.db"))
         self.db = Database(db_path)
@@ -36,7 +38,7 @@ class TradingFloor:
             lookback=cfg.get("data", {}).get("lookback", "5d"),
         )
         self.portfolio = Portfolio(cfg)
-        
+
         self.scout = ScoutAgent(cfg, self.tracer)
         self.signal_mom = MomentumSignalAgent(cfg, self.tracer)
         self.signal_mean = MeanReversionSignalAgent(cfg, self.tracer)
@@ -47,6 +49,19 @@ class TradingFloor:
         self.pm = PMAgent(cfg, self.tracer)
         self.compliance = ComplianceAgent(cfg, self.tracer)
         self.reviewer = NextDayReviewer(cfg, self.tracer)
+        self.normalizer = SignalNormalizer(
+            lookback=cfg.get("signals", {}).get("norm_lookback", 100)
+        )
+
+        # Shadow Runner (Kalman + HMM, shadow mode)
+        shadow_cfg = cfg.get("shadow_mode", {})
+        if shadow_cfg.get("enabled", False):
+            self.shadow = ShadowRunner(
+                db_path=str(db_path),
+                config=shadow_cfg,
+            )
+        else:
+            self.shadow = None
 
     def _approval_check(self):
         approval_cfg = self.cfg.get("approval", {})
@@ -73,7 +88,36 @@ class TradingFloor:
         note = data.get("notes") or data.get("note") or ""
         return approved, note
 
+    def _is_within_trading_hours(self):
+        """Check if current time is within configured trading hours (weekdays only)."""
+        from zoneinfo import ZoneInfo
+        tz_str = self.cfg["hours"]["tz"]
+        tz = ZoneInfo(tz_str)
+        now = datetime.now(tz)
+        
+        # Skip weekends (Saturday=5, Sunday=6)
+        if now.weekday() >= 5:
+            print(f"[TradingFloor] Weekend. Market closed. Skipping.")
+            return False
+        
+        # Skip market holidays
+        holidays = self.cfg.get("hours", {}).get("holidays", [])
+        today_str = now.strftime("%Y-%m-%d")
+        if today_str in holidays:
+            print(f"[TradingFloor] Market holiday ({today_str}). Skipping.")
+            return False
+        
+        start_parts = self.cfg["hours"]["start"].split(":")
+        end_parts = self.cfg["hours"]["end"].split(":")
+        start_time = now.replace(hour=int(start_parts[0]), minute=int(start_parts[1]), second=0, microsecond=0)
+        end_time = now.replace(hour=int(end_parts[0]), minute=int(end_parts[1]), second=0, microsecond=0)
+        return start_time <= now <= end_time
+
     def run(self):
+        if not self._is_within_trading_hours():
+            print(f"[TradingFloor] Outside trading hours ({self.cfg['hours']['start']}-{self.cfg['hours']['end']} {self.cfg['hours']['tz']}). Skipping.")
+            return
+
         context = {
             "timestamp": latest_timestamp(),
             "universe": self.cfg["universe"],
@@ -83,29 +127,29 @@ class TradingFloor:
             # Fetch Universe + Market Indicators
             fetch_list = list(set(self.cfg["universe"] + ["SPY", "^VIX"]))
             md = self.data.fetch(fetch_list)
-            
+
             # Market Regime Calculation
             market_regime = {"is_downtrend": False, "is_fear": False}
-            
-            # SPY Trend Check (MA20)
+
             if "SPY" in md and not md["SPY"].df.empty:
                 spy_series = md["SPY"].df["close"]
                 if len(spy_series) >= 20:
                     ma20 = spy_series.rolling(20).mean().iloc[-1]
                     market_regime["is_downtrend"] = spy_series.iloc[-1] < ma20
-            
-            # VIX Fear Check
+
             if "^VIX" in md and not md["^VIX"].df.empty:
                 vix_val = md["^VIX"].df["close"].iloc[-1]
                 market_regime["is_fear"] = vix_val > 25.0
-            
+
             context["market_regime"] = market_regime
 
             windowed = {}
             current_prices = {}
-            
+            price_series = {}  # For correlation checks in PM
+
             for sym, m in md.items():
-                if sym not in self.cfg["universe"]: continue
+                if sym not in self.cfg["universe"]:
+                    continue
                 windowed[sym] = filter_trading_window(
                     m.df,
                     tz=self.cfg["hours"]["tz"],
@@ -114,6 +158,7 @@ class TradingFloor:
                 )
                 if not m.df.empty:
                     current_prices[sym] = m.df["close"].iloc[-1]
+                    price_series[sym] = m.df["close"]
 
             # Mark portfolio to market
             self.portfolio.mark_to_market(current_prices)
@@ -122,58 +167,108 @@ class TradingFloor:
             context["positions"] = list(self.portfolio.state.positions.keys())
             context["portfolio_obj"] = self.portfolio
 
-            # 1. Check Exits (Stop Loss / Take Profit)
+            # 1. Check Exits (Stop Loss / Trailing Stop)
             forced_exits = self.exit_manager.check_exits(context)
-            
+
             ranked = self.scout.rank(windowed)
             signals = {}
-            signal_details = {} # Store components for logging
-            
+            signal_details = {}
+
+            # Scout gate: only process top N symbols
+            scout_top_n = self.cfg.get("scout_top_n", 5)
+            top_symbols = set(r["symbol"] for r in ranked[:scout_top_n])
+
             # Load Weights
             weights = self.cfg.get("signals", {}).get("weights", {
                 "momentum": 0.25, "meanrev": 0.25, "breakout": 0.25, "news": 0.25
             })
-            
-            for sym, df in windowed.items():
-                if df.empty: continue
-                # Could parallelize this loop if heavy
-                mom = self.signal_mom.score(df)
-                mean = self.signal_mean.score(df)
-                brk = self.signal_break.score(df)
-                news = self.signal_news.get_sentiment(sym)
-                news_scaled = news * 0.01 
-                
-                # Weighted Sum
+
+            def _score_symbol(sym, df):
+                """Score a single symbol with all 4 signal agents (thread-safe)."""
+                mom_raw = self.signal_mom.score(df)
+                mean_raw = self.signal_mean.score(df)
+                brk_raw = self.signal_break.score(df)
+                news_raw = self.signal_news.get_sentiment(sym)
+
+                mom = self.normalizer.normalize(sym, "momentum", mom_raw)
+                mean = self.normalizer.normalize(sym, "meanrev", mean_raw)
+                brk = self.normalizer.normalize(sym, "breakout", brk_raw)
+                news = news_raw
+
                 score = (
                     (mom * weights.get("momentum", 0.25)) +
                     (mean * weights.get("meanrev", 0.25)) +
                     (brk * weights.get("breakout", 0.25)) +
-                    (news_scaled * weights.get("news", 0.25))
+                    (news * weights.get("news", 0.25))
                 )
-                
-                signals[sym] = score
-                signal_details[sym] = {
-                    "components": {"momentum": mom, "meanrev": mean, "breakout": brk, "news": news},
+
+                details = {
+                    "components": {
+                        "momentum": mom, "meanrev": mean,
+                        "breakout": brk, "news": news
+                    },
+                    "raw": {
+                        "momentum": mom_raw, "meanrev": mean_raw,
+                        "breakout": brk_raw, "news": news_raw
+                    },
                     "weights": weights,
                     "final_score": score
                 }
+                return sym, score, details
 
-            context.update({"ranked": ranked, "signals": signals})
+            # Run signal scoring in parallel across top symbols
+            with ThreadPoolExecutor(max_workers=min(scout_top_n, 8)) as executor:
+                futures = {}
+                for sym, df in windowed.items():
+                    if df.empty or sym not in top_symbols:
+                        continue
+                    futures[executor.submit(_score_symbol, sym, df)] = sym
+
+                for future in as_completed(futures):
+                    sym, score, details = future.result()
+                    signals[sym] = score
+                    signal_details[sym] = details
+
+            context.update({
+                "ranked": ranked,
+                "signals": signals,
+                "price_data": price_series,  # For PM correlation check
+            })
+
+            # --- Shadow Mode: Kalman + HMM ---
+            if self.shadow is not None:
+                try:
+                    spy_prices = md["SPY"].df["close"] if "SPY" in md and not md["SPY"].df.empty else None
+                    vix_prices = md["^VIX"].df["close"] if "^VIX" in md and not md["^VIX"].df.empty else None
+                    regime_label = ("bear" if market_regime.get("is_downtrend") else "bull") + \
+                                   ("_high_vol" if market_regime.get("is_fear") else "_low_vol")
+                    shadow_summary = self.shadow.run(
+                        price_data=price_series,
+                        spy_data=spy_prices,
+                        vix_data=vix_prices,
+                        existing_signals=signals,
+                        existing_regime={"label": regime_label},
+                    )
+                    agree = shadow_summary.get("kalman_agree", 0)
+                    total = shadow_summary.get("kalman_total_compared", 0)
+                    hmm = shadow_summary.get("hmm")
+                    hmm_str = ""
+                    if hmm:
+                        hmm_str = f", HMM sees {hmm['state_label']} regime ({hmm['confidence']:.0%} confidence)"
+                    print(f"[Shadow] Kalman agrees with {agree}/{total} signals{hmm_str}")
+                except Exception as e:
+                    print(f"[Shadow] Error: {e}")
+
             plan, plan_notes = self.pm.create_plan(context)
-            
+
             # Merge forced exits into plan
             if forced_exits:
-                # If exit manager says close, we override PM entry signals for that symbol
                 final_plans = []
-                # Add forced exits first
                 for sym, side in forced_exits.items():
-                    final_plans.append({"symbol": sym, "side": side, "score": 999.9}) # High score for priority
-                
-                # Add PM plans if not conflicting
+                    final_plans.append({"symbol": sym, "side": side, "score": 999.9})
                 for p in plan.get("plans", []):
                     if p["symbol"] not in forced_exits:
                         final_plans.append(p)
-                
                 plan["plans"] = final_plans
                 plan_notes = f"{plan_notes} + {len(forced_exits)} forced exits"
 
@@ -208,26 +303,28 @@ class TradingFloor:
                     score = p["score"]
                     target_val = p.get("target_value", 0.0)
                     price = current_prices.get(sym, 0.0)
-                    
-                    # Execute in portfolio (updates cash/positions)
+
                     pnl = 0.0
                     if price > 0:
                         pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
-                    
+
+                    actual_qty = 0
+                    if price > 0 and target_val > 0:
+                        actual_qty = int(target_val // price)
+
                     trade_record = {
                         "timestamp": context["timestamp"],
                         "symbol": sym,
                         "side": side,
-                        "quantity": p.get("target_value", 0), # Simplified for now
+                        "quantity": actual_qty,
                         "price": price,
                         "score": score,
                         "pnl": pnl,
                     }
-                    
+
                     self.logger.log_trade(trade_record)
                     self.db.log_trade(trade_record)
-                    
-                    # Log Signal Components for Optimizer
+
                     if sym in signal_details:
                         details = signal_details[sym]
                         details["timestamp"] = context["timestamp"]
@@ -235,16 +332,16 @@ class TradingFloor:
                         details["side"] = side
                         self.signal_logger.log_signal(details)
                         self.db.log_signal(details)
-                
-                # Save portfolio state
+
                 self.portfolio.save()
 
-            # reward signals for Agent Lightning
             self.tracer.emit_reward({
                 "risk_ok": int(risk_ok),
                 "compliance_ok": int(compliance_ok),
                 "approval_granted": int(approval_granted),
-                "equity_change": self.portfolio.state.equity - context.get("portfolio_equity", 0) # naive daily change
+                "equity_change": self.portfolio.state.equity - context.get("portfolio_equity", 0)
             })
 
-            _ = self.reviewer.summarize()
+            review = self.reviewer.summarize()
+            if review.get("insights"):
+                print(f"[Reviewer] {review['insights'][:200]}")
