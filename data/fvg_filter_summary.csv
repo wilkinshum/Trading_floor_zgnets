@@ -1,0 +1,4 @@
+group,total_trades,wins,losses,win_rate_pct,avg_pnl,total_pnl,profit_factor,max_drawdown,avg_winner,avg_loser
+ALL,177,67,110,37.9,-37.17,-6578.88,0.54,-7507.39,114.41,-129.49
+WITH_FVG,116,44,72,37.9,-37.68,-4371.03,0.49,-4789.45,94.68,-118.57
+WITHOUT_FVG,61,23,38,37.7,-36.19,-2207.85,0.61,-3203.36,152.13,-150.18
