@@ -16,12 +16,15 @@ hours:
 risk:
   equity: 5000
   daily_max_loss: 0.02
-  max_positions: 2
-  stop_loss: 0.02                    # 2% hard stop
+  max_positions: 3                   # hard cap: 3 simultaneous positions
+  stop_loss: 0.02                    # fallback hard stop (when ATR unavailable)
   take_profit: 0.05                  # 5% target
-  trailing_breakeven_trigger: 0.02   # move stop to breakeven at +2%
-  trailing_trigger: 0.03             # start trailing at +3%
-  trailing_pct: 0.015                # trail 1.5% below HWM
+  atr_stop_multiplier: 2.0           # ATR-based stop: 2x ATR (adaptive per symbol)
+  atr_period: 14                     # ATR lookback period
+  trailing_breakeven_trigger: 0.015  # move stop to breakeven at +1.5%
+  trailing_trigger: 0.025            # start trailing at +2.5%
+  trailing_pct: 0.012                # trail 1.2% below HWM/above LWM
+  portfolio_kill_pct: 0.05           # kill switch: close ALL if unrealized loss > 5% equity
 execution:
   slippage_bps: 5
   commission: 0.005
@@ -67,8 +70,8 @@ agent_lightning:
 shadow_mode:
   enabled: true
   kalman:
-    process_variance: 1e-5
-    measurement_variance: 1e-3
+    process_variance: 0.00001
+    measurement_variance: 0.001
   hmm:
     n_states: 3
     lookback: 60

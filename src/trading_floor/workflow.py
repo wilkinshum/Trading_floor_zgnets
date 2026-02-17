@@ -167,7 +167,8 @@ class TradingFloor:
             context["positions"] = list(self.portfolio.state.positions.keys())
             context["portfolio_obj"] = self.portfolio
 
-            # 1. Check Exits (Stop Loss / Trailing Stop)
+            # 1. Check Exits (ATR-based Stop / Trailing / Breakeven / Kill Switch)
+            context["price_data"] = price_series  # needed for ATR calc in exits
             forced_exits = self.exit_manager.check_exits(context)
 
             ranked = self.scout.rank(windowed)
@@ -261,15 +262,23 @@ class TradingFloor:
 
             plan, plan_notes = self.pm.create_plan(context)
 
-            # Merge forced exits into plan
+            # Merge forced exits into plan (exits always execute first)
+            exit_plans = []
+            new_entry_plans = []
             if forced_exits:
-                final_plans = []
                 for sym, side in forced_exits.items():
-                    final_plans.append({"symbol": sym, "side": side, "score": 999.9})
-                for p in plan.get("plans", []):
-                    if p["symbol"] not in forced_exits:
-                        final_plans.append(p)
-                plan["plans"] = final_plans
+                    exit_plans.append({"symbol": sym, "side": side, "score": 999.9})
+            for p in plan.get("plans", []):
+                if p["symbol"] not in forced_exits:
+                    new_entry_plans.append(p)
+
+            # Enforce max positions on NEW entries (exits always allowed)
+            new_entry_plans = self.exit_manager.check_max_positions(
+                self.portfolio, new_entry_plans
+            )
+
+            plan["plans"] = exit_plans + new_entry_plans
+            if forced_exits:
                 plan_notes = f"{plan_notes} + {len(forced_exits)} forced exits"
 
             context["plan"] = plan

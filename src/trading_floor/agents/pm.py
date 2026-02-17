@@ -63,6 +63,8 @@ class PMAgent:
 
         # --- Position sizing ---
         portfolio_equity = context.get("portfolio_equity", 5000.0)
+        if not portfolio_equity or math.isnan(portfolio_equity) or portfolio_equity <= 0:
+            portfolio_equity = self.cfg.get("risk", {}).get("equity", 5000.0)
         vol_map = {item["symbol"]: item.get("vol", 0.20) for item in ranked}
 
         for plan in candidates:

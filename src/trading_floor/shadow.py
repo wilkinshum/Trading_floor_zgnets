@@ -23,8 +23,8 @@ class ShadowRunner:
 
         kalman_cfg = self.config.get("kalman", {})
         self.kalman_filters: dict[str, KalmanFilter] = {}
-        self._kalman_pv = kalman_cfg.get("process_variance", 1e-5)
-        self._kalman_mv = kalman_cfg.get("measurement_variance", 1e-3)
+        self._kalman_pv = float(kalman_cfg.get("process_variance", 1e-5))
+        self._kalman_mv = float(kalman_cfg.get("measurement_variance", 1e-3))
 
         hmm_cfg = self.config.get("hmm", {})
         self.hmm = HMMRegimeDetector(
