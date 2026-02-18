@@ -1,18 +1,5 @@
 {
-  "cash": 12540.342234377096,
-  "equity": 0.0,
-  "positions": {
-    "ANET": {
-      "quantity": -31,
-      "avg_price": 140.18021699794647,
-      "highest_price": 140.18021699794647,
-      "lowest_price": 140.18021699794647
-    },
-    "IDR": {
-      "quantity": -114,
-      "avg_price": 38.74107775099235,
-      "highest_price": 38.74107775099235,
-      "lowest_price": 38.74107775099235
-    }
-  }
+  "cash": 3664.972107393455,
+  "equity": 3667.313847421836,
+  "positions": {}
 }
