@@ -315,7 +315,16 @@ class TradingFloor:
 
                     pnl = 0.0
                     if price > 0:
-                        pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
+                        # For exits (forced_exits), pass the full position quantity
+                        if sym in forced_exits:
+                            pos = self.portfolio.state.positions.get(sym)
+                            if pos:
+                                close_qty = abs(pos.quantity)
+                                pnl = self.portfolio.execute(sym, side, price, quantity=close_qty)
+                            else:
+                                continue
+                        else:
+                            pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
 
                     actual_qty = 0
                     if price > 0 and target_val > 0:
