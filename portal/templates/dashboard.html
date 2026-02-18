@@ -272,6 +272,32 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card accent-purple"><div class="stat-label">Total Tokens</div><div class="stat-value text-purple" id="tk-tokens">—</div></div>
   </div>
   <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-green">
+      <div class="stat-label" style="margin-bottom:8px">Input Tokens</div>
+      <div class="stat-value text-green" id="tk-input" style="font-size:28px">—</div>
+      <div class="stat-label" style="margin-top:4px;font-size:11px" id="tk-input-pct">—</div>
+    </div>
+    <div class="card accent-orange">
+      <div class="stat-label" style="margin-bottom:8px">Output Tokens</div>
+      <div class="stat-value text-yellow" id="tk-output" style="font-size:28px">—</div>
+      <div class="stat-label" style="margin-top:4px;font-size:11px" id="tk-output-pct">—</div>
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-purple">
+      <div class="stat-label" style="margin-bottom:8px">Sessions Parsed</div>
+      <div class="stat-value text-purple" id="tk-sessions" style="font-size:28px">—</div>
+    </div>
+    <div class="card accent-teal">
+      <div class="stat-label" style="margin-bottom:8px">Days Active</div>
+      <div class="stat-value text-teal" id="tk-days" style="font-size:28px">—</div>
+    </div>
+  </div>
+  <div class="card accent-teal" style="margin-top:20px">
+    <div class="stat-label" style="margin-bottom:12px">Token Usage by Model</div>
+    <div id="model-costs"></div>
+  </div>
+  <div class="grid grid-2" style="margin-top:20px">
     <div class="card accent-teal">
       <div class="stat-label" style="margin-bottom:12px">Cost by Provider</div>
       <canvas id="provider-chart" height="200"></canvas>
@@ -477,6 +503,28 @@ async function loadTokens() {
   document.getElementById('tk-daily').textContent = fmt$(d.daily_avg);
   document.getElementById('tk-projected').textContent = fmt$(d.projected_monthly);
   document.getElementById('tk-tokens').textContent = fmtK(d.total_tokens);
+
+  // Input/Output breakdown
+  const inp = d.input_tokens || 0;
+  const out = d.output_tokens || 0;
+  const total = inp + out || 1;
+  document.getElementById('tk-input').textContent = fmtK(inp);
+  document.getElementById('tk-output').textContent = fmtK(out);
+  document.getElementById('tk-input-pct').textContent = `${((inp/total)*100).toFixed(1)}% of total`;
+  document.getElementById('tk-output-pct').textContent = `${((out/total)*100).toFixed(1)}% of total`;
+  document.getElementById('tk-sessions').textContent = (d.sessions_parsed || 0).toLocaleString();
+  document.getElementById('tk-days').textContent = d.days_active || '—';
+
+  // Model breakdown table
+  const modelDiv = document.getElementById('model-costs');
+  if (d.by_model && d.by_model.length) {
+    modelDiv.innerHTML = `<div style="display:grid;grid-template-columns:1fr 90px 90px 80px 60px;gap:4px;font-size:13px;color:var(--text-dim)">
+      <div style="font-weight:600;color:var(--text)">Model</div><div style="text-align:right;font-weight:600;color:var(--text)">Input</div><div style="text-align:right;font-weight:600;color:var(--text)">Output</div><div style="text-align:right;font-weight:600;color:var(--text)">Cost</div><div style="text-align:right;font-weight:600;color:var(--text)">Calls</div>
+      ${d.by_model.map(m => `<div style="color:var(--teal)">${m.model}</div><div style="text-align:right">${fmtK(m.input)}</div><div style="text-align:right">${fmtK(m.output)}</div><div style="text-align:right">${fmt$(m.cost)}</div><div style="text-align:right">${m.calls}</div>`).join('')}
+    </div>`;
+  } else {
+    modelDiv.innerHTML = '<div style="color:var(--text-muted)">No model data available</div>';
+  }
 
   // Provider chart
   const ctx = document.getElementById('provider-chart').getContext('2d');
