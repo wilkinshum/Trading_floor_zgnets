@@ -235,8 +235,15 @@ async def api_tokens():
                     cost_obj = usage.get("cost") or {}
                     cost = cost_obj.get("total", 0) if isinstance(cost_obj, dict) else (cost_obj or 0)
                     
-                    if inp or out:
-                        total_input += inp + cache_read
+                    if inp or out or usage.get("totalTokens"):
+                        # For Claude, 'input' is delta only; real input = totalTokens - output
+                        total_toks = usage.get("totalTokens") or 0
+                        if total_toks > 0 and total_toks > (inp + cache_read + out):
+                            actual_input = total_toks - out
+                        else:
+                            actual_input = inp + cache_read
+                        
+                        total_input += actual_input
                         total_output += out
                         total_cost += cost
                         
@@ -245,7 +252,7 @@ async def api_tokens():
                         model_short = model.split("/")[-1] if "/" in model else model
                         if model_short not in by_model:
                             by_model[model_short] = {"input": 0, "output": 0, "cost": 0.0, "calls": 0}
-                        by_model[model_short]["input"] += inp
+                        by_model[model_short]["input"] += actual_input
                         by_model[model_short]["output"] += out
                         by_model[model_short]["cost"] += cost
                         by_model[model_short]["calls"] += 1
@@ -257,7 +264,7 @@ async def api_tokens():
                             if len(day) == 10 and day[4] == "-":
                                 if day not in by_day:
                                     by_day[day] = {"input": 0, "output": 0, "cost": 0.0}
-                                by_day[day]["input"] += inp
+                                by_day[day]["input"] += actual_input
                                 by_day[day]["output"] += out
                                 by_day[day]["cost"] += cost
             except Exception:
