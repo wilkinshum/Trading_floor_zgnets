@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1220;--card:#121826;--card-hover:#1a2235;
+  --purple:#6D5EF6;--green:#25D27B;--teal:#20C4C6;
+  --red:#EF4444;--yellow:#F59E0B;--orange:#F97316;
+  --text:#E2E8F0;--text-dim:#94A3B8;--text-muted:#64748B;
+  --border:#1E293B;--sidebar-w:240px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{width:var(--sidebar-w);background:#0D1525;border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:10}
+.sidebar-brand{padding:24px 20px;font-size:18px;font-weight:700;color:var(--purple);display:flex;align-items:center;gap:10px}
+.sidebar-brand .dot{width:10px;height:10px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sidebar nav{flex:1;padding:8px 12px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;cursor:pointer;color:var(--text-dim);font-size:14px;font-weight:500;transition:all .2s;margin-bottom:2px}
+.nav-item:hover{background:rgba(109,94,246,.1);color:var(--text)}
+.nav-item.active{background:rgba(109,94,246,.15);color:var(--purple)}
+.nav-item svg{width:20px;height:20px;flex-shrink:0}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)}
+
+/* Main Content */
+.main{margin-left:var(--sidebar-w);flex:1;padding:32px 40px}
+.page-header{text-align:center;margin-bottom:32px}
+.page-header h1{font-size:28px;font-weight:700;color:var(--text)}
+.page-header p{font-size:14px;color:var(--text-dim);margin-top:4px}
+
+/* Cards */
+.card{background:var(--card);border-radius:10px;padding:24px;box-shadow:0 4px 24px rgba(0,0,0,.25);transition:transform .2s,box-shadow .2s;border-left:3px solid transparent}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.35)}
+.card.accent-purple{border-left-color:var(--purple)}
+.card.accent-green{border-left-color:var(--green)}
+.card.accent-teal{border-left-color:var(--teal)}
+.card.accent-yellow{border-left-color:var(--yellow)}
+.card.accent-red{border-left-color:var(--red)}
+.card.accent-orange{border-left-color:var(--orange)}
+
+/* Grid */
+.grid{display:grid;gap:20px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-1{grid-template-columns:1fr}
+
+/* Stats */
+.stat-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700}
+.stat-sub{font-size:12px;color:var(--text-dim);margin-top:4px}
+.text-green{color:var(--green)}.text-red{color:var(--red)}.text-purple{color:var(--purple)}.text-teal{color:var(--teal)}.text-yellow{color:var(--yellow)}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* Badge */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(37,210,123,.15);color:var(--green)}
+.badge-yellow{background:rgba(245,158,11,.15);color:var(--yellow)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-purple{background:rgba(109,94,246,.15);color:var(--purple)}
+.badge-teal{background:rgba(32,196,198,.15);color:var(--teal)}
+
+/* Progress */
+.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:4px;transition:width .5s}
+
+/* Status dots */
+.status-row{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
+.status-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim)}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.status-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.status-dot.off{background:var(--red)}
+
+/* Tabs */
+.tab-group{display:flex;gap:4px;margin-bottom:24px;background:#0D1525;border-radius:8px;padding:4px}
+.tab-btn{padding:8px 20px;border:none;background:none;color:var(--text-dim);font-size:13px;font-weight:500;cursor:pointer;border-radius:6px;transition:all .2s;font-family:inherit}
+.tab-btn.active{background:var(--purple);color:#fff}
+
+/* Journal */
+.journal-list{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+.journal-item{padding:16px;background:var(--card);border-radius:8px;cursor:pointer;transition:all .2s;border-left:3px solid var(--purple)}
+.journal-item:hover{background:var(--card-hover);transform:translateX(4px)}
+.journal-item .date{font-weight:600;color:var(--purple);font-size:15px}
+.journal-item .preview{color:var(--text-dim);font-size:13px;margin-top:4px}
+.journal-viewer{background:var(--card);border-radius:10px;padding:32px;min-height:400px;font-size:14px;line-height:1.8}
+.journal-viewer h1,.journal-viewer h2,.journal-viewer h3{color:var(--purple);margin:16px 0 8px}
+.journal-viewer code{background:#1E293B;padding:2px 6px;border-radius:4px;font-size:13px}
+.journal-viewer pre{background:#0D1525;padding:16px;border-radius:8px;overflow-x:auto;margin:12px 0}
+
+/* Search */
+.search-bar{width:100%;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+.search-bar:focus{border-color:var(--purple)}
+
+/* Tags */
+.tag-row{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tag{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--text-dim);transition:all .2s}
+.tag:hover,.tag.active{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* Org Chart */
+.org-chart{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px}
+.org-node{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:16px 32px;text-align:center;min-width:160px}
+.org-node .name{font-weight:700;font-size:16px}
+.org-node .role{font-size:12px;color:var(--text-dim)}
+.org-connector{width:2px;height:24px;background:var(--border)}
+.org-branch{display:flex;gap:32px;position:relative}
+.org-branch::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:calc(100% - 160px);height:2px;background:var(--border)}
+
+/* Cron Card */
+.cron-card{display:flex;align-items:center;gap:16px;padding:20px;background:var(--card);border-radius:10px;transition:transform .2s}
+.cron-card:hover{transform:translateY(-2px)}
+.cron-stripe{width:4px;height:48px;border-radius:2px}
+.cron-info h3{font-size:15px;font-weight:600}
+.cron-info p{font-size:12px;color:var(--text-dim);margin-top:2px}
+.cron-meta{margin-left:auto;text-align:right;font-size:12px;color:var(--text-muted)}
+
+/* Section hide/show */
+.section{display:none}
+.section.active{display:block}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Brain entry */
+.brain-entry{background:var(--card);border-radius:10px;padding:20px;border-left:3px solid var(--teal);transition:transform .2s}
+.brain-entry:hover{transform:translateY(-2px)}
+.brain-entry h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.brain-entry .body{font-size:13px;color:var(--text-dim);line-height:1.6;white-space:pre-wrap}
+
+@media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-brand"><span class="dot"></span> OpenClaw</div>
+  <nav>
+    <div class="nav-item active" data-tab="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </div>
+    <div class="nav-item" data-tab="trading">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/><polyline points="16,7 22,7 22,13"/></svg>
+      Trading
+    </div>
+    <div class="nav-item" data-tab="tokens">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>
+      Tokens
+    </div>
+    <div class="nav-item" data-tab="agents">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Agents
+    </div>
+    <div class="nav-item" data-tab="schedule">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Schedule
+    </div>
+    <div class="nav-item" data-tab="journal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Journal
+    </div>
+    <div class="nav-item" data-tab="brain">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      2nd Brain
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;align-items:center;gap:8px"><span class="status-dot on"></span> System Online</div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="section active" id="sec-overview">
+  <div class="page-header">
+    <h1>Dashboard Overview</h1>
+    <p>Real-time system health and portfolio snapshot</p>
+  </div>
+  <div class="grid grid-4" id="overview-stats">
+    <div class="card accent-green"><div class="stat-label">Equity</div><div class="stat-value text-green" id="ov-equity">—</div></div>
+    <div class="card accent-purple"><div class="stat-label">Today's P&L</div><div class="stat-value" id="ov-pnl">—</div></div>
+    <div class="card accent-teal"><div class="stat-label">Open Positions</div><div class="stat-value text-teal" id="ov-positions">—</div></div>
+    <div class="card accent-yellow"><div class="stat-label">Win Rate</div><div class="stat-value text-yellow" id="ov-winrate">—</div></div>
+  </div>
+  <div style="margin-top:24px">
+    <div class="card accent-purple">
+      <div class="stat-label" style="margin-bottom:16px">System Status</div>
+      <div class="status-row">
+        <div class="status-item"><span class="status-dot on"></span> WhatsApp</div>
+        <div class="status-item"><span class="status-dot on"></span> Crons</div>
+        <div class="status-item"><span class="status-dot on"></span> Portal</div>
+        <div class="status-item"><span class="status-dot on"></span> Gateway</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-teal">
+      <div class="stat-label">Total Trades</div>
+      <div class="stat-value text-teal" id="ov-trades">—</div>
+      <div class="stat-sub">All-time closed trades</div>
+    </div>
+    <div class="card accent-green">
+      <div class="stat-label">Cash Available</div>
+      <div class="stat-value text-green" id="ov-cash">—</div>
+      <div class="stat-sub">Buying power</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRADING ═══ -->
+<div class="section" id="sec-trading">
+  <div class="page-header">
+    <h1>Trading Floor</h1>
+    <p>Active positions, equity curve, and signal indicators</p>
+  </div>
+  <div class="card accent-green" style="margin-bottom:20px">
+    <div class="stat-label" style="margin-bottom:12px">Active Positions</div>
+    <div class="table-wrap">
+      <table id="positions-table">
+        <thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th><th>Current</th><th>P&L</th><th>P&L %</th></tr></thead>
+        <tbody id="positions-body"><tr><td colspan="6" style="text-align:center;color:var(--text-muted)">No open positions</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card accent-purple">
+      <div class="stat-label" style="margin-bottom:12px">Equity Curve</div>
+      <canvas id="equity-chart" height="200"></canvas>
+    </div>
+    <div class="card accent-teal">
+      <div class="stat-label" style="margin-bottom:12px">Recent Trades</div>
+      <div id="trades-feed" style="max-height:280px;overflow-y:auto;font-size:13px;color:var(--text-dim)">
+        <div style="text-align:center;color:var(--text-muted)">No trades yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOKENS ═══ -->
+<div class="section" id="sec-tokens">
+  <div class="page-header">
+    <h1>Token Usage</h1>
+    <p>API costs, token consumption, and budget tracking</p>
+  </div>
+  <div class="card accent-purple" style="margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div class="stat-label">Budget Progress</div><div class="stat-value text-purple" id="tk-budget-text">—</div></div>
+      <div style="text-align:right"><div class="stat-label">Budget</div><div style="font-size:20px;font-weight:600" id="tk-budget-total">—</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="tk-budget-bar" style="width:0%;background:var(--purple)"></div></div>
+  </div>
+  <div class="grid grid-4" id="tk-metrics">
+    <div class="card accent-green"><div class="stat-label">Budget Used</div><div class="stat-value text-green" id="tk-used">—</div></div>
+    <div class="card accent-teal"><div class="stat-label">Daily Avg</div><div class="stat-value text-teal" id="tk-daily">—</div></div>
+    <div class="card accent-yellow"><div class="stat-label">Projected Monthly</div><div class="stat-value text-yellow" id="tk-projected">—</div></div>
+    <div class="card accent-purple"><div class="stat-label">Total Tokens</div><div class="stat-value text-purple" id="tk-tokens">—</div></div>
+  </div>
+  <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-teal">
+      <div class="stat-label" style="margin-bottom:12px">Cost by Provider</div>
+      <canvas id="provider-chart" height="200"></canvas>
+    </div>
+    <div class="card accent-green">
+      <div class="stat-label" style="margin-bottom:12px">Cost by Agent</div>
+      <div id="agent-costs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AGENTS ═══ -->
+<div class="section" id="sec-agents">
+  <div class="page-header">
+    <h1>Agent Network</h1>
+    <p>Organization chart, skills, and documents</p>
+  </div>
+  <div class="tab-group">
+    <button class="tab-btn active" data-agent-tab="org">Org Chart</button>
+    <button class="tab-btn" data-agent-tab="docs">Documents</button>
+  </div>
+  <div id="agent-org" class="agent-panel">
+    <div class="card accent-purple">
+      <div class="org-chart">
+        <div class="org-node" style="border-color:var(--yellow)"><div class="name">🐍 Snake</div><div class="role">Owner</div></div>
+        <div class="org-connector"></div>
+        <div class="org-node" style="border-color:var(--purple)"><div class="name">🤖 boybot</div><div class="role">Manager · claude-opus-4.6</div></div>
+        <div class="org-connector"></div>
+        <div class="org-branch">
+          <div class="org-node" style="border-color:var(--teal)"><div class="name">✈️ travel</div><div class="role">Travel Agent</div></div>
+          <div class="org-node" style="border-color:var(--green)"><div class="name">💊 vita</div><div class="role">Health Agent</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="agent-docs" class="agent-panel" style="display:none">
+    <div class="grid grid-1" id="docs-list"></div>
+  </div>
+</div>
+
+<!-- ═══ SCHEDULE ═══ -->
+<div class="section" id="sec-schedule">
+  <div class="page-header">
+    <h1>Schedule</h1>
+    <p>Cron jobs and automated tasks</p>
+  </div>
+  <div class="grid grid-1" id="schedule-list"></div>
+</div>
+
+<!-- ═══ JOURNAL ═══ -->
+<div class="section" id="sec-journal">
+  <div class="page-header">
+    <h1>Journal</h1>
+    <p>Daily memory notes and reflections</p>
+  </div>
+  <div class="grid grid-2">
+    <div class="journal-list" id="journal-list"></div>
+    <div class="journal-viewer" id="journal-viewer">
+      <div style="text-align:center;color:var(--text-muted);padding-top:100px">Select a date to view</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 2ND BRAIN ═══ -->
+<div class="section" id="sec-brain">
+  <div class="page-header">
+    <h1>2nd Brain</h1>
+    <p>Knowledge base and verified learnings</p>
+  </div>
+  <input class="search-bar" id="brain-search" placeholder="Search knowledge..." oninput="loadBrain()">
+  <div class="tag-row" id="brain-tags">
+    <span class="tag active" data-tag="">All</span>
+    <span class="tag" data-tag="Trading">Trading</span>
+    <span class="tag" data-tag="Knowledge">Knowledge</span>
+    <span class="tag" data-tag="Places">Places</span>
+    <span class="tag" data-tag="Notes">Notes</span>
+  </div>
+  <div class="grid grid-1" id="brain-list"></div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── Navigation ──
+const navItems = document.querySelectorAll('.nav-item');
+const sections = document.querySelectorAll('.section');
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    navItems.forEach(n => n.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('sec-' + item.dataset.tab).classList.add('active');
+    loadTab(item.dataset.tab);
+  });
+});
+
+// ── Agent tabs ──
+document.querySelectorAll('[data-agent-tab]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-agent-tab]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.agent-panel').forEach(p => p.style.display = 'none');
+    btn.classList.add('active');
+    document.getElementById('agent-' + btn.dataset.agentTab).style.display = 'block';
+  });
+});
+
+// ── Brain tags ──
+document.querySelectorAll('#brain-tags .tag').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#brain-tags .tag').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    loadBrain();
+  });
+});
+
+const api = (url) => fetch(url).then(r => r.json()).catch(() => null);
+const fmt$ = (v) => '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtK = (v) => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v;
+
+let equityChart = null, providerChart = null;
+
+async function loadTab(tab) {
+  if (tab === 'overview') await loadOverview();
+  else if (tab === 'trading') await loadTrading();
+  else if (tab === 'tokens') await loadTokens();
+  else if (tab === 'agents') await loadAgents();
+  else if (tab === 'schedule') await loadSchedule();
+  else if (tab === 'journal') await loadJournal();
+  else if (tab === 'brain') await loadBrain();
+}
+
+async function loadOverview() {
+  const d = await api('/api/overview');
+  if (!d) return;
+  document.getElementById('ov-equity').textContent = fmt$(d.equity);
+  const pnlEl = document.getElementById('ov-pnl');
+  pnlEl.textContent = (d.today_pnl >= 0 ? '+' : '') + fmt$(d.today_pnl);
+  pnlEl.className = 'stat-value ' + (d.today_pnl >= 0 ? 'text-green' : 'text-red');
+  document.getElementById('ov-positions').textContent = d.open_positions;
+  document.getElementById('ov-winrate').textContent = d.win_rate + '%';
+  document.getElementById('ov-trades').textContent = d.total_trades;
+  document.getElementById('ov-cash').textContent = fmt$(d.cash);
+}
+
+async function loadTrading() {
+  // Positions
+  const pos = await api('/api/positions') || [];
+  const tbody = document.getElementById('positions-body');
+  if (pos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted)">No open positions</td></tr>';
+  } else {
+    tbody.innerHTML = pos.map(p => `<tr>
+      <td style="font-weight:600">${p.symbol}</td><td>${p.qty}</td>
+      <td>${fmt$(p.entry)}</td><td>${fmt$(p.current)}</td>
+      <td class="${p.pnl>=0?'text-green':'text-red'}">${(p.pnl>=0?'+':'')+fmt$(p.pnl)}</td>
+      <td class="${p.pnl_pct>=0?'text-green':'text-red'}">${(p.pnl_pct>=0?'+':'')+p.pnl_pct.toFixed(2)}%</td>
+    </tr>`).join('');
+  }
+
+  // Equity chart
+  const curve = await api('/api/equity_history') || [];
+  const ctx = document.getElementById('equity-chart').getContext('2d');
+  if (equityChart) equityChart.destroy();
+  equityChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: curve.map((c,i) => i === 0 ? 'Start' : (c.timestamp||'').slice(0,10)),
+      datasets: [{
+        label: 'Equity',
+        data: curve.map(c => c.equity),
+        borderColor: '#6D5EF6',
+        backgroundColor: 'rgba(109,94,246,0.1)',
+        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+      }]
+    },
+    options: {responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'#1E293B'},ticks:{color:'#64748B'}}}}
+  });
+
+  // Recent trades
+  const trades = await api('/api/trades') || [];
+  const feed = document.getElementById('trades-feed');
+  if (trades.length === 0) {
+    feed.innerHTML = '<div style="text-align:center;color:var(--text-muted)">No trades yet</div>';
+  } else {
+    feed.innerHTML = trades.slice(0,15).map(t => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <span><strong>${t.symbol||'—'}</strong> ${t.side||''} ${t.qty||''}</span>
+      <span class="${(t.pnl||0)>=0?'text-green':'text-red'}">${t.pnl!=null?((t.pnl>=0?'+':'')+Number(t.pnl).toFixed(2)):'—'}</span>
+    </div>`).join('');
+  }
+}
+
+async function loadTokens() {
+  const d = await api('/api/tokens');
+  if (!d) return;
+  document.getElementById('tk-budget-text').textContent = fmt$(d.budget_used);
+  document.getElementById('tk-budget-total').textContent = fmt$(d.budget);
+  const pct = Math.min((d.budget_used / d.budget) * 100, 100);
+  const bar = document.getElementById('tk-budget-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 80 ? 'var(--red)' : pct > 60 ? 'var(--yellow)' : 'var(--purple)';
+
+  document.getElementById('tk-used').textContent = fmt$(d.budget_used);
+  document.getElementById('tk-daily').textContent = fmt$(d.daily_avg);
+  document.getElementById('tk-projected').textContent = fmt$(d.projected_monthly);
+  document.getElementById('tk-tokens').textContent = fmtK(d.total_tokens);
+
+  // Provider chart
+  const ctx = document.getElementById('provider-chart').getContext('2d');
+  if (providerChart) providerChart.destroy();
+  const colors = ['#6D5EF6','#25D27B','#20C4C6','#F59E0B','#EF4444'];
+  providerChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: (d.by_provider||[]).map(p => p.provider),
+      datasets: [{data:(d.by_provider||[]).map(p => p.tokens), backgroundColor: colors, borderWidth:0}]
+    },
+    options: {responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',font:{size:12}}}}}
+  });
+
+  // Agent costs
+  const ac = document.getElementById('agent-costs');
+  ac.innerHTML = (d.by_agent||[]).map((a,i) => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+    <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i]};margin-right:8px"></span>${a.agent}</div>
+    <div>${fmt$(a.cost)} · ${fmtK(a.tokens)} tokens</div>
+  </div>`).join('');
+}
+
+async function loadAgents() {
+  const d = await api('/api/agents');
+  if (!d) return;
+  const dl = document.getElementById('docs-list');
+  dl.innerHTML = (d.documents||[]).map(doc => `<div class="card accent-purple" style="display:flex;justify-content:space-between;align-items:center">
+    <div><strong>${doc.name}</strong><div style="font-size:12px;color:var(--text-dim)">${(doc.size/1024).toFixed(1)} KB</div></div>
+    <span class="badge badge-purple">Workspace</span>
+  </div>`).join('');
+}
+
+async function loadSchedule() {
+  const jobs = await api('/api/schedule') || [];
+  const el = document.getElementById('schedule-list');
+  el.innerHTML = jobs.map(j => `<div class="cron-card">
+    <div class="cron-stripe" style="background:${j.color||'var(--purple)'}"></div>
+    <div class="cron-info"><h3>${j.name}</h3><p>${j.description||''}</p></div>
+    <div class="cron-meta">
+      <span class="badge ${j.status==='Active'||j.status==='Running'?'badge-green':j.status==='Paused'?'badge-yellow':'badge-purple'}">${j.status||'Active'}</span>
+      <div style="margin-top:4px">${j.schedule||''}</div>
+    </div>
+  </div>`).join('') || '<div class="card" style="text-align:center;color:var(--text-muted)">No scheduled jobs</div>';
+}
+
+async function loadJournal() {
+  const entries = await api('/api/journal') || [];
+  const list = document.getElementById('journal-list');
+  list.innerHTML = entries.map(e => `<div class="journal-item" onclick="viewJournal('${e.date}')">
+    <div class="date">${e.date}</div>
+    <div class="preview">${escHtml(e.preview)}</div>
+    <div class="tag-row">${(e.tags||[]).map(t => '<span class="tag" style="font-size:10px;padding:2px 8px">'+escHtml(t)+'</span>').join('')}</div>
+  </div>`).join('') || '<div style="color:var(--text-muted)">No journal entries</div>';
+}
+
+async function viewJournal(date) {
+  const d = await api('/api/journal/' + date);
+  if (!d) return;
+  const viewer = document.getElementById('journal-viewer');
+  // Simple markdown rendering
+  let html = escHtml(d.content)
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^- (.+)$/gm, '• $1<br>')
+    .replace(/\n/g, '<br>');
+  viewer.innerHTML = '<h2 style="margin-bottom:16px">📝 ' + date + '</h2>' + html;
+}
+
+let brainTag = '';
+async function loadBrain() {
+  const activeTag = document.querySelector('#brain-tags .tag.active');
+  brainTag = activeTag ? activeTag.dataset.tag : '';
+  const q = document.getElementById('brain-search').value;
+  const entries = await api('/api/brain?q=' + encodeURIComponent(q)) || [];
+  const filtered = brainTag ? entries.filter(e => (e.tags||[]).includes(brainTag)) : entries;
+  const el = document.getElementById('brain-list');
+  el.innerHTML = filtered.map(e => `<div class="brain-entry">
+    <h3>${escHtml(e.title)}</h3>
+    <div class="tag-row">${(e.tags||[]).map(t => '<span class="tag" style="font-size:10px;padding:2px 8px">'+escHtml(t)+'</span>').join('')}</div>
+    <div class="body">${escHtml(e.body)}</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">Source: ${escHtml(e.source||'')}</div>
+  </div>`).join('') || '<div class="card" style="text-align:center;color:var(--text-muted)">No entries found</div>';
+}
+
+function escHtml(s) { const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+
+// ── WebSocket live updates ──
+function connectWS() {
+  const ws = new WebSocket('ws://' + location.host + '/ws/feed');
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    if (d.type === 'status_update' && document.getElementById('sec-overview').classList.contains('active')) {
+      document.getElementById('ov-equity').textContent = fmt$(d.equity);
+    }
+  };
+  ws.onclose = () => setTimeout(connectWS, 3000);
+}
+
+// ── Init ──
+loadOverview();
+connectWS();
+</script>
+</body>
+</html>
