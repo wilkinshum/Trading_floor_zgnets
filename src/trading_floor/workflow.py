@@ -82,7 +82,12 @@ class TradingFloor:
             return False, "approval file unreadable"
 
         if data.get("date") and data.get("date") != datetime.now().date().isoformat():
-            return False, "approval expired"
+            # Clean up stale approval file
+            try:
+                path.unlink()
+            except OSError:
+                pass
+            return False, "approval expired (stale file removed)"
 
         approved = bool(data.get("approved"))
         note = data.get("notes") or data.get("note") or ""
