@@ -314,21 +314,24 @@ class TradingFloor:
                     price = current_prices.get(sym, 0.0)
 
                     pnl = 0.0
+                    actual_qty = 0
                     if price > 0:
-                        # For exits (forced_exits), pass the full position quantity
-                        if sym in forced_exits:
+                        if side == "SELL":
+                            # All sells close existing position (forced or not)
                             pos = self.portfolio.state.positions.get(sym)
-                            if pos:
+                            if pos and pos.quantity != 0:
                                 close_qty = abs(pos.quantity)
                                 pnl = self.portfolio.execute(sym, side, price, quantity=close_qty)
+                                actual_qty = close_qty
                             else:
-                                continue
+                                continue  # Nothing to close
                         else:
+                            # BUY — new entry
                             pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
-
-                    actual_qty = 0
-                    if price > 0 and target_val > 0:
-                        actual_qty = int(target_val // price)
+                            if price > 0 and target_val > 0:
+                                actual_qty = int(target_val // price)
+                            elif sym in self.portfolio.state.positions:
+                                actual_qty = abs(self.portfolio.state.positions[sym].quantity)
 
                     trade_record = {
                         "timestamp": context["timestamp"],
