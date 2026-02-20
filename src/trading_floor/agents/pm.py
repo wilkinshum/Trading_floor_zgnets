@@ -68,6 +68,11 @@ class PMAgent:
         portfolio_equity = context.get("portfolio_equity", 5000.0)
         if not portfolio_equity or math.isnan(portfolio_equity) or portfolio_equity <= 0:
             portfolio_equity = self.cfg.get("risk", {}).get("equity", 5000.0)
+        portfolio_cash = context.get("portfolio_cash", portfolio_equity)
+        if (not portfolio_cash or math.isnan(portfolio_cash)
+                or portfolio_cash <= 0):
+            portfolio_cash = portfolio_equity
+        sizing_capital = min(portfolio_cash, portfolio_equity / max(1, max_positions))
         vol_map = {item["symbol"]: item.get("vol", 0.20) for item in ranked}
 
         for plan in candidates:
@@ -77,14 +82,14 @@ class PMAgent:
                 annual_vol = 0.20
 
             if sizing_method == "kelly":
-                dollar_size = self._kelly_size(plan["score"], annual_vol, portfolio_equity, max_trades)
+                dollar_size = self._kelly_size(plan["score"], annual_vol, sizing_capital, max_trades)
             elif sizing_method == "fixed_fractional":
                 frac = self.cfg.get("signals", {}).get("fixed_fraction", 0.02)  # risk 2% of equity
                 stop_loss = self.cfg.get("risk", {}).get("stop_loss", 0.02)
-                dollar_size = (portfolio_equity * frac) / max(stop_loss, 0.01)
+                dollar_size = (sizing_capital * frac) / max(stop_loss, 0.01)
             else:
                 # Default: volatility-adjusted
-                base_alloc = portfolio_equity / max(1, max_trades)
+                base_alloc = sizing_capital / max(1, max_trades)
                 target_vol = 0.20
                 size_factor = target_vol / annual_vol
                 size_factor = max(0.5, min(1.5, size_factor))
