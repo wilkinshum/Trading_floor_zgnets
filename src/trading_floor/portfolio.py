@@ -117,22 +117,30 @@ class Portfolio:
 
         # Sizing Logic
         if quantity == 0:
-            if target_value > 0:
-                if math.isnan(target_value) or math.isinf(target_value):
-                    logger.warning("Skipping trade for %s: invalid target_value=%s", symbol, target_value)
-                    return 0.0
-                # Use Volatility-Sized Target Value
-                quantity = int(target_value // exec_price)
-            else:
-                # Fallback to Equal Weight
-                max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
-                target_alloc = self.state.equity / max_pos
-                if not target_alloc or math.isnan(target_alloc) or math.isinf(target_alloc) or target_alloc <= 0:
-                    logger.warning("Skipping trade for %s: invalid target_alloc=%s (equity=%s)", symbol, target_alloc, self.state.equity)
-                    return 0.0
-                quantity = int(target_alloc // exec_price)
-            
-            if quantity < 1: quantity = 1
+            pos = self.state.positions.get(symbol)
+            if pos:
+                if side == "SELL" and pos.quantity > 0:
+                    quantity = abs(pos.quantity)
+                elif side == "BUY" and pos.quantity < 0:
+                    quantity = abs(pos.quantity)
+
+            if quantity == 0:
+                if target_value > 0:
+                    if math.isnan(target_value) or math.isinf(target_value):
+                        logger.warning("Skipping trade for %s: invalid target_value=%s", symbol, target_value)
+                        return 0.0
+                    # Use Volatility-Sized Target Value
+                    quantity = int(target_value // exec_price)
+                else:
+                    # Fallback to Equal Weight
+                    max_pos = self.cfg.get("risk", {}).get("max_positions", 2)
+                    target_alloc = self.state.equity / max_pos
+                    if not target_alloc or math.isnan(target_alloc) or math.isinf(target_alloc) or target_alloc <= 0:
+                        logger.warning("Skipping trade for %s: invalid target_alloc=%s (equity=%s)", symbol, target_alloc, self.state.equity)
+                        return 0.0
+                    quantity = int(target_alloc // exec_price)
+                
+                if quantity < 1: quantity = 1
 
         # Calculate commission cost
         comm_cost = float(quantity) * commission
