@@ -1,7 +1,12 @@
 from datetime import datetime
-import json
+import json, sys, io
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+# Fix Windows cp1252 encoding for emoji/unicode in print()
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ('utf-8', 'utf8'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
 from trading_floor.data import YahooDataProvider, filter_trading_window, latest_timestamp
 from trading_floor.portfolio import Portfolio
 from trading_floor.agents.scout import ScoutAgent
