@@ -38,6 +38,7 @@ class PMAgent:
 
         # --- Build candidate list ---
         candidates = []
+        held_symbols = set(context.get("positions", []))
         for item in ranked:
             sym = item["symbol"]
             score = signals.get(sym, 0.0)
@@ -47,6 +48,8 @@ class PMAgent:
                 continue
 
             if score >= threshold:
+                if sym in held_symbols:
+                    continue
                 candidates.append({"symbol": sym, "side": "BUY", "score": score, "vol": item.get("vol", 0.20)})
             elif score <= -threshold:
                 candidates.append({"symbol": sym, "side": "SELL", "score": score, "vol": item.get("vol", 0.20)})
