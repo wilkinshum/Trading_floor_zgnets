@@ -350,8 +350,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- ═══ JOURNAL ═══ -->
 <div class="section" id="sec-journal">
   <div class="page-header">
-    <h1>Journal</h1>
-    <p>Daily memory notes and reflections</p>
+    <h1>Trading Journal</h1>
+    <p>Daily entries with market regime, agent reasoning, trades & lessons</p>
+  </div>
+  <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+    <button onclick="generateJournal()" style="background:var(--purple);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px">📝 Generate Today</button>
+    <span id="journal-gen-status" style="font-size:12px;color:var(--text-dim)"></span>
   </div>
   <div class="grid grid-2">
     <div class="journal-list" id="journal-list"></div>
@@ -413,7 +417,7 @@ document.querySelectorAll('#brain-tags .tag').forEach(t => {
   });
 });
 
-const api = (url) => fetch(url).then(r => r.json()).catch(() => null);
+const api = (url, opts) => fetch(url, opts).then(r => r.json()).catch(() => null);
 const fmt$ = (v) => '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 const fmtK = (v) => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v;
 
@@ -573,27 +577,163 @@ async function loadSchedule() {
 async function loadJournal() {
   const entries = await api('/api/journal') || [];
   const list = document.getElementById('journal-list');
-  list.innerHTML = entries.map(e => `<div class="journal-item" onclick="viewJournal('${e.date}')">
-    <div class="date">${e.date}</div>
-    <div class="preview">${escHtml(e.preview)}</div>
-    <div class="tag-row">${(e.tags||[]).map(t => '<span class="tag" style="font-size:10px;padding:2px 8px">'+escHtml(t)+'</span>').join('')}</div>
-  </div>`).join('') || '<div style="color:var(--text-muted)">No journal entries</div>';
+  list.innerHTML = entries.map(e => {
+    const icon = e.type === 'trading' ? '📊' : '📝';
+    const borderColor = e.type === 'trading' ? 'var(--green)' : 'var(--purple)';
+    const tags = (e.tags||[]).map(t => {
+      let color = 'var(--purple)';
+      if (t === 'Bullish') color = 'var(--green)';
+      else if (t === 'Bearish') color = 'var(--red)';
+      else if (t.includes('blocked')) color = 'var(--yellow, #EAB308)';
+      return `<span class="tag" style="font-size:10px;padding:2px 8px;border-color:${color};color:${color}">${escHtml(t)}</span>`;
+    }).join('');
+    return `<div class="journal-item" style="border-left-color:${borderColor}" onclick="viewJournal('${e.date}','${e.type||'memory'}')">
+      <div class="date">${icon} ${e.date}</div>
+      <div class="preview">${escHtml(e.preview)}</div>
+      <div class="tag-row">${tags}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text-muted)">No journal entries yet. Click "Generate Today" to create one.</div>';
 }
 
-async function viewJournal(date) {
+async function viewJournal(date, type) {
   const d = await api('/api/journal/' + date);
   if (!d) return;
   const viewer = document.getElementById('journal-viewer');
-  // Simple markdown rendering
-  let html = escHtml(d.content)
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/^- (.+)$/gm, '• $1<br>')
-    .replace(/\n/g, '<br>');
-  viewer.innerHTML = '<h2 style="margin-bottom:16px">📝 ' + date + '</h2>' + html;
+  let html = '';
+
+  // Trading journal (rich view)
+  if (d.trading) {
+    const t = d.trading;
+    html += `<h2 style="margin-bottom:4px">📊 Trading Journal — ${date}</h2>`;
+
+    // Regime badge
+    if (t.market_regime) {
+      const regimeColor = t.market_regime === 'Bullish' ? 'var(--green)' :
+                          t.market_regime === 'Bearish' ? 'var(--red)' : 'var(--yellow, #EAB308)';
+      html += `<div style="margin:12px 0"><span style="background:${regimeColor}22;color:${regimeColor};padding:6px 14px;border-radius:20px;font-weight:600;font-size:14px">${t.market_regime}</span></div>`;
+    }
+
+    // Shadow analysis
+    if (t.shadow_analysis) {
+      const s = t.shadow_analysis;
+      html += `<div style="background:#111827;border-radius:8px;padding:16px;margin:12px 0">
+        <h3 style="margin:0 0 8px;font-size:14px">🔮 Shadow Analysis</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px">
+          <div><span style="color:var(--text-dim)">Predictions</span><br><strong>${s.total_predictions}</strong></div>
+          <div><span style="color:var(--text-dim)">Symbols</span><br><strong>${s.unique_symbols}</strong></div>
+          <div><span style="color:var(--text-dim)">Bull/Bear</span><br><strong style="color:var(--green)">${s.hmm_bull_pct}%</strong> / <strong style="color:var(--red)">${s.hmm_bear_pct}%</strong></div>
+        </div>
+      </div>`;
+    }
+
+    // Agent signals
+    if (t.agent_signals && Object.keys(t.agent_signals).length > 0) {
+      html += `<h3 style="margin:16px 0 8px">🤖 Agent Signals</h3>`;
+      for (const [agent, info] of Object.entries(t.agent_signals)) {
+        html += `<div style="background:#111827;border-radius:8px;padding:12px;margin:6px 0">
+          <strong style="text-transform:capitalize">${escHtml(agent)}</strong>
+          <span style="color:var(--text-dim);font-size:12px"> — ${info.total_signals} signals, ${info.unique_symbols} symbols</span>`;
+        if (info.top_by_strength) {
+          html += '<div style="margin-top:8px;font-size:13px">';
+          for (const sig of info.top_by_strength.slice(0, 3)) {
+            const dir = sig.signal_value > 0 ? '🟢 LONG' : sig.signal_value < 0 ? '🔴 SHORT' : '⚪ NEUTRAL';
+            html += `<div style="padding:2px 0">• <strong>${escHtml(sig.symbol)}</strong>: ${sig.signal_value.toFixed(4)} (${dir}, conf: ${(sig.confidence * 100).toFixed(1)}%)</div>`;
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+    }
+
+    // Trades
+    html += `<h3 style="margin:16px 0 8px">💰 Trades</h3>`;
+    if (t.trades_executed && t.trades_executed.length > 0) {
+      for (const tr of t.trades_executed) {
+        const pnl = parseFloat(tr.pnl) || 0;
+        const pnlColor = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+        html += `<div style="background:#111827;border-radius:8px;padding:12px;margin:6px 0;display:flex;justify-content:space-between">
+          <span><strong>${tr.side} ${escHtml(tr.symbol)}</strong> — qty: ${tr.quantity}, $${parseFloat(tr.price).toFixed(2)}</span>
+          <span style="color:${pnlColor};font-weight:600">$${pnl.toFixed(2)}</span>
+        </div>`;
+      }
+    } else {
+      html += `<div style="color:var(--text-dim);font-style:italic">No trades executed</div>`;
+    }
+
+    // Blocked
+    if (t.trades_blocked > 0) {
+      html += `<div style="margin:12px 0;padding:12px;background:#7C2D1233;border-radius:8px;border-left:3px solid var(--red)">
+        <strong>⚠️ ${t.trades_blocked} cycles blocked</strong>`;
+      if (t.events_summary && t.events_summary.block_reasons) {
+        for (const r of t.events_summary.block_reasons.filter(x => x)) {
+          html += `<div style="font-size:12px;color:var(--text-dim);margin-top:4px">• ${escHtml(r)}</div>`;
+        }
+      }
+      html += '</div>';
+    }
+
+    // Portfolio
+    if (t.portfolio_snapshot) {
+      const p = t.portfolio_snapshot;
+      const pct = ((p.equity - 5000) / 5000 * 100).toFixed(1);
+      const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+      html += `<div style="background:#111827;border-radius:8px;padding:16px;margin:12px 0">
+        <h3 style="margin:0 0 8px;font-size:14px">💼 Portfolio</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px">
+          <div><span style="color:var(--text-dim)">Equity</span><br><strong>$${p.equity.toLocaleString()}</strong></div>
+          <div><span style="color:var(--text-dim)">Cash</span><br><strong>$${p.cash.toLocaleString()}</strong></div>
+          <div><span style="color:var(--text-dim)">Since Start</span><br><strong style="color:${pctColor}">${pct}%</strong></div>
+        </div>
+      </div>`;
+    }
+
+    // Lessons
+    if (t.lessons && t.lessons.length > 0) {
+      html += '<h3 style="margin:16px 0 8px">📚 Lessons</h3>';
+      for (const l of t.lessons) {
+        html += `<div style="padding:4px 0;font-size:13px">• ${escHtml(l)}</div>`;
+      }
+    }
+    html += '<hr style="border-color:#1E293B;margin:20px 0">';
+  }
+
+  // Trading narrative (markdown)
+  if (d.trading_narrative) {
+    html += `<details style="margin:8px 0"><summary style="cursor:pointer;color:var(--purple);font-size:13px">📄 Raw Narrative</summary>
+      <pre style="white-space:pre-wrap;font-size:12px;margin-top:8px;background:#0D1525;padding:16px;border-radius:8px">${escHtml(d.trading_narrative)}</pre>
+    </details>`;
+  }
+
+  // Memory notes
+  if (d.memory) {
+    html += `<h3 style="margin:16px 0 8px">📝 Memory Notes</h3>`;
+    let memHtml = escHtml(d.memory)
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
+      .replace(/^- (.+)$/gm, '• $1<br>')
+      .replace(/\n/g, '<br>');
+    html += memHtml;
+  }
+
+  viewer.innerHTML = html || '<div style="color:var(--text-muted)">No data for this date</div>';
+}
+
+async function generateJournal() {
+  const status = document.getElementById('journal-gen-status');
+  status.textContent = 'Generating...';
+  const today = new Date().toISOString().split('T')[0];
+  const res = await api('/api/journal/generate/' + today, {method: 'POST'});
+  if (res && !res.error) {
+    status.textContent = '✅ Generated!';
+    await loadJournal();
+    viewJournal(today, 'trading');
+  } else {
+    status.textContent = '❌ ' + (res?.error || 'Failed');
+  }
+  setTimeout(() => status.textContent = '', 3000);
 }
 
 let brainTag = '';

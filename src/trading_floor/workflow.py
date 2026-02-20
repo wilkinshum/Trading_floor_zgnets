@@ -241,6 +241,17 @@ class TradingFloor:
                 "price_data": price_series,  # For PM correlation check
             })
 
+            # --- Always log signals (even if approval pending) ---
+            for sym, details in signal_details.items():
+                details["timestamp"] = context["timestamp"]
+                details["symbol"] = sym
+                details["side"] = "BUY" if signals.get(sym, 0) > 0 else "SELL"
+                try:
+                    self.signal_logger.log_signal(details)
+                    self.db.log_signal(details)
+                except Exception:
+                    pass
+
             # --- Shadow Mode: Kalman + HMM ---
             if self.shadow is not None:
                 try:
@@ -350,14 +361,6 @@ class TradingFloor:
 
                     self.logger.log_trade(trade_record)
                     self.db.log_trade(trade_record)
-
-                    if sym in signal_details:
-                        details = signal_details[sym]
-                        details["timestamp"] = context["timestamp"]
-                        details["symbol"] = sym
-                        details["side"] = side
-                        self.signal_logger.log_signal(details)
-                        self.db.log_signal(details)
 
                 self.portfolio.save()
 

@@ -351,36 +351,105 @@ async def api_schedule():
 
 
 # ──────────────────────────────────────────────
-# API — Journal
+# API — Journal (Trading Journal with reasoning)
 # ──────────────────────────────────────────────
+
+JOURNAL_DIR = PROJECT_ROOT / "trading_logs" / "journals"
 
 @app.get("/api/journal")
 async def api_journal():
-    dates = list_memory_dates()
+    """List all journal entries (trading + memory)."""
     entries = []
+
+    # Trading journal entries (generated)
+    if JOURNAL_DIR.exists():
+        for jp in sorted(JOURNAL_DIR.glob("*.json"), reverse=True):
+            try:
+                data = json.loads(jp.read_text())
+                regime = data.get("market_regime", "Unknown")
+                trades_count = len(data.get("trades_executed", []))
+                blocked = data.get("trades_blocked", 0)
+                portfolio = data.get("portfolio_snapshot", {})
+                equity = portfolio.get("equity", 0) if portfolio else 0
+                entries.append({
+                    "date": data["date"],
+                    "type": "trading",
+                    "preview": f"Regime: {regime} | Trades: {trades_count} | Blocked: {blocked} | Equity: ${equity:,.0f}",
+                    "tags": [regime, f"{trades_count} trades", f"{blocked} blocked"],
+                    "has_narrative": bool(data.get("narrative")),
+                })
+            except Exception:
+                pass
+
+    # Memory entries (daily logs)
+    dates = list_memory_dates()
+    trading_dates = {e["date"] for e in entries}
     for d in dates:
         path = MEMORY_DIR / f"{d}.md"
         content = read_file_safe(path)
-        # Extract first line as preview
         lines = content.strip().split("\n")
         preview = lines[0][:120] if lines else ""
-        # Count tags (lines starting with ##)
         tags = [l[3:].strip() for l in lines if l.startswith("## ")]
         entries.append({
             "date": d,
+            "type": "memory",
             "preview": preview,
             "tags": tags[:5],
             "size": len(content),
+            "has_trading": d in trading_dates,
         })
+
+    # Sort by date descending
+    entries.sort(key=lambda x: x["date"], reverse=True)
     return entries
 
 
 @app.get("/api/journal/{date}")
 async def api_journal_entry(date: str):
-    path = MEMORY_DIR / f"{date}.md"
-    if not path.exists():
+    """Get journal entry — trading journal + memory notes."""
+    result = {"date": date}
+
+    # Trading journal
+    json_path = JOURNAL_DIR / f"{date}.json"
+    if json_path.exists():
+        try:
+            result["trading"] = json.loads(json_path.read_text())
+        except Exception:
+            pass
+
+    md_path = JOURNAL_DIR / f"{date}.md"
+    if md_path.exists():
+        result["trading_narrative"] = read_file_safe(md_path)
+
+    # Memory notes
+    mem_path = MEMORY_DIR / f"{date}.md"
+    if mem_path.exists():
+        result["memory"] = read_file_safe(mem_path)
+
+    if len(result) == 1:
         return JSONResponse({"error": "Not found"}, 404)
-    return {"date": date, "content": read_file_safe(path)}
+    return result
+
+
+@app.post("/api/journal/generate/{date}")
+async def api_journal_generate(date: str):
+    """Generate/regenerate a trading journal entry for a given date."""
+    try:
+        result = subprocess.run(
+            [str(PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"),
+             str(PROJECT_ROOT / "scripts" / "generate_journal.py"), date],
+            capture_output=True, text=True, timeout=30,
+            cwd=str(PROJECT_ROOT),
+        )
+        if result.returncode != 0:
+            return JSONResponse({"error": result.stderr}, 500)
+        # Return the generated entry
+        json_path = JOURNAL_DIR / f"{date}.json"
+        if json_path.exists():
+            return json.loads(json_path.read_text())
+        return {"status": "generated", "output": result.stdout}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, 500)
 
 
 # ──────────────────────────────────────────────

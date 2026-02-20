@@ -42,9 +42,9 @@ signals:
   sizing_method: volatility          # volatility | kelly | fixed_fractional
   fixed_fraction: 0.02               # for fixed_fractional sizing
   weights:
-    momentum: 0.25
-    meanrev: 0.25
-    breakout: 0.25
+    momentum: 0.35
+    meanrev: 0.10
+    breakout: 0.30
     news: 0.25
 logging:
   trades_csv: trading_logs/trades.csv
