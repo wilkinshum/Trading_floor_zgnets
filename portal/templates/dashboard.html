@@ -110,11 +110,19 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .tag:hover,.tag.active{background:var(--purple);border-color:var(--purple);color:#fff}
 
 /* Org Chart */
-.org-chart{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px}
-.org-node{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:16px 32px;text-align:center;min-width:160px}
-.org-node .name{font-weight:700;font-size:16px}
-.org-node .role{font-size:12px;color:var(--text-dim)}
-.org-connector{width:2px;height:24px;background:var(--border)}
+.org-chart{display:flex;flex-direction:column;align-items:center;gap:0;padding:20px 10px}
+.org-node{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:14px 24px;text-align:center;min-width:150px;position:relative;transition:transform .2s,box-shadow .2s}
+.org-node:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.org-node .name{font-weight:700;font-size:15px}
+.org-node .role{font-size:11px;color:var(--text-dim);margin-top:2px}
+.org-node .model-tag{font-size:10px;color:var(--text-muted);margin-top:4px;padding:2px 8px;background:rgba(255,255,255,.05);border-radius:4px;display:inline-block}
+.org-node .status-dot{width:8px;height:8px;border-radius:50%;position:absolute;top:8px;right:8px}
+.org-node .status-dot.active{background:var(--green);animation:pulse 2s infinite}
+.org-node .status-dot.disabled{background:var(--text-muted)}
+.org-connector{width:2px;height:20px;background:var(--border)}
+.org-row{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;position:relative}
+.org-row::before{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:calc(100% - 120px);height:2px;background:var(--border)}
+.org-row-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin:8px 0 4px}
 .org-branch{display:flex;gap:32px;position:relative}
 .org-branch::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:calc(100% - 160px);height:2px;background:var(--border)}
 
@@ -322,13 +330,68 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div id="agent-org" class="agent-panel">
     <div class="card accent-purple">
       <div class="org-chart">
-        <div class="org-node" style="border-color:var(--yellow)"><div class="name">🐍 Snake</div><div class="role">Owner</div></div>
+        <!-- Owner -->
+        <div class="org-node" style="border-color:var(--yellow)">
+          <div class="name">🐍 Snake</div>
+          <div class="role">Owner</div>
+        </div>
         <div class="org-connector"></div>
-        <div class="org-node" style="border-color:var(--purple)"><div class="name">🤖 boybot</div><div class="role">Manager · claude-opus-4.6</div></div>
+
+        <!-- Manager -->
+        <div class="org-node" style="border-color:var(--purple)">
+          <div class="status-dot active"></div>
+          <div class="name">🤖 boybot</div>
+          <div class="role">Manager · Orchestration</div>
+          <div class="model-tag">claude-opus-4.6</div>
+        </div>
         <div class="org-connector"></div>
-        <div class="org-branch">
-          <div class="org-node" style="border-color:var(--teal)"><div class="name">✈️ travel</div><div class="role">Travel Agent</div></div>
-          <div class="org-node" style="border-color:var(--green)"><div class="name">💊 vita</div><div class="role">Health Agent</div></div>
+
+        <!-- Trading Floor Team -->
+        <div class="org-row-label">Trading Floor</div>
+        <div class="org-row">
+          <div class="org-node" style="border-color:var(--teal)">
+            <div class="status-dot disabled"></div>
+            <div class="name">⚡ trading-ops</div>
+            <div class="role">Execution & Monitoring</div>
+            <div class="model-tag">gpt-5.2-codex</div>
+          </div>
+          <div class="org-node" style="border-color:var(--orange)">
+            <div class="status-dot active"></div>
+            <div class="name">🏗️ architect</div>
+            <div class="role">Code Review Gate</div>
+            <div class="model-tag">gpt-5.2-codex</div>
+          </div>
+          <div class="org-node" style="border-color:var(--green)">
+            <div class="status-dot active"></div>
+            <div class="name">🧪 qa</div>
+            <div class="role">Dev & Testing</div>
+            <div class="model-tag">gpt-5.2-codex</div>
+          </div>
+          <div class="org-node" style="border-color:var(--red)">
+            <div class="status-dot active"></div>
+            <div class="name">📊 strategy</div>
+            <div class="role">Trading Logic & Signals</div>
+            <div class="model-tag">claude-opus-4.6</div>
+          </div>
+        </div>
+
+        <div class="org-connector"></div>
+
+        <!-- Personal Agents -->
+        <div class="org-row-label">Personal</div>
+        <div class="org-row">
+          <div class="org-node" style="border-color:var(--teal)">
+            <div class="status-dot active"></div>
+            <div class="name">✈️ travel</div>
+            <div class="role">Travel Research</div>
+            <div class="model-tag">claude-haiku-4.5</div>
+          </div>
+          <div class="org-node" style="border-color:var(--green)">
+            <div class="status-dot active"></div>
+            <div class="name">💊 vita</div>
+            <div class="role">Vita's Agent</div>
+            <div class="model-tag">claude-opus-4.6</div>
+          </div>
         </div>
       </div>
     </div>
