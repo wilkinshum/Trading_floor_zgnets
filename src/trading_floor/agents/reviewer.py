@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 
@@ -21,14 +21,26 @@ class NextDayReviewer:
         """Analyze yesterday's (or given date's) trades and return insights."""
         self.tracer.emit_span("reviewer.summarize", {})
 
-        if date_str is None:
-            date_str = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-
         if not self.db_path.exists():
-            return {"date": date_str, "trades": 0, "insights": "No database found."}
+            return {"date": date_str or "", "trades": 0, "insights": "No database found."}
 
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
+
+        if date_str is None:
+            latest_trade = conn.execute(
+                "SELECT MAX(substr(timestamp, 1, 10)) AS trade_date FROM trades"
+            ).fetchone()
+            date_str = latest_trade["trade_date"] if latest_trade else None
+
+            if not date_str:
+                latest_signal = conn.execute(
+                    "SELECT MAX(substr(timestamp, 1, 10)) AS signal_date FROM signals"
+                ).fetchone()
+                date_str = latest_signal["signal_date"] if latest_signal else None
+
+            if not date_str:
+                date_str = datetime.now().strftime("%Y-%m-%d")
 
         trades = conn.execute(
             "SELECT * FROM trades WHERE timestamp LIKE ?", (f"{date_str}%",)
