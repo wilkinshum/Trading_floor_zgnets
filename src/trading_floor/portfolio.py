@@ -156,14 +156,11 @@ class Portfolio:
                 pos = self.state.positions[symbol]
                 qty_to_cover = min(quantity, abs(pos.quantity))
                 
-                entry_val = pos.avg_price * qty_to_cover
-                exit_val = exec_price * qty_to_cover
-                
                 # Cash outflow: Buyback cost + commission
-                self.state.cash -= (exit_val + comm_cost)
+                self.state.cash -= (exec_price * qty_to_cover + comm_cost)
                 
-                # PnL = (ShortEntry - CoverExit) - Comm
-                trade_pnl = (entry_val - exit_val) - comm_cost
+                # PnL = (Entry - Exit) * Qty
+                trade_pnl = (pos.avg_price - exec_price) * qty_to_cover
                 realized_pnl += trade_pnl
                 
                 pos.quantity += qty_to_cover
@@ -216,10 +213,8 @@ class Portfolio:
                 part_comm = qty_to_sell * commission
                 net_proceeds = sale_val - part_comm
                 
-                cost_basis = pos.avg_price * qty_to_sell
-                
                 self.state.cash += net_proceeds
-                realized_pnl += (net_proceeds - cost_basis)
+                realized_pnl += (exec_price - pos.avg_price) * qty_to_sell
                 
                 pos.quantity -= qty_to_sell
                 
