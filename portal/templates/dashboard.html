@@ -156,6 +156,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="sidebar-brand"><span class="dot"></span> OpenClaw</div>
+  <div style="padding:0 20px 12px;font-size:11px;color:var(--text-muted)">
+    <span id="live-indicator" style="display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:4px;animation:pulse 2s infinite"></span>
+    Live · <span id="last-updated">--</span>
+    <span id="refresh-spin" style="display:none;margin-left:6px">⟳</span>
+  </div>
   <nav>
     <div class="nav-item active" data-tab="overview">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -184,6 +189,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="nav-item" data-tab="brain">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
       2nd Brain
+    </div>
+    <div class="nav-item" data-tab="finance">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Finance
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -445,6 +454,76 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="grid grid-1" id="brain-list"></div>
 </div>
 
+<!-- ═══ FINANCE ═══ -->
+<div class="section" id="sec-finance">
+  <div class="page-header">
+    <h1>💰 Financial Report</h1>
+    <p>Receipt tracking & spending analysis for Snake</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="card accent-purple" style="margin-bottom:24px">
+    <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+      <div>
+        <label class="stat-label">From</label>
+        <input type="date" id="fin-start" class="search-bar" style="width:180px;padding:8px 12px">
+      </div>
+      <div>
+        <label class="stat-label">To</label>
+        <input type="date" id="fin-end" class="search-bar" style="width:180px;padding:8px 12px">
+      </div>
+      <div>
+        <label class="stat-label">Category</label>
+        <select id="fin-category" class="search-bar" style="width:180px;padding:8px 12px">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <button onclick="loadFinance()" style="padding:8px 24px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:14px">Apply</button>
+      <button onclick="document.getElementById('fin-start').value='';document.getElementById('fin-end').value='';document.getElementById('fin-category').value='';loadFinance()" style="padding:8px 16px;background:var(--border);color:var(--text-dim);border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px">Clear</button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-4" id="fin-summary" style="margin-bottom:24px">
+    <div class="card accent-green"><div class="stat-label">Total Spent</div><div class="stat-value text-green" id="fin-total">$0</div></div>
+    <div class="card accent-purple"><div class="stat-label">Receipts</div><div class="stat-value text-purple" id="fin-count">0</div></div>
+    <div class="card accent-teal"><div class="stat-label">Avg per Receipt</div><div class="stat-value text-teal" id="fin-avg">$0</div></div>
+    <div class="card accent-yellow"><div class="stat-label">Top Category</div><div class="stat-value text-yellow" id="fin-top-cat">-</div></div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-2" style="margin-bottom:24px">
+    <div class="card accent-purple">
+      <h3 style="margin-bottom:16px;font-size:16px">Spending by Category</h3>
+      <canvas id="fin-cat-chart" height="260"></canvas>
+    </div>
+    <div class="card accent-teal">
+      <h3 style="margin-bottom:16px;font-size:16px">Monthly Spending</h3>
+      <canvas id="fin-month-chart" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Top Stores -->
+  <div class="card accent-orange" style="margin-bottom:24px">
+    <h3 style="margin-bottom:16px;font-size:16px">🏪 Top Stores</h3>
+    <div id="fin-stores"></div>
+  </div>
+
+  <!-- Receipt Table -->
+  <div class="card" style="margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:16px">📋 All Receipts</h3>
+      <input class="search-bar" id="fin-search" placeholder="Search receipts..." style="width:300px;padding:8px 12px" oninput="filterReceiptTable()">
+    </div>
+    <div class="table-wrap">
+      <table id="fin-table">
+        <thead><tr><th>Date</th><th>Store</th><th>Category</th><th>Total</th><th>Payment</th><th>Items</th></tr></thead>
+        <tbody id="fin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </div><!-- /main -->
 
 <script>
@@ -480,7 +559,16 @@ document.querySelectorAll('#brain-tags .tag').forEach(t => {
   });
 });
 
-const api = (url, opts) => fetch(url, opts).then(r => r.json()).catch(() => null);
+const api = async (url, opts) => {
+  document.getElementById('refresh-spin').style.display = 'inline';
+  try {
+    const r = await fetch(url, opts);
+    const d = await r.json();
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+    return d;
+  } catch(e) { return null; }
+  finally { document.getElementById('refresh-spin').style.display = 'none'; }
+};
 const fmt$ = (v) => '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 const fmtK = (v) => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'K' : v;
 
@@ -494,6 +582,7 @@ async function loadTab(tab) {
   else if (tab === 'schedule') await loadSchedule();
   else if (tab === 'journal') await loadJournal();
   else if (tab === 'brain') await loadBrain();
+  else if (tab === 'finance') await loadFinance();
 }
 
 async function loadOverview() {
@@ -829,9 +918,136 @@ function connectWS() {
   ws.onclose = () => setTimeout(connectWS, 3000);
 }
 
+// ── Finance ──
+let finCatChart = null, finMonthChart = null;
+let finAllReceipts = [];
+
+async function loadFinance() {
+  const start = document.getElementById('fin-start').value;
+  const end = document.getElementById('fin-end').value;
+  const cat = document.getElementById('fin-category').value;
+  let url = '/api/receipts?';
+  if (start) url += `start=${start}&`;
+  if (end) url += `end=${end}&`;
+  if (cat) url += `category=${encodeURIComponent(cat)}&`;
+  const d = await api(url);
+  if (!d) return;
+  const s = d.summary;
+  finAllReceipts = d.receipts;
+
+  // Summary cards
+  document.getElementById('fin-total').textContent = fmt$(s.total_spent);
+  document.getElementById('fin-count').textContent = s.receipt_count;
+  document.getElementById('fin-avg').textContent = s.receipt_count ? fmt$(s.total_spent / s.receipt_count) : '$0';
+  const topCat = Object.entries(s.by_category)[0];
+  document.getElementById('fin-top-cat').textContent = topCat ? topCat[0] : '-';
+
+  // Populate category dropdown (only on first load)
+  const sel = document.getElementById('fin-category');
+  if (sel.options.length <= 1 && s.categories) {
+    s.categories.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c;
+      sel.appendChild(o);
+    });
+    if (cat) sel.value = cat;
+  }
+
+  // Category donut chart
+  const catLabels = Object.keys(s.by_category);
+  const catData = Object.values(s.by_category);
+  const catColors = ['#6D5EF6','#25D27B','#20C4C6','#F59E0B','#EF4444','#F97316','#EC4899','#8B5CF6','#06B6D4','#84CC16','#D946EF','#14B8A6','#FB923C','#A855F7','#38BDF8','#FBBF24'];
+  if (finCatChart) finCatChart.destroy();
+  finCatChart = new Chart(document.getElementById('fin-cat-chart'), {
+    type: 'doughnut',
+    data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors.slice(0, catLabels.length), borderWidth: 0 }] },
+    options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#94A3B8', font: { size: 11 }, padding: 8 } } } }
+  });
+
+  // Monthly bar chart
+  const monthLabels = Object.keys(s.by_month);
+  const monthData = Object.values(s.by_month);
+  if (finMonthChart) finMonthChart.destroy();
+  finMonthChart = new Chart(document.getElementById('fin-month-chart'), {
+    type: 'bar',
+    data: { labels: monthLabels, datasets: [{ label: 'Spent', data: monthData, backgroundColor: '#6D5EF6', borderRadius: 4 }] },
+    options: { responsive: true, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#64748B', callback: v => '$' + v.toLocaleString() }, grid: { color: '#1E293B' } } }, plugins: { legend: { display: false } } }
+  });
+
+  // Top stores
+  const storesDiv = document.getElementById('fin-stores');
+  if (s.top_stores.length) {
+    const maxStore = s.top_stores[0].total;
+    storesDiv.innerHTML = s.top_stores.map(s => `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <div style="width:200px;font-size:13px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${s.store}">${s.store}</div>
+        <div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:${(s.total/maxStore*100).toFixed(1)}%;background:var(--orange)"></div></div></div>
+        <div style="width:80px;text-align:right;font-size:13px;font-weight:600;color:var(--orange)">$${s.total.toLocaleString()}</div>
+      </div>
+    `).join('');
+  } else {
+    storesDiv.innerHTML = '<p style="color:var(--text-muted)">No data</p>';
+  }
+
+  // Receipt table
+  renderReceiptTable(d.receipts);
+}
+
+function renderReceiptTable(receipts) {
+  const tbody = document.getElementById('fin-tbody');
+  const catBadge = cat => {
+    const colors = { Meal: 'green', Self: 'purple', Health: 'teal', Grocery: 'green', 'Car Maintenance': 'yellow', Travel: 'purple', Entertainment: 'yellow', Home: 'teal', Gas: 'yellow', Electronics: 'purple', Pet: 'green', Parking: 'red' };
+    const c = colors[cat] || 'purple';
+    return `<span class="badge badge-${c}">${cat || 'N/A'}</span>`;
+  };
+  tbody.innerHTML = receipts.sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(r => `
+    <tr>
+      <td style="white-space:nowrap">${r.date || '-'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.store||'').replace(/"/g,'&quot;')}">${r.store || '-'}</td>
+      <td>${catBadge(r.category)}</td>
+      <td style="font-weight:600;color:var(--green)">$${parseFloat(r.total||0).toFixed(2)}</td>
+      <td style="color:var(--text-muted);font-size:12px">${r.payment_method || '-'}</td>
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dim);font-size:12px" title="${(r.items||'').replace(/"/g,'&quot;')}">${r.items || '-'}</td>
+    </tr>
+  `).join('');
+}
+
+function filterReceiptTable() {
+  const q = document.getElementById('fin-search').value.toLowerCase();
+  if (!q) return renderReceiptTable(finAllReceipts);
+  renderReceiptTable(finAllReceipts.filter(r =>
+    (r.store||'').toLowerCase().includes(q) || (r.items||'').toLowerCase().includes(q) || (r.category||'').toLowerCase().includes(q) || (r.date||'').includes(q)
+  ));
+}
+
+// ── Auto-refresh active tab ──
+let activeTab = 'overview';
+let refreshTimer = null;
+
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => {
+    const tab = activeTab;
+    // Only auto-refresh data-heavy tabs
+    if (['overview','trading','agents','finance'].includes(tab)) {
+      loadTab(tab);
+    }
+  }, 30000); // 30s refresh
+}
+
+// Override nav click to track active tab
+document.querySelectorAll('.nav-item').forEach(n => {
+  const origClick = n.onclick;
+  n.addEventListener('click', () => {
+    activeTab = n.dataset.tab;
+    startAutoRefresh(); // reset timer on tab switch
+  });
+});
+
 // ── Init ──
 loadOverview();
 connectWS();
+startAutoRefresh();
 </script>
 </body>
 </html>

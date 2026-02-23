@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 DB_PATH = PROJECT_ROOT / "trading.db"
+RECEIPTS_CSV = Path(r"C:\Users\moltbot\OneDrive\Desktop\receipts_snake.csv")
 PORTFOLIO_PATH = PROJECT_ROOT / "portfolio.json"
 MEMORY_DIR = Path(r"C:\Users\moltbot\.openclaw\workspace\memory")
 WORKSPACE_DIR = Path(r"C:\Users\moltbot\.openclaw\workspace")
@@ -561,6 +562,64 @@ async def api_brain(q: str = ""):
         entries = [e for e in entries if ql in e["title"].lower() or ql in e["body"].lower()]
 
     return entries
+
+
+# ──────────────────────────────────────────────
+# API — Receipts / Finance
+# ──────────────────────────────────────────────
+
+@app.get("/api/receipts")
+async def api_receipts(start: str = "", end: str = "", category: str = ""):
+    """Return receipts from CSV with optional date/category filters."""
+    import csv as _csv
+    if not RECEIPTS_CSV.exists():
+        return {"receipts": [], "summary": {}}
+    rows = []
+    with open(RECEIPTS_CSV, encoding="utf-8") as f:
+        for r in _csv.DictReader(f):
+            rows.append(r)
+    # filters
+    if start:
+        rows = [r for r in rows if r.get("date", "") >= start]
+    if end:
+        rows = [r for r in rows if r.get("date", "") <= end]
+    if category:
+        rows = [r for r in rows if r.get("category", "").lower() == category.lower()]
+    # build summary
+    total_spent = 0
+    by_category = {}
+    by_month = {}
+    by_store = {}
+    for r in rows:
+        amt = 0
+        try:
+            amt = float(r.get("total", 0))
+        except (ValueError, TypeError):
+            pass
+        total_spent += amt
+        cat = r.get("category", "Uncategorized") or "Uncategorized"
+        by_category[cat] = round(by_category.get(cat, 0) + amt, 2)
+        month = r.get("date", "")[:7]
+        if month:
+            by_month[month] = round(by_month.get(month, 0) + amt, 2)
+        store = r.get("store", "Unknown") or "Unknown"
+        by_store[store] = round(by_store.get(store, 0) + amt, 2)
+    # top stores
+    top_stores = sorted(by_store.items(), key=lambda x: -x[1])[:15]
+    # sort months
+    sorted_months = sorted(by_month.items())
+    categories = sorted(by_category.keys())
+    return {
+        "receipts": rows,
+        "summary": {
+            "total_spent": round(total_spent, 2),
+            "receipt_count": len(rows),
+            "by_category": dict(sorted(by_category.items(), key=lambda x: -x[1])),
+            "by_month": dict(sorted_months),
+            "top_stores": [{"store": s, "total": t} for s, t in top_stores],
+            "categories": categories,
+        }
+    }
 
 
 # ──────────────────────────────────────────────
