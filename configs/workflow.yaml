@@ -21,6 +21,8 @@ risk:
   take_profit: 0.05                  # 5% target
   atr_stop_multiplier: 2.0           # ATR-based stop: 2x ATR (adaptive per symbol)
   atr_period: 14                     # ATR lookback period
+  max_atr_pct: 0.10                  # reject if daily ATR > 10% of price
+  min_atr_pct: 0.005                 # reject if daily ATR < 0.5% of price
   trailing_breakeven_trigger: 0.015  # move stop to breakeven at +1.5%
   trailing_trigger: 0.025            # start trailing at +2.5%
   trailing_pct: 0.012                # trail 1.2% below HWM/above LWM
