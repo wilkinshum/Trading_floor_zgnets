@@ -17,7 +17,10 @@ md = data.fetch(syms)
 current = {}
 for sym, m in md.items():
     if not m.df.empty:
-        current[sym] = float(m.df['close'].iloc[-1])
+        # Handle both 'close' and '{symbol}_close' column naming
+        close_col = next((c for c in m.df.columns if c.lower().endswith('close')), None)
+        if close_col:
+            current[sym] = float(m.df[close_col].iloc[-1])
 
 stop_loss = cfg.get('risk', {}).get('stop_loss', 0.02)
 take_profit = cfg.get('risk', {}).get('take_profit', 0.05)

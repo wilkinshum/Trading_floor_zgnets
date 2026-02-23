@@ -157,13 +157,17 @@ async def api_positions():
     result = []
     for sym, data in positions.items():
         if isinstance(data, dict):
+            qty = data.get("quantity", data.get("qty", 0))
+            entry = data.get("avg_price", data.get("entry_price", 0))
+            highest = data.get("highest_price", entry)
             result.append({
                 "symbol": sym,
-                "qty": data.get("qty", 0),
-                "entry": data.get("entry_price", 0),
-                "current": data.get("current_price", data.get("entry_price", 0)),
-                "pnl": data.get("unrealized_pnl", 0),
-                "pnl_pct": data.get("pnl_pct", 0),
+                "qty": qty,
+                "entry": round(entry, 2),
+                "highest": round(highest, 2),
+                "current": 0,  # filled by frontend via live price
+                "pnl": 0,
+                "pnl_pct": 0,
             })
     return result
 
@@ -319,14 +323,40 @@ async def api_agents():
         if p.exists():
             docs.append({"name": name, "size": p.stat().st_size, "path": str(p)})
 
+    # Try reading openclaw.json for real agent config
+    agents_list = []
+    openclaw_cfg = Path(r"C:\Users\moltbot\.openclaw\openclaw.json")
+    if openclaw_cfg.exists():
+        try:
+            cfg = json.loads(openclaw_cfg.read_text())
+            for agent in cfg.get("agents", []):
+                agents_list.append({
+                    "name": agent.get("id", "unknown"),
+                    "role": agent.get("description", agent.get("id", "")),
+                    "model": agent.get("model", "default"),
+                    "status": "active",
+                })
+        except Exception:
+            pass
+
+    if not agents_list:
+        agents_list = [
+            {"name": "main (boybot)", "role": "Manager", "model": "claude-opus-4.6", "status": "active"},
+            {"name": "trading-ops", "role": "Trading Operations", "model": "gpt-5.2-codex", "status": "active"},
+            {"name": "architect", "role": "Code Review & Architecture", "model": "gpt-5.2-codex", "status": "active"},
+            {"name": "qa", "role": "Quality Assurance", "model": "gpt-5.2-codex", "status": "active"},
+            {"name": "strategy", "role": "Trading Strategy", "model": "claude-opus-4.6", "status": "active"},
+            {"name": "travel", "role": "Travel Agent", "model": "claude-haiku-4.5", "status": "active"},
+            {"name": "vita", "role": "Health Agent", "model": "claude-opus-4.6", "status": "active"},
+            {"name": "image", "role": "Image Processing", "model": "gpt-5-mini", "status": "dormant"},
+            {"name": "accountant", "role": "Receipt Filing", "model": "gpt-4o-mini", "status": "active"},
+        ]
+
     return {
         "org": {
             "owner": {"name": "Snake", "role": "Owner"},
             "manager": {"name": "boybot", "role": "Manager", "model": "claude-opus-4.6"},
-            "agents": [
-                {"name": "travel", "role": "Travel Agent", "model": "gpt-4o"},
-                {"name": "vita", "role": "Health Agent", "model": "gpt-4o"},
-            ]
+            "agents": agents_list,
         },
         "documents": docs,
     }
@@ -339,15 +369,35 @@ async def api_agents():
 @app.get("/api/schedule")
 async def api_schedule():
     jobs = get_cron_jobs()
-    if not jobs:
-        # Fallback mock based on typical OpenClaw setup
-        jobs = [
-            {"name": "Heartbeat", "schedule": "*/30 * * * *", "status": "Active", "description": "Periodic check-in and background tasks", "color": "#6D5EF6"},
-            {"name": "Morning Scan", "schedule": "0 9 * * 1-5", "status": "Active", "description": "Pre-market signal scan", "color": "#25D27B"},
-            {"name": "EOD Review", "schedule": "0 16 * * 1-5", "status": "Active", "description": "End of day portfolio review", "color": "#20C4C6"},
-            {"name": "Weekly Report", "schedule": "0 18 * * 5", "status": "Active", "description": "Weekly performance summary", "color": "#F59E0B"},
+    # Normalize format from openclaw cron list --json
+    result = []
+    if isinstance(jobs, list):
+        for j in jobs:
+            sched = j.get("schedule", {})
+            expr = sched.get("expr", j.get("schedule", ""))
+            if isinstance(expr, dict):
+                expr = expr.get("expr", "")
+            tz = sched.get("tz", "") if isinstance(sched, dict) else ""
+            result.append({
+                "id": j.get("id", ""),
+                "name": j.get("name", "Unknown"),
+                "schedule": f"{expr} ({tz})" if tz else str(expr),
+                "enabled": j.get("enabled", True),
+                "status": "Active" if j.get("enabled", True) else "Disabled",
+                "agent": j.get("agentId", "main"),
+                "lastStatus": j.get("state", {}).get("lastStatus", ""),
+                "lastDuration": j.get("state", {}).get("lastDurationMs", 0),
+                "nextRun": j.get("state", {}).get("nextRunAtMs", 0),
+            })
+    if not result:
+        result = [
+            {"name": "Trading Workflow", "schedule": "*/30 9-11 * * 1-5 (ET)", "status": "Active", "agent": "main", "id": "e8c37a2a"},
+            {"name": "Exit Monitor", "schedule": "*/5 9-15 * * 1-5 (ET)", "status": "Active", "agent": "main", "id": "34aec0ca"},
+            {"name": "Healthcheck Day", "schedule": "*/15 8-22 * * * (ET)", "status": "Active", "agent": "main", "id": "94021f90"},
+            {"name": "Healthcheck Night", "schedule": "0 23,0-7 * * * (ET)", "status": "Active", "agent": "main", "id": "ed4eecfd"},
+            {"name": "Backup", "schedule": "0 */4 * * * (ET)", "status": "Active", "agent": "main", "id": "c5ea3f7b"},
         ]
-    return jobs
+    return result
 
 
 # ──────────────────────────────────────────────
