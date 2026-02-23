@@ -14,32 +14,95 @@ from trading_floor.agent_memory import AgentMemory
 logger = logging.getLogger(__name__)
 
 # Keyword-based sentiment as robust fallback (no TextBlob dependency issues)
-_POSITIVE = {
+_NEGATORS = {
+    "no", "not", "never", "without", "fail", "fails", "failed", "failing",
+}
+
+_POS_STRONG = {
     "surge", "surges", "soar", "soars", "jump", "jumps", "rally", "rallies",
-    "gain", "gains", "rise", "rises", "bull", "bullish", "upgrade", "upgrades",
-    "beat", "beats", "record", "high", "boom", "profit", "revenue", "growth",
-    "strong", "outperform", "buy", "positive", "optimism", "recover", "recovery",
-    "breakout", "upside", "accelerate", "expand", "deal", "partnership", "innovative",
+    "breakout", "boom", "record", "milestone", "approve", "launch",
 }
-_NEGATIVE = {
-    "crash", "crashes", "plunge", "plunges", "drop", "drops", "fall", "falls",
-    "decline", "declines", "bear", "bearish", "downgrade", "downgrades", "miss",
-    "misses", "low", "loss", "losses", "weak", "sell", "negative", "fear",
-    "recession", "layoff", "layoffs", "cut", "cuts", "risk", "warning", "warn",
-    "debt", "default", "lawsuit", "fraud", "investigation", "probe", "fine",
-    "slump", "tumble", "sink", "sinks", "concern", "volatile", "uncertainty",
+_POS_MEDIUM = {
+    "gain", "gains", "rise", "rises", "upgrade", "upgrades", "beat", "beats",
+    "profit", "revenue", "growth", "strong", "outperform", "buy", "recover",
+    "recovery", "accelerate", "expand", "deal", "partnership", "innovative",
+    "exceeds", "exceed", "tops", "top", "raises", "raise", "raised", "momentum",
+    "demand", "rebound", "support", "dividend", "positive", "optimism",
+    "overweight", "upbeat", "guidance",
 }
+_POS_WEAK = {
+    "bull", "bullish", "high", "upside", "hold", "target", "targets",
+    "reiterate", "reiterates", "reiterated",
+}
+
+_NEG_STRONG = {
+    "crash", "crashes", "plunge", "plunges", "slump", "tumble", "sink", "sinks",
+    "selloff", "correction", "bubble", "fraud", "default", "recall", "collapse",
+}
+_NEG_MEDIUM = {
+    "drop", "drops", "fall", "falls", "decline", "declines", "downgrade",
+    "downgrades", "miss", "misses", "loss", "losses", "weak", "sell", "recession",
+    "layoff", "layoffs", "risk", "warning", "warn", "debt", "lawsuit",
+    "investigation", "probe", "fine", "underperform", "underweight", "downside",
+    "lower", "lowers", "lowered", "pressure", "pressured", "headwind", "slowdown",
+    "delay", "suspend", "overvalued", "negative", "concern", "volatile",
+    "uncertainty", "bear", "bearish", "hangover", "guidance",
+}
+_NEG_WEAK = {
+    "low", "cut", "cuts", "fear",
+}
+
+
+def _build_weight_map(strong: set[str], medium: set[str], weak: set[str]) -> dict[str, float]:
+    weights: dict[str, float] = {}
+    for word in strong:
+        weights[word] = 1.0
+    for word in medium:
+        weights[word] = 0.6
+    for word in weak:
+        weights[word] = 0.3
+    return weights
+
+
+_POSITIVE_WEIGHTS = _build_weight_map(_POS_STRONG, _POS_MEDIUM, _POS_WEAK)
+_NEGATIVE_WEIGHTS = _build_weight_map(_NEG_STRONG, _NEG_MEDIUM, _NEG_WEAK)
+_AMBIGUOUS_KEYWORDS = set(_POSITIVE_WEIGHTS) & set(_NEGATIVE_WEIGHTS)
 
 
 def _keyword_score(text: str) -> float:
-    """Score text from -1 to +1 using keyword matching."""
-    words = set(re.findall(r"[a-z]+", text.lower()))
-    pos = len(words & _POSITIVE)
-    neg = len(words & _NEGATIVE)
-    total = pos + neg
-    if total == 0:
+    """Score text from -1 to +1 using weighted keyword matching."""
+    normalized = text.lower().replace("n't", " not")
+    tokens = re.findall(r"[a-z]+", normalized)
+    if not tokens:
         return 0.0
-    return (pos - neg) / total  # Range: -1 to +1
+
+    pos_weight = 0.0
+    neg_weight = 0.0
+
+    for idx, word in enumerate(tokens):
+        if word in _AMBIGUOUS_KEYWORDS:
+            continue
+        weight = _POSITIVE_WEIGHTS.get(word)
+        polarity = 1
+        if weight is None:
+            weight = _NEGATIVE_WEIGHTS.get(word)
+            polarity = -1
+        if weight is None:
+            continue
+
+        window = tokens[max(0, idx - 3):idx]
+        if any(w in _NEGATORS for w in window):
+            polarity *= -1
+
+        if polarity > 0:
+            pos_weight += weight
+        else:
+            neg_weight += weight
+
+    total = pos_weight + neg_weight
+    if total == 0.0:
+        return 0.0
+    return (pos_weight - neg_weight) / total  # Range: -1 to +1
 
 
 def _scrape_google_news(symbol: str, max_headlines: int = 8) -> list[str]:
@@ -54,8 +117,16 @@ def _scrape_google_news(symbol: str, max_headlines: int = 8) -> list[str]:
         titles = re.findall(r"<title><!\[CDATA\[(.*?)\]\]></title>", xml)
         if not titles:
             titles = re.findall(r"<title>(.*?)</title>", xml)
-        # Skip the first title (it's the feed title)
-        headlines = [unescape(t) for t in titles[1:max_headlines + 1]]
+        headlines = []
+        for t in titles:
+            headline = unescape(t).strip()
+            if not headline:
+                continue
+            if headline.lower() == "google news":
+                continue
+            headlines.append(headline)
+            if len(headlines) >= max_headlines:
+                break
         return headlines
     except Exception:
         return []
