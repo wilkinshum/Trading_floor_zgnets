@@ -11,7 +11,7 @@ DB_PATH = PROJECT_ROOT / "trading.db"
 CSV_PATH = PROJECT_ROOT / "trading_logs" / "trades.csv"
 
 def log_trade(symbol, side, quantity, price, pnl):
-    ts = datetime.now().isoformat()
+    ts = datetime.utcnow().isoformat()
     with open(CSV_PATH, "a", newline="") as f:
         csv.writer(f).writerow([ts, symbol, side, quantity, price, "", pnl])
     try:
