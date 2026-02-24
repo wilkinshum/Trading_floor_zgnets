@@ -790,8 +790,9 @@ async function loadAgents() {
     </div>`;
 
   const manager = agents.find(a => a.name.includes('main') || a.name.includes('boybot'));
+  const vita = agents.find(a => a.name === 'vita');
   const trading = agents.filter(a => tradingTeam.includes(a.name));
-  const personal = agents.filter(a => personalTeam.includes(a.name));
+  const personal = agents.filter(a => personalTeam.includes(a.name) && a.name !== 'vita');
   // Catch any agents not in known groups
   const known = new Set([manager?.name, ...tradingTeam, ...personalTeam].filter(Boolean));
   const other = agents.filter(a => !known.has(a.name));
@@ -803,10 +804,15 @@ async function loadAgents() {
     </div>
     <div class="org-connector"></div>`;
 
+  // Main + Vita side by side (both report to Snake)
+  html += '<div class="org-row">';
   if (manager) {
     html += makeNode(manager.name, manager.role, manager.model, 'var(--purple)', manager.status);
-    html += '<div class="org-connector"></div>';
   }
+  if (vita) {
+    html += makeNode(vita.name, vita.role, vita.model, colors[vita.name], vita.status);
+  }
+  html += '</div><div class="org-connector"></div>';
 
   if (trading.length) {
     html += '<div class="org-row-label">Trading Floor</div><div class="org-row">';
