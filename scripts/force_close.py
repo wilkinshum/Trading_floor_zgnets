@@ -1,8 +1,28 @@
 """Force close specified positions with current market price."""
-import sys
+import sys, csv, sqlite3
 import yaml
 import yfinance as yf
+from pathlib import Path
+from datetime import datetime
 from trading_floor.portfolio import Portfolio
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DB_PATH = PROJECT_ROOT / "trading.db"
+CSV_PATH = PROJECT_ROOT / "trading_logs" / "trades.csv"
+
+def log_trade(symbol, side, quantity, price, pnl):
+    ts = datetime.now().isoformat()
+    with open(CSV_PATH, "a", newline="") as f:
+        csv.writer(f).writerow([ts, symbol, side, quantity, price, "", pnl])
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute(
+            "INSERT INTO trades (timestamp, symbol, side, quantity, price, score, pnl, strategy_data) VALUES (?,?,?,?,?,?,?,?)",
+            (ts, symbol, side, quantity, price, 0.0, pnl, '{"source":"force_close"}')
+        )
+        conn.commit(); conn.close()
+    except Exception as e:
+        print(f"DB log error: {e}")
 
 cfg = yaml.safe_load(open("configs/workflow.yaml"))
 p = Portfolio(cfg)
@@ -45,6 +65,7 @@ for sym in symbols:
     qty = abs(pos.quantity)
     side = "BUY" if pos.quantity < 0 else "SELL"
     pnl = p.execute(sym, side, price, quantity=qty)
+    log_trade(sym, side, qty, price, pnl)
     print(f"CLOSED {sym}: {side} {qty} shares @ ${price:.2f} | PnL: ${pnl:.2f}")
 
 p.save()

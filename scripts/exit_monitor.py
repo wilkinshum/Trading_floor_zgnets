@@ -1,5 +1,5 @@
 """Exit-only monitor: checks stops/TP/kill switch without running signals or entering new trades."""
-import sys
+import sys, csv, sqlite3
 import yaml
 import yfinance as yf
 from pathlib import Path
@@ -8,6 +8,28 @@ from trading_floor.agents.exits import ExitManager
 from trading_floor.lightning import LightningTracer
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DB_PATH = PROJECT_ROOT / "trading.db"
+CSV_PATH = PROJECT_ROOT / "trading_logs" / "trades.csv"
+
+def log_trade(symbol, side, quantity, price, pnl):
+    """Log exit trade to both CSV and DB."""
+    ts = datetime.now().isoformat()
+    # CSV
+    with open(CSV_PATH, "a", newline="") as f:
+        csv.writer(f).writerow([ts, symbol, side, quantity, price, "", pnl])
+    # DB
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute(
+            "INSERT INTO trades (timestamp, symbol, side, quantity, price, score, pnl, strategy_data) VALUES (?,?,?,?,?,?,?,?)",
+            (ts, symbol, side, quantity, price, 0.0, pnl, '{"source":"exit_monitor"}')
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[ExitMonitor] DB log error: {e}")
 
 
 def main():
@@ -88,6 +110,7 @@ def main():
         
         qty = abs(pos.quantity)
         pnl = portfolio.execute(sym, side, price, quantity=qty)
+        log_trade(sym, side, qty, price, pnl)
         print(f"[ExitMonitor] CLOSED {sym}: {side} {qty} shares @ ${price:.2f} | PnL: ${pnl:.2f}")
 
     portfolio.save()

@@ -338,70 +338,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div id="agent-org" class="agent-panel">
     <div class="card accent-purple">
-      <div class="org-chart">
-        <!-- Owner -->
-        <div class="org-node" style="border-color:var(--yellow)">
-          <div class="name">🐍 Snake</div>
-          <div class="role">Owner</div>
-        </div>
-        <div class="org-connector"></div>
-
-        <!-- Manager -->
-        <div class="org-node" style="border-color:var(--purple)">
-          <div class="status-dot active"></div>
-          <div class="name">🤖 boybot</div>
-          <div class="role">Manager · Orchestration</div>
-          <div class="model-tag">claude-opus-4.6</div>
-        </div>
-        <div class="org-connector"></div>
-
-        <!-- Trading Floor Team -->
-        <div class="org-row-label">Trading Floor</div>
-        <div class="org-row">
-          <div class="org-node" style="border-color:var(--teal)">
-            <div class="status-dot disabled"></div>
-            <div class="name">⚡ trading-ops</div>
-            <div class="role">Execution & Monitoring</div>
-            <div class="model-tag">gpt-5.2-codex</div>
-          </div>
-          <div class="org-node" style="border-color:var(--orange)">
-            <div class="status-dot active"></div>
-            <div class="name">🏗️ architect</div>
-            <div class="role">Code Review Gate</div>
-            <div class="model-tag">gpt-5.2-codex</div>
-          </div>
-          <div class="org-node" style="border-color:var(--green)">
-            <div class="status-dot active"></div>
-            <div class="name">🧪 qa</div>
-            <div class="role">Dev & Testing</div>
-            <div class="model-tag">gpt-5.2-codex</div>
-          </div>
-          <div class="org-node" style="border-color:var(--red)">
-            <div class="status-dot active"></div>
-            <div class="name">📊 strategy</div>
-            <div class="role">Trading Logic & Signals</div>
-            <div class="model-tag">claude-opus-4.6</div>
-          </div>
-        </div>
-
-        <div class="org-connector"></div>
-
-        <!-- Personal Agents -->
-        <div class="org-row-label">Personal</div>
-        <div class="org-row">
-          <div class="org-node" style="border-color:var(--teal)">
-            <div class="status-dot active"></div>
-            <div class="name">✈️ travel</div>
-            <div class="role">Travel Research</div>
-            <div class="model-tag">claude-haiku-4.5</div>
-          </div>
-          <div class="org-node" style="border-color:var(--green)">
-            <div class="status-dot active"></div>
-            <div class="name">💊 vita</div>
-            <div class="role">Vita's Agent</div>
-            <div class="model-tag">claude-opus-4.6</div>
-          </div>
-        </div>
+      <div class="org-chart" id="org-chart-container">
+        <!-- Dynamically populated by loadAgents() -->
       </div>
     </div>
   </div>
@@ -706,6 +644,72 @@ async function loadTokens() {
 async function loadAgents() {
   const d = await api('/api/agents');
   if (!d) return;
+
+  // Build org chart dynamically
+  const org = d.org || {};
+  const agents = org.agents || [];
+  const container = document.getElementById('org-chart-container');
+
+  const icons = {
+    'main (boybot)':'🤖','trading-ops':'⚡','architect':'🏗️','qa':'🧪',
+    'strategy':'📊','travel':'✈️','vita':'💊','image':'🖼️','accountant':'🧾'
+  };
+  const colors = {
+    'main (boybot)':'var(--purple)','trading-ops':'var(--teal)','architect':'var(--orange)',
+    'qa':'var(--green)','strategy':'var(--red)','travel':'var(--teal)','vita':'var(--green)',
+    'image':'var(--yellow, #EAB308)','accountant':'var(--yellow, #EAB308)'
+  };
+  const tradingTeam = ['trading-ops','architect','qa','strategy'];
+  const personalTeam = ['travel','vita','image','accountant'];
+
+  const makeNode = (name, role, model, color, status) => `
+    <div class="org-node" style="border-color:${color||'var(--purple)'}">
+      <div class="status-dot ${status==='active'?'active':'disabled'}"></div>
+      <div class="name">${icons[name]||'🔹'} ${name}</div>
+      <div class="role">${role}</div>
+      <div class="model-tag">${model}</div>
+    </div>`;
+
+  const manager = agents.find(a => a.name.includes('main') || a.name.includes('boybot'));
+  const trading = agents.filter(a => tradingTeam.includes(a.name));
+  const personal = agents.filter(a => personalTeam.includes(a.name));
+  // Catch any agents not in known groups
+  const known = new Set([manager?.name, ...tradingTeam, ...personalTeam].filter(Boolean));
+  const other = agents.filter(a => !known.has(a.name));
+
+  let html = `
+    <div class="org-node" style="border-color:var(--yellow)">
+      <div class="name">🐍 ${org.owner?.name || 'Snake'}</div>
+      <div class="role">Owner</div>
+    </div>
+    <div class="org-connector"></div>`;
+
+  if (manager) {
+    html += makeNode(manager.name, manager.role, manager.model, 'var(--purple)', manager.status);
+    html += '<div class="org-connector"></div>';
+  }
+
+  if (trading.length) {
+    html += '<div class="org-row-label">Trading Floor</div><div class="org-row">';
+    trading.forEach(a => { html += makeNode(a.name, a.role, a.model, colors[a.name], a.status); });
+    html += '</div><div class="org-connector"></div>';
+  }
+
+  if (personal.length) {
+    html += '<div class="org-row-label">Personal</div><div class="org-row">';
+    personal.forEach(a => { html += makeNode(a.name, a.role, a.model, colors[a.name], a.status); });
+    html += '</div>';
+  }
+
+  if (other.length) {
+    html += '<div class="org-connector"></div><div class="org-row-label">Other</div><div class="org-row">';
+    other.forEach(a => { html += makeNode(a.name, a.role, a.model, colors[a.name]||'var(--purple)', a.status); });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+
+  // Docs list
   const dl = document.getElementById('docs-list');
   dl.innerHTML = (d.documents||[]).map(doc => `<div class="card accent-purple" style="display:flex;justify-content:space-between;align-items:center">
     <div><strong>${doc.name}</strong><div style="font-size:12px;color:var(--text-dim)">${(doc.size/1024).toFixed(1)} KB</div></div>

@@ -326,15 +326,41 @@ async def api_agents():
 
     # Try reading openclaw.json for real agent config
     agents_list = []
+    role_map = {
+        "main": ("main (boybot)", "Manager · Orchestration"),
+        "trading-ops": ("trading-ops", "Execution & Monitoring"),
+        "architect": ("architect", "Code Review Gate"),
+        "qa": ("qa", "Dev & Testing"),
+        "strategy": ("strategy", "Trading Logic & Signals"),
+        "travel": ("travel", "Travel Research"),
+        "vita": ("vita", "Vita's Agent"),
+        "image": ("image", "Image Processing"),
+        "accountant": ("accountant", "Receipt Filing"),
+    }
     openclaw_cfg = Path(r"C:\Users\moltbot\.openclaw\openclaw.json")
     if openclaw_cfg.exists():
         try:
             cfg = json.loads(openclaw_cfg.read_text())
-            for agent in cfg.get("agents", []):
+            agents_data = cfg.get("agents", {})
+            agent_list_raw = agents_data.get("list", []) if isinstance(agents_data, dict) else agents_data
+            for agent in agent_list_raw:
+                aid = agent.get("id", "unknown")
+                display_name, role = role_map.get(aid, (aid, aid))
+                model_cfg = agent.get("model", {})
+                if isinstance(model_cfg, dict):
+                    model = model_cfg.get("primary", "default")
+                else:
+                    model = str(model_cfg) or "default"
+                # Strip provider prefix for display
+                model = model.replace("github-copilot/", "")
+                if model == "default":
+                    # Inherit from defaults
+                    defaults_model = agents_data.get("defaults", {}).get("model", {}).get("primary", "claude-opus-4.6")
+                    model = defaults_model.replace("github-copilot/", "")
                 agents_list.append({
-                    "name": agent.get("id", "unknown"),
-                    "role": agent.get("description", agent.get("id", "")),
-                    "model": agent.get("model", "default"),
+                    "name": display_name,
+                    "role": role,
+                    "model": model,
                     "status": "active",
                 })
         except Exception:
