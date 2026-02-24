@@ -1,5 +1,7 @@
 import math
 
+from trading_floor.sector_filter import check_sector_filter
+
 
 class RiskAgent:
     def __init__(self, cfg, tracer):
@@ -9,6 +11,7 @@ class RiskAgent:
         self.max_atr_pct = cfg.get("risk", {}).get("max_atr_pct", 0.10)
         self.min_atr_pct = cfg.get("risk", {}).get("min_atr_pct", 0.005)
         self.atr_period = cfg.get("risk", {}).get("atr_period", 14)
+        self.sector_filter_threshold = cfg.get("risk", {}).get("sector_filter_threshold", -0.15)
 
     def _calc_atr_pct(self, sym: str, price_data: dict):
         if not price_data or sym not in price_data:
@@ -85,6 +88,15 @@ class RiskAgent:
                     f"[RiskAgent] VOLATILITY FILTER: {sym} too flat "
                     f"(ATR {atr_pct:.2%} < min {self.min_atr_pct:.2%}) - REJECTED"
                 )
+                rejected.append(sym)
+                continue
+
+            # Sector news filter
+            passed, reason, sector_score = check_sector_filter(
+                sym, threshold=self.sector_filter_threshold
+            )
+            if not passed:
+                print(f"[RiskAgent] SECTOR FILTER: {sym} - {reason} - REJECTED")
                 rejected.append(sym)
                 continue
 

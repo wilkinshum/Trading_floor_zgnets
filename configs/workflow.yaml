@@ -1,4 +1,4 @@
-universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, HUT, TSLA, ORCL, CRWD, AMD, NBIS, IREN, TSM, ASML, RKLB, ASTS, LUNR, RDW, GEV, CEG, ONDS, CCJ, OKLO, VST, KTOS, AVAV, AMTM, SYM, ISRG, TE, EOSE, ELVA, FLNC, QBTS, IONQ, RGTI, GH, GRAL, MIRM, VRT, ANET, CRML, TMC, IDR, MTZ, AGX, POWL, TMQ, UUUU, UNH, QCOM, NFLX]
+universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, HUT, TSLA, ORCL, CRWD, AMD, NBIS, IREN, TSM, ASML, RKLB, ASTS, LUNR, RDW, GEV, CEG, ONDS, CCJ, OKLO, VST, KTOS, AVAV, AMTM, SYM, ISRG, TE, EOSE, ELVA, FLNC, QBTS, IONQ, RGTI, GH, GRAL, MIRM, VRT, ANET, CRML, TMC, IDR, MTZ, AGX, POWL, TMQ, UUUU, UNH, QCOM, NFLX, JPM, GS, V, SQ, COIN, COST, SBUX, NKE, FSLR, MP, PATH, PLTR, MSTR, MARA, RIOT, CORZ, BITF]
 scout_top_n: 5
 min_avg_volume: 100000
 hours:
@@ -27,6 +27,7 @@ risk:
   trailing_trigger: 0.025            # start trailing at +2.5%
   trailing_pct: 0.012                # trail 1.2% below HWM/above LWM
   portfolio_kill_pct: 0.05           # kill switch: close ALL if unrealized loss > 5% equity
+  sector_filter_threshold: -0.15     # block entry if sector sentiment < -0.15
 execution:
   slippage_bps: 5
   commission: 0.005
