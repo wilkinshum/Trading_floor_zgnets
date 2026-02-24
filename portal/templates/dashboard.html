@@ -568,7 +568,7 @@ async function loadTrading() {
   equityChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: curve.map((c,i) => i === 0 ? 'Start' : (c.timestamp||'').slice(0,10)),
+      labels: curve.map((c,i) => {if(i===0) return 'Start'; const d=new Date(c.timestamp); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}),
       datasets: [{
         label: 'Equity',
         data: curve.map(c => c.equity),
@@ -577,7 +577,7 @@ async function loadTrading() {
         fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
       }]
     },
-    options: {responsive:true,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'#1E293B'},ticks:{color:'#64748B'}}}}
+    options: {responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{title:function(items){const c=curve[items[0].dataIndex];return c.trade||c.timestamp||'Start';},label:function(item){return '$'+item.raw.toLocaleString();}}}},scales:{x:{display:true,grid:{color:'#1E293B'},ticks:{color:'#64748B',maxRotation:45,autoSkip:true,maxTicksLimit:8}},y:{grid:{color:'#1E293B'},ticks:{color:'#64748B',callback:function(v){return '$'+v.toLocaleString();}}}}}
   });
 
   // Recent trades
