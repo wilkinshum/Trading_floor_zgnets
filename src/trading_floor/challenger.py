@@ -64,8 +64,13 @@ class TradeChallengeSystem:
         if c:
             challenges.append(c)
 
-        # 2. Re-entry Guard
+        # 2. Re-entry Guard (warns, stacks with #2b for effective block)
         c = self._check_reentry(sym, side)
+        if c:
+            challenges.append(c)
+
+        # 2b. Re-entry Signal Quality (only fires on re-entries — needs unanimous signals)
+        c = self._check_reentry_signal_quality(sym, side, signals)
         if c:
             challenges.append(c)
 
@@ -126,13 +131,13 @@ class TradeChallengeSystem:
 
     def _check_reentry(self, sym: str, side: str) -> Optional[Challenge]:
         """
-        GROUND RULE: No re-entry to any stock that was traded today.
-        If we exited a position (win or loss), that stock is done for the day.
-        Re-entry requires a completely fresh analysis cycle on a new trading day.
+        GROUND RULE: Re-entry to a stock exited today requires overwhelming evidence.
+        Instead of blocking, raise warnings that stack — all signals must agree,
+        news must be present, and regime must be favorable. The should_proceed()
+        logic will block if too many warnings accumulate (2+ = block).
         """
         try:
             db = sqlite3.connect(self.db_path)
-            # Check for any exit (SELL with PnL) today
             today = datetime.utcnow().strftime("%Y-%m-%d")
             rows = db.execute('''
                 SELECT side, pnl, timestamp FROM trades
@@ -146,15 +151,69 @@ class TradeChallengeSystem:
                 outcome = f"profit ${last_pnl:+.2f}" if last_pnl > 0 else f"loss ${last_pnl:+.2f}"
                 return Challenge(
                     agent="compliance",
-                    severity="block",
+                    severity="warn",
                     reason=(
-                        f"Re-entry BLOCKED: {sym} already exited today at {last_ts[11:16]} "
-                        f"({outcome}). No same-day re-entry — stock is done for today."
+                        f"Re-entry caution: {sym} already exited today at {last_ts[11:16]} "
+                        f"({outcome}). All signals must agree for re-entry."
                     ),
-                    details={"last_pnl": last_pnl, "last_ts": last_ts}
+                    details={"last_pnl": last_pnl, "last_ts": last_ts, "is_reentry": True}
                 )
         except Exception as e:
             logger.debug("Re-entry check failed: %s", e)
+        return None
+
+    def _check_reentry_signal_quality(self, sym: str, side: str, signals: dict) -> Optional[Challenge]:
+        """
+        For re-entries: require ALL signal components to agree on direction.
+        If any signal disagrees or news is absent, warn (stacks with re-entry warning → block).
+        """
+        if not signals:
+            return None
+
+        components = signals.get(sym, {})
+        if not components:
+            return None
+
+        # Check if this is actually a re-entry (called after _check_reentry sets the flag)
+        try:
+            db = sqlite3.connect(self.db_path)
+            today = datetime.utcnow().strftime("%Y-%m-%d")
+            rows = db.execute(
+                'SELECT 1 FROM trades WHERE symbol = ? AND date(timestamp) = ? AND pnl != 0 LIMIT 1',
+                (sym, today)
+            ).fetchall()
+            db.close()
+            if not rows:
+                return None  # Not a re-entry, skip this check
+        except Exception:
+            return None
+
+        # For re-entries, every signal must point the same direction
+        buy_signals = [k for k, v in components.items() if v > 0.1]
+        sell_signals = [k for k, v in components.items() if v < -0.1]
+        neutral = [k for k, v in components.items() if -0.1 <= v <= 0.1]
+        news_val = components.get("news", 0)
+
+        problems = []
+        if side == "BUY" and sell_signals:
+            problems.append(f"{', '.join(sell_signals)} bearish")
+        elif side == "SELL" and buy_signals:
+            problems.append(f"{', '.join(buy_signals)} bullish")
+        if neutral:
+            problems.append(f"{', '.join(neutral)} neutral/weak")
+        if abs(news_val) < 0.05:
+            problems.append("no news confirmation")
+
+        if problems:
+            return Challenge(
+                agent="strategy",
+                severity="warn",
+                reason=(
+                    f"Re-entry needs unanimous signals for {sym}, but: {'; '.join(problems)}. "
+                    f"Components: {', '.join(f'{k}={v:+.2f}' for k,v in components.items())}"
+                ),
+                details={"components": components, "problems": problems}
+            )
         return None
 
     def _check_regime_mismatch(self, sym: str, side: str, regime: dict) -> Optional[Challenge]:
