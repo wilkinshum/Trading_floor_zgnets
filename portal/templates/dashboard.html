@@ -314,6 +314,16 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="stat-label" style="margin-bottom:12px">Token Usage by Model</div>
     <div id="model-costs"></div>
   </div>
+  <div class="card accent-purple" style="margin-top:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="stat-label">Token Consumption by Model</div>
+      <div>
+        <button class="tab-btn active" id="tok-daily-btn" onclick="renderModelChart('daily')">Daily</button>
+        <button class="tab-btn" id="tok-monthly-btn" onclick="renderModelChart('monthly')">Monthly</button>
+      </div>
+    </div>
+    <canvas id="model-line-chart" height="280"></canvas>
+  </div>
   <div class="grid grid-2" style="margin-top:20px">
     <div class="card accent-teal">
       <div class="stat-label" style="margin-bottom:12px">Cost by Provider</div>
@@ -639,6 +649,115 @@ async function loadTokens() {
     <div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${colors[i]};margin-right:8px"></span>${a.agent}</div>
     <div>${fmt$(a.cost)} · ${fmtK(a.tokens)} tokens</div>
   </div>`).join('');
+
+  // Store data for line chart
+  window._tokenData = d;
+  renderModelChart('daily');
+}
+
+let modelLineChart = null;
+const modelChartColors = ['#6D5EF6','#25D27B','#20C4C6','#F59E0B','#EF4444','#EC4899','#8B5CF6','#14B8A6','#F97316','#64748B'];
+
+function renderModelChart(mode) {
+  document.getElementById('tok-daily-btn').classList.toggle('active', mode === 'daily');
+  document.getElementById('tok-monthly-btn').classList.toggle('active', mode === 'monthly');
+
+  const d = window._tokenData;
+  if (!d) return;
+
+  const ctx = document.getElementById('model-line-chart').getContext('2d');
+  if (modelLineChart) modelLineChart.destroy();
+
+  if (mode === 'daily') {
+    // by_model_day: {model: [{date, tokens}]}
+    const bmd = d.by_model_day || {};
+    const allDates = [...new Set(Object.values(bmd).flatMap(arr => arr.map(x => x.date)))].sort();
+    // Show last 30 days max
+    const dates = allDates.slice(-30);
+
+    const datasets = Object.entries(bmd)
+      .sort((a,b) => {
+        const sumA = a[1].reduce((s,x) => s + x.tokens, 0);
+        const sumB = b[1].reduce((s,x) => s + x.tokens, 0);
+        return sumB - sumA;
+      })
+      .slice(0, 8) // top 8 models
+      .map(([model, points], i) => {
+        const dateMap = Object.fromEntries(points.map(p => [p.date, p.tokens]));
+        return {
+          label: model,
+          data: dates.map(d => dateMap[d] || 0),
+          borderColor: modelChartColors[i % modelChartColors.length],
+          backgroundColor: modelChartColors[i % modelChartColors.length] + '22',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: false,
+          pointRadius: 2,
+        };
+      });
+
+    modelLineChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: dates.map(d => d.slice(5)), datasets },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { ticks: { color: '#64748B', font: { size: 10 }, maxRotation: 45 }, grid: { color: '#1E293B' } },
+          y: { ticks: { color: '#64748B', callback: v => fmtK(v) }, grid: { color: '#1E293B' } }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } },
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtK(ctx.parsed.y) + ' tokens' } }
+        }
+      }
+    });
+  } else {
+    // Monthly view from by_day aggregated per model
+    const bmd = d.by_model_day || {};
+    // Aggregate to monthly
+    const monthlyByModel = {};
+    for (const [model, points] of Object.entries(bmd)) {
+      monthlyByModel[model] = {};
+      for (const p of points) {
+        const m = p.date.slice(0, 7);
+        monthlyByModel[model][m] = (monthlyByModel[model][m] || 0) + p.tokens;
+      }
+    }
+    const allMonths = [...new Set(Object.values(monthlyByModel).flatMap(obj => Object.keys(obj)))].sort();
+
+    const datasets = Object.entries(monthlyByModel)
+      .sort((a,b) => {
+        const sumA = Object.values(a[1]).reduce((s,v) => s+v, 0);
+        const sumB = Object.values(b[1]).reduce((s,v) => s+v, 0);
+        return sumB - sumA;
+      })
+      .slice(0, 8)
+      .map(([model, months], i) => ({
+        label: model,
+        data: allMonths.map(m => months[m] || 0),
+        borderColor: modelChartColors[i % modelChartColors.length],
+        backgroundColor: modelChartColors[i % modelChartColors.length] + '44',
+        borderWidth: 2,
+        fill: true,
+      }));
+
+    modelLineChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: allMonths, datasets },
+      options: {
+        responsive: true,
+        scales: {
+          x: { stacked: true, ticks: { color: '#64748B' }, grid: { color: '#1E293B' } },
+          y: { stacked: true, ticks: { color: '#64748B', callback: v => fmtK(v) }, grid: { color: '#1E293B' } }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#94A3B8', font: { size: 11 }, usePointStyle: true } },
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtK(ctx.parsed.y) + ' tokens' } }
+        }
+      }
+    });
+  }
 }
 
 async function loadAgents() {
@@ -999,21 +1118,54 @@ async function loadFinance() {
 
 function renderReceiptTable(receipts) {
   const tbody = document.getElementById('fin-tbody');
-  const catBadge = cat => {
-    const colors = { Meal: 'green', Self: 'purple', Health: 'teal', Grocery: 'green', 'Car Maintenance': 'yellow', Travel: 'purple', Entertainment: 'yellow', Home: 'teal', Gas: 'yellow', Electronics: 'purple', Pet: 'green', Parking: 'red' };
+  const categories = ['Meal','Self','Health','Grocery','Car Maintenance','Travel','Entertainment','Home','Gas','Electronics','Pet','Parking','Subscription','Gift','Education','Uncategorized'];
+  const colors = { Meal: 'green', Self: 'purple', Health: 'teal', Grocery: 'green', 'Car Maintenance': 'yellow', Travel: 'purple', Entertainment: 'yellow', Home: 'teal', Gas: 'yellow', Electronics: 'purple', Pet: 'green', Parking: 'red', Subscription: 'teal', Gift: 'purple', Education: 'teal' };
+  tbody.innerHTML = receipts.sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(r => {
+    const cat = r.category || 'Uncategorized';
     const c = colors[cat] || 'purple';
-    return `<span class="badge badge-${c}">${cat || 'N/A'}</span>`;
-  };
-  tbody.innerHTML = receipts.sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(r => `
-    <tr>
+    const opts = categories.map(o => `<option value="${o}" ${o===cat?'selected':''}>${o}</option>`).join('');
+    const idx = r._idx !== undefined ? r._idx : '';
+    return `<tr>
       <td style="white-space:nowrap">${r.date || '-'}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.store||'').replace(/"/g,'&quot;')}">${r.store || '-'}</td>
-      <td>${catBadge(r.category)}</td>
+      <td><select class="cat-select badge-${c}" data-idx="${idx}" onchange="updateCategory(this)" style="background:rgba(var(--${c}-rgb,109,94,246),.15);color:var(--${c},#6D5EF6);border:1px solid rgba(var(--${c}-rgb,109,94,246),.3);border-radius:12px;padding:3px 8px;font-size:12px;cursor:pointer;outline:none">${opts}</select></td>
       <td style="font-weight:600;color:var(--green)">$${parseFloat(r.total||0).toFixed(2)}</td>
       <td style="color:var(--text-muted);font-size:12px">${r.payment_method || '-'}</td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dim);font-size:12px" title="${(r.items||'').replace(/"/g,'&quot;')}">${r.items || '-'}</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+}
+
+async function updateCategory(el) {
+  const idx = el.dataset.idx;
+  const newCat = el.value;
+  if (idx === '') return;
+  el.disabled = true;
+  el.style.opacity = '0.5';
+  try {
+    const res = await fetch('/api/receipts/' + idx + '/category', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({category: newCat})
+    });
+    const d = await res.json();
+    if (d.ok) {
+      // Update local data
+      const orig = finAllReceipts.find(r => r._idx == idx);
+      if (orig) orig.category = newCat;
+      el.style.opacity = '1';
+      // Flash green briefly
+      el.style.boxShadow = '0 0 8px var(--green)';
+      setTimeout(() => { el.style.boxShadow = ''; }, 1000);
+    } else {
+      alert('Failed: ' + (d.error || 'unknown'));
+      el.style.opacity = '1';
+    }
+  } catch(e) {
+    alert('Error saving: ' + e.message);
+    el.style.opacity = '1';
+  }
+  el.disabled = false;
 }
 
 function filterReceiptTable() {

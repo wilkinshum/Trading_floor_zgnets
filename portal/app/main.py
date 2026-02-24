@@ -217,6 +217,7 @@ async def api_tokens():
     total_cost = 0.0
     by_model = {}
     by_day = {}
+    by_model_day = {}  # model -> day -> {input, output}
     session_count = 0
     
     try:
@@ -272,11 +273,28 @@ async def api_tokens():
                                 by_day[day]["input"] += actual_input
                                 by_day[day]["output"] += out
                                 by_day[day]["cost"] += cost
+                                # Per-model-day
+                                if model_short not in by_model_day:
+                                    by_model_day[model_short] = {}
+                                if day not in by_model_day[model_short]:
+                                    by_model_day[model_short][day] = {"input": 0, "output": 0}
+                                by_model_day[model_short][day]["input"] += actual_input
+                                by_model_day[model_short][day]["output"] += out
             except Exception:
                 continue
     except Exception as e:
         logging.error(f"Token parsing error: {e}")
     
+    # Aggregate by month
+    by_month_agg = {}
+    for d, v in by_day.items():
+        m = d[:7]
+        if m not in by_month_agg:
+            by_month_agg[m] = {"input": 0, "output": 0, "cost": 0.0}
+        by_month_agg[m]["input"] += v["input"]
+        by_month_agg[m]["output"] += v["output"]
+        by_month_agg[m]["cost"] += v["cost"]
+
     total_tokens = total_input + total_output
     days_active = max(len(by_day), 1)
     daily_avg_cost = total_cost / days_active if total_cost > 0 else 0
@@ -308,6 +326,14 @@ async def api_tokens():
             {"agent": "boybot (main)", "cost": round(total_cost * 0.7, 2), "tokens": int(total_tokens * 0.7)},
             {"agent": "travel", "cost": round(total_cost * 0.15, 2), "tokens": int(total_tokens * 0.15)},
             {"agent": "vita", "cost": round(total_cost * 0.15, 2), "tokens": int(total_tokens * 0.15)},
+        ],
+        "by_model_day": {
+            model: [{"date": d, "tokens": v["input"] + v["output"]} for d, v in sorted(days.items())]
+            for model, days in by_model_day.items()
+        },
+        "by_month": [
+            {"month": k, "input": v["input"], "output": v["output"], "cost": round(v["cost"], 4)}
+            for k, v in sorted(by_month_agg.items())
         ],
     }
 
@@ -602,7 +628,8 @@ async def api_receipts(start: str = "", end: str = "", category: str = ""):
         return {"receipts": [], "summary": {}}
     rows = []
     with open(RECEIPTS_CSV, encoding="utf-8") as f:
-        for r in _csv.DictReader(f):
+        for i, r in enumerate(_csv.DictReader(f)):
+            r["_idx"] = i
             rows.append(r)
     # filters
     if start:
@@ -646,6 +673,37 @@ async def api_receipts(start: str = "", end: str = "", category: str = ""):
             "categories": categories,
         }
     }
+
+
+@app.put("/api/receipts/{row_index}/category")
+async def update_receipt_category(row_index: int, body: dict):
+    """Update a receipt's category in the CSV by row index."""
+    import csv as _csv
+    new_category = body.get("category", "").strip()
+    if not new_category:
+        return JSONResponse({"error": "Category required"}, 400)
+    if not RECEIPTS_CSV.exists():
+        return JSONResponse({"error": "CSV not found"}, 404)
+
+    # Read all rows
+    with open(RECEIPTS_CSV, encoding="utf-8") as f:
+        reader = _csv.DictReader(f)
+        fieldnames = reader.fieldnames
+        rows = list(reader)
+
+    if row_index < 0 or row_index >= len(rows):
+        return JSONResponse({"error": f"Invalid row index {row_index}"}, 400)
+
+    old_category = rows[row_index].get("category", "")
+    rows[row_index]["category"] = new_category
+
+    # Write back
+    with open(RECEIPTS_CSV, "w", encoding="utf-8", newline="") as f:
+        writer = _csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    return {"ok": True, "row": row_index, "old": old_category, "new": new_category}
 
 
 # ──────────────────────────────────────────────
