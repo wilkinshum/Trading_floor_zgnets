@@ -338,14 +338,21 @@ class TradingFloor:
                     actual_qty = 0
                     if price > 0:
                         if side == "SELL":
-                            # All sells close existing position (forced or not)
                             pos = self.portfolio.state.positions.get(sym)
-                            if pos and pos.quantity != 0:
+                            if pos and pos.quantity > 0:
+                                # Close existing long position
                                 close_qty = abs(pos.quantity)
                                 pnl = self.portfolio.execute(sym, side, price, quantity=close_qty)
                                 actual_qty = close_qty
+                            elif score == 999.9:
+                                continue  # Forced exit but no position — skip
                             else:
-                                continue  # Nothing to close
+                                # Open new short position
+                                pnl = self.portfolio.execute(sym, side, price, target_value=target_val)
+                                if price > 0 and target_val > 0:
+                                    actual_qty = int(target_val // price)
+                                elif sym in self.portfolio.state.positions:
+                                    actual_qty = abs(self.portfolio.state.positions[sym].quantity)
                         else:
                             # BUY — new entry
                             pnl = self.portfolio.execute(sym, side, price, target_value=target_val)

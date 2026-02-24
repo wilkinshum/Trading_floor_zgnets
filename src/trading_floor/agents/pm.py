@@ -8,6 +8,7 @@ import numpy as np
 
 from trading_floor.agent_memory import AgentMemory
 from trading_floor.regime import detect_regime
+from trading_floor.sector_map import get_sector
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,27 @@ class PMAgent:
             candidates = self._filter_correlated(candidates, price_data, corr_threshold, max_trades)
         else:
             candidates = candidates[:max_trades]
+
+        # --- Cross-sector diversification ---
+        # Don't enter 2+ stocks from the same sector (pick highest conviction)
+        sector_seen = {}
+        diversified = []
+        for cand in candidates:
+            sym = cand["symbol"]
+            info = get_sector(sym)
+            sector = info.get("sector", "Unknown") if info else "Unknown"
+            if sector == "ETF":
+                diversified.append(cand)
+                continue
+            if sector not in sector_seen:
+                sector_seen[sector] = sym
+                diversified.append(cand)
+            else:
+                logger.info(
+                    "PM sector diversification: dropping %s (%s) — already have %s from %s",
+                    sym, sector, sector_seen[sector], sector
+                )
+        candidates = diversified
 
         # --- Position sizing ---
         portfolio_equity = context.get("portfolio_equity", 5000.0)
