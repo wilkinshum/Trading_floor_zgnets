@@ -125,29 +125,34 @@ class TradeChallengeSystem:
         return None
 
     def _check_reentry(self, sym: str, side: str) -> Optional[Challenge]:
-        """Block re-entering a stock we just got stopped out of."""
+        """
+        GROUND RULE: No re-entry to any stock that was traded today.
+        If we exited a position (win or loss), that stock is done for the day.
+        Re-entry requires a completely fresh analysis cycle on a new trading day.
+        """
         try:
             db = sqlite3.connect(self.db_path)
-            cutoff = (datetime.now() - timedelta(minutes=self.reentry_minutes)).isoformat()
+            # Check for any exit (SELL with PnL) today
+            today = datetime.utcnow().strftime("%Y-%m-%d")
             rows = db.execute('''
                 SELECT side, pnl, timestamp FROM trades
-                WHERE symbol = ? AND timestamp > ? AND pnl != 0
+                WHERE symbol = ? AND date(timestamp) = ? AND pnl != 0
                 ORDER BY timestamp DESC LIMIT 1
-            ''', (sym, cutoff)).fetchall()
+            ''', (sym, today)).fetchall()
             db.close()
 
             if rows:
                 last_side, last_pnl, last_ts = rows[0]
-                if last_pnl < 0:
-                    return Challenge(
-                        agent="compliance",
-                        severity="block",
-                        reason=(
-                            f"Re-entry blocked: {sym} was stopped out {last_ts[11:16]} "
-                            f"with PnL ${last_pnl:+.2f} (within {self.reentry_minutes}min cooldown)"
-                        ),
-                        details={"last_pnl": last_pnl, "last_ts": last_ts}
-                    )
+                outcome = f"profit ${last_pnl:+.2f}" if last_pnl > 0 else f"loss ${last_pnl:+.2f}"
+                return Challenge(
+                    agent="compliance",
+                    severity="block",
+                    reason=(
+                        f"Re-entry BLOCKED: {sym} already exited today at {last_ts[11:16]} "
+                        f"({outcome}). No same-day re-entry — stock is done for today."
+                    ),
+                    details={"last_pnl": last_pnl, "last_ts": last_ts}
+                )
         except Exception as e:
             logger.debug("Re-entry check failed: %s", e)
         return None
