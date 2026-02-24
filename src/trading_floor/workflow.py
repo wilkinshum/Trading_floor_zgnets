@@ -25,6 +25,7 @@ from trading_floor.signal_normalizer import SignalNormalizer
 from trading_floor.lightning import LightningTracer
 from trading_floor.db import Database
 from trading_floor.shadow import ShadowRunner
+from trading_floor.challenger import TradeChallengeSystem
 
 
 class TradingFloor:
@@ -54,6 +55,7 @@ class TradingFloor:
         self.pm = PMAgent(cfg, self.tracer)
         self.compliance = ComplianceAgent(cfg, self.tracer)
         self.reviewer = NextDayReviewer(cfg, self.tracer)
+        self.challenger = TradeChallengeSystem(cfg, db_path=str(db_path))
         self.normalizer = SignalNormalizer(
             lookback=cfg.get("signals", {}).get("norm_lookback", 100)
         )
@@ -327,12 +329,33 @@ class TradingFloor:
             })
 
             if approval_granted:
+                # Build signal details for challenger
+                challenge_context = {
+                    "signal_details": {},
+                    "market_regime": context.get("market_regime", {}),
+                }
+                for p in plan.get("plans", []):
+                    sym = p["symbol"]
+                    if sym in signals:
+                        # Reconstruct individual signal components if available
+                        challenge_context["signal_details"][sym] = signal_details.get(sym, {}).get("components", {})
+
                 for p in plan.get("plans", []):
                     sym = p["symbol"]
                     side = p["side"]
                     score = p["score"]
                     target_val = p.get("target_value", 0.0)
                     price = current_prices.get(sym, 0.0)
+
+                    # Challenge system — agents question illogical trades
+                    if score != 999.9:  # Skip forced exits
+                        challenges = self.challenger.challenge_plan(p, challenge_context)
+                        proceed, challenge_summary = self.challenger.should_proceed(challenges)
+                        if challenges:
+                            print(f"[TradingFloor] Challenges for {side} {sym}: {challenge_summary}")
+                        if not proceed:
+                            print(f"[TradingFloor] TRADE BLOCKED by challenge system: {side} {sym}")
+                            continue
 
                     pnl = 0.0
                     actual_qty = 0

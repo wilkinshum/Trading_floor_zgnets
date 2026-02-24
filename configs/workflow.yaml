@@ -28,6 +28,11 @@ risk:
   trailing_pct: 0.012                # trail 1.2% below HWM/above LWM
   portfolio_kill_pct: 0.05           # kill switch: close ALL if unrealized loss > 5% equity
   sector_filter_threshold: -0.15     # block entry if sector sentiment < -0.15
+challenges:
+  disagreement_threshold: 1.5        # signal spread that triggers challenge (max - min)
+  reentry_cooldown_minutes: 60       # block re-entry after stop-out for N minutes
+  min_news_score: 0.0                # warn if news = 0
+  max_consecutive_losses: 3          # block after N consecutive losses on same stock
 execution:
   slippage_bps: 5
   commission: 0.005
