@@ -180,21 +180,37 @@ async def api_trades():
 
 @app.get("/api/equity_history")
 async def api_equity_history():
-    rows = await db_query("SELECT timestamp, pnl FROM trades ORDER BY timestamp ASC")
-    starting = 5000.0
+    """
+    Build equity curve from trades with actual realized PnL.
+    Anchors backwards from current portfolio equity so the curve
+    ends at the real number regardless of unlogged legacy losses.
+    """
+    rows = await db_query(
+        "SELECT timestamp, pnl, side, symbol FROM trades WHERE pnl IS NOT NULL AND pnl != 0.0 ORDER BY timestamp ASC"
+    )
+    p = read_portfolio()
+    current_equity = round(p.get("equity", 0) or p.get("cash", 0), 2)
+
+    if not rows:
+        return [
+            {"timestamp": "start", "equity": 5000},
+            {"timestamp": datetime.now().isoformat(), "equity": current_equity}
+        ]
+
+    # Anchor: work backwards from current equity
+    total_realized_pnl = sum(r.get("pnl", 0) or 0 for r in rows)
+    starting = round(current_equity - total_realized_pnl, 2)
+
     equity = starting
     curve = [{"timestamp": "start", "equity": starting}]
     for r in rows:
         pnl = r.get("pnl") or 0.0
         equity += pnl
-        curve.append({"timestamp": r["timestamp"], "equity": round(equity, 2)})
-    # If no trades, just show current portfolio equity
-    if not rows:
-        p = read_portfolio()
-        curve = [
-            {"timestamp": "start", "equity": 5000},
-            {"timestamp": datetime.now().isoformat(), "equity": round(p.get("equity", 5000), 2)}
-        ]
+        curve.append({
+            "timestamp": r["timestamp"],
+            "equity": round(equity, 2),
+            "trade": f"{r.get('side', '')} {r.get('symbol', '')} PnL:{pnl:+.2f}"
+        })
     return curve
 
 
