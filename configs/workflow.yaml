@@ -16,7 +16,8 @@ hours:
 risk:
   equity: 5000
   daily_max_loss: 0.02
-  max_positions: 3                   # hard cap: 3 simultaneous positions
+  max_positions: 4                   # #10: increased from 3 to 4 for diversification
+  max_position_pct: 0.20             # #9: hard cap any single position at 20% of equity
   stop_loss: 0.02                    # fallback hard stop (when ATR unavailable)
   take_profit: 0.05                  # 5% target
   atr_stop_multiplier: 2.0           # ATR-based stop: 2x ATR (adaptive per symbol)
@@ -26,6 +27,8 @@ risk:
   trailing_breakeven_trigger: 0.015  # move stop to breakeven at +1.5%
   trailing_trigger: 0.025            # start trailing at +2.5%
   trailing_pct: 0.012                # trail 1.2% below HWM/above LWM
+  wide_trail_trigger: 0.035          # #8: at +3.5% gain, switch to wider trail
+  wide_trail_pct: 0.020              # #8: wider 2.0% trail for big winners (let them run)
   portfolio_kill_pct: 0.05           # kill switch: close ALL if unrealized loss > 5% equity
   sector_filter_threshold: -0.15     # block entry if sector sentiment < -0.15
 challenges:
@@ -43,17 +46,22 @@ signals:
   momentum_short: 5
   meanrev_long: 20
   breakout_lookback: 10
-  trade_threshold: 0.05              # raised: signals now normalized to [-1,+1]
+  trade_threshold: 0.15              # raised from 0.05: need stronger conviction for entry
+  min_momentum_score: 0.40           # #5: require momentum > 0.40 for entry
   norm_lookback: 100                 # rolling window for z-score normalization
   max_trades_per_cycle: 2            # only top N conviction trades
   correlation_threshold: 0.7         # drop correlated candidates above this
+  high_bar_sectors:                  # #11: sectors requiring extra-high conviction
+    - "Quantum Computing"
+  high_bar_threshold: 0.65           # #11: minimum |score| for high-bar sectors
   sizing_method: volatility          # volatility | kelly | fixed_fractional
   fixed_fraction: 0.02               # for fixed_fractional sizing
   weights:
-    momentum: 0.35
+    momentum: 0.40
     meanrev: 0.10
-    breakout: 0.30
-    news: 0.25
+    breakout: 0.05
+    news: 0.30
+    reserve: 0.15
 logging:
   trades_csv: trading_logs/trades.csv
   events_csv: trading_logs/events.csv

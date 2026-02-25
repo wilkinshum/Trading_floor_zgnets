@@ -34,18 +34,37 @@ class PMAgent:
         max_positions = self.cfg.get("risk", {}).get("max_positions", 2)
         max_trades = self.cfg.get("signals", {}).get("max_trades_per_cycle", max_positions)
         threshold = self.cfg.get("signals", {}).get("trade_threshold", 0.001)
+        min_momentum = self.cfg.get("signals", {}).get("min_momentum_score", 0.0)
         sizing_method = self.cfg.get("signals", {}).get("sizing_method", "volatility")  # kelly | fixed_fractional | volatility
         corr_threshold = self.cfg.get("signals", {}).get("correlation_threshold", 0.7)
+        max_position_pct = self.cfg.get("risk", {}).get("max_position_pct", 0.20)  # #9: hard cap 20%
+        high_bar_sectors = self.cfg.get("signals", {}).get("high_bar_sectors", [])
+        high_bar_threshold = self.cfg.get("signals", {}).get("high_bar_threshold", 0.65)
 
         # --- Build candidate list ---
         candidates = []
         held_symbols = set(context.get("positions", []))
+        signal_details = context.get("signal_details", {})
         for item in ranked:
             sym = item["symbol"]
             score = signals.get(sym, 0.0)
 
             # Market regime filter
             if market_regime["is_downtrend"] and score > 0:
+                continue
+
+            # #5: Momentum gate — require minimum momentum score for entry
+            sym_details = signal_details.get(sym, {})
+            mom_score = abs(sym_details.get("momentum", 0.0)) if sym_details else 0.0
+            if min_momentum > 0 and mom_score < min_momentum:
+                logger.info("PM momentum gate: %s momentum=%.2f < min %.2f, skipping", sym, mom_score, min_momentum)
+                continue
+
+            # #11: High-bar sectors (e.g. quantum) need extra-high conviction
+            sym_sector_info = get_sector(sym)
+            sym_sector = sym_sector_info.get("sector", "") if sym_sector_info else ""
+            if sym_sector in high_bar_sectors and abs(score) < high_bar_threshold:
+                logger.info("PM high-bar sector: %s (%s) score=%.3f < %.3f, skipping", sym, sym_sector, abs(score), high_bar_threshold)
                 continue
 
             if score >= threshold:
@@ -120,6 +139,12 @@ class PMAgent:
             # Fear regime: cut size
             if market_regime.get("is_fear"):
                 dollar_size *= 0.5
+
+            # #9: Hard cap positions at max_position_pct of equity (default 20%)
+            max_dollar = portfolio_equity * max_position_pct
+            if dollar_size > max_dollar:
+                logger.info("PM position cap: %s sized $%.0f > cap $%.0f (%.0f%%), capping", sym, dollar_size, max_dollar, max_position_pct * 100)
+                dollar_size = max_dollar
 
             plan["target_value"] = dollar_size
 

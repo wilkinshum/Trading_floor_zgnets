@@ -15,6 +15,9 @@ class ExitManager:
         self.breakeven_trigger = cfg.get("risk", {}).get("trailing_breakeven_trigger", 0.015)
         self.trail_trigger = cfg.get("risk", {}).get("trailing_trigger", 0.025)
         self.trail_pct = cfg.get("risk", {}).get("trailing_pct", 0.012)
+        # #8: Wider trail for big winners — let winners run
+        self.wide_trail_trigger = cfg.get("risk", {}).get("wide_trail_trigger", 0.035)  # at +3.5% gain
+        self.wide_trail_pct = cfg.get("risk", {}).get("wide_trail_pct", 0.020)  # wider 2.0% trail
         # Take profit
         self.take_profit = cfg.get("risk", {}).get("take_profit", 0.05)
         # Portfolio kill switch
@@ -129,11 +132,14 @@ class ExitManager:
                     forced_exits[sym] = "SELL"
                     continue
 
-                # 3. Trailing stop
+                # 3. Trailing stop (wider trail for big winners #8)
                 peak_gain = (hwm - pos.avg_price) / pos.avg_price
                 if peak_gain >= self.trail_trigger:
-                    if drawdown_from_hwm <= -self.trail_pct:
-                        print(f"[ExitManager] {sym} TRAILING STOP: dropped {drawdown_from_hwm:.1%} from HWM")
+                    # Use wider trail if position is a big winner
+                    effective_trail = self.wide_trail_pct if peak_gain >= self.wide_trail_trigger else self.trail_pct
+                    if drawdown_from_hwm <= -effective_trail:
+                        trail_type = "WIDE " if peak_gain >= self.wide_trail_trigger else ""
+                        print(f"[ExitManager] {sym} {trail_type}TRAILING STOP: dropped {drawdown_from_hwm:.1%} from HWM (trail={effective_trail:.1%})")
                         forced_exits[sym] = "SELL"
                         continue
 
@@ -161,11 +167,13 @@ class ExitManager:
                     forced_exits[sym] = "BUY"
                     continue
 
-                # 3. Trailing stop
+                # 3. Trailing stop (wider trail for big winners #8)
                 peak_gain = (pos.avg_price - lwm) / pos.avg_price
                 if peak_gain >= self.trail_trigger:
-                    if drawup_from_lwm >= self.trail_pct:
-                        print(f"[ExitManager] {sym} TRAILING STOP: rose {drawup_from_lwm:.1%} from LWM")
+                    effective_trail = self.wide_trail_pct if peak_gain >= self.wide_trail_trigger else self.trail_pct
+                    if drawup_from_lwm >= effective_trail:
+                        trail_type = "WIDE " if peak_gain >= self.wide_trail_trigger else ""
+                        print(f"[ExitManager] {sym} {trail_type}TRAILING STOP: rose {drawup_from_lwm:.1%} from LWM (trail={effective_trail:.1%})")
                         forced_exits[sym] = "BUY"
                         continue
 

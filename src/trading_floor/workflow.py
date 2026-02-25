@@ -283,6 +283,11 @@ class TradingFloor:
                 except Exception as e:
                     print(f"[Shadow] Error: {e}")
 
+            # Pass signal component details to PM for momentum gate & high-bar checks
+            context["signal_details"] = {
+                sym: d.get("components", {}) for sym, d in signal_details.items()
+            }
+
             plan, plan_notes = self.pm.create_plan(context)
 
             # Merge forced exits into plan (exits always execute first)
