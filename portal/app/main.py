@@ -378,6 +378,7 @@ async def api_agents():
         "vita": ("vita", "Vita's Agent"),
         "image": ("image", "Image Processing"),
         "accountant": ("accountant", "Receipt Filing"),
+        "finance": ("finance", "Financial Analyst"),
     }
     openclaw_cfg = Path(r"C:\Users\moltbot\.openclaw\openclaw.json")
     if openclaw_cfg.exists():

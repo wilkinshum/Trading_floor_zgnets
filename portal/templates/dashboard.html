@@ -771,14 +771,14 @@ async function loadAgents() {
 
   const icons = {
     'main (boybot)':'🤖','trading-ops':'⚡','architect':'🏗️','qa':'🧪',
-    'strategy':'📊','travel':'✈️','vita':'💊','image':'🖼️','accountant':'🧾'
+    'strategy':'📊','finance':'💰','travel':'✈️','vita':'💊','image':'🖼️','accountant':'🧾'
   };
   const colors = {
     'main (boybot)':'var(--purple)','trading-ops':'var(--teal)','architect':'var(--orange)',
-    'qa':'var(--green)','strategy':'var(--red)','travel':'var(--teal)','vita':'var(--green)',
+    'qa':'var(--green)','strategy':'var(--red)','finance':'var(--green)','travel':'var(--teal)','vita':'var(--green)',
     'image':'var(--yellow, #EAB308)','accountant':'var(--yellow, #EAB308)'
   };
-  const tradingTeam = ['trading-ops','architect','qa','strategy'];
+  const tradingTeam = ['trading-ops','architect','qa','strategy','finance'];
   const personalTeam = ['travel','vita','image','accountant'];
 
   const makeNode = (name, role, model, color, status) => `
