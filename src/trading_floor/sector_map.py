@@ -93,7 +93,7 @@ SECTOR_MAP = {
     "JPM":   {"sector": "Financials", "industry": "Banking", "sector_etf": "XLF"},
     "GS":    {"sector": "Financials", "industry": "Investment Banking", "sector_etf": "XLF"},
     "V":     {"sector": "Financials", "industry": "Payments", "sector_etf": "XLF"},
-    "SQ":    {"sector": "Financials", "industry": "Fintech", "sector_etf": "ARKF"},
+    "XYZ":   {"sector": "Financials", "industry": "Fintech", "sector_etf": "ARKF"},  # was SQ, Block rebranded
     "COIN":  {"sector": "Financials", "industry": "Crypto Exchange", "sector_etf": "BITQ"},
 
     # --- Consumer ---
