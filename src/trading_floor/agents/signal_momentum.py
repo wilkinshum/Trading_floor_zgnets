@@ -7,7 +7,7 @@ class MomentumSignalAgent:
     def __init__(self, cfg, tracer):
         self.cfg = cfg
         self.tracer = tracer
-        self.short = cfg.get("signals", {}).get("momentum_short", 5)
+        self.short = cfg.get("signals", {}).get("momentum_short", 10)
 
     def score(self, df: pd.DataFrame) -> float:
         self.tracer.emit_span("signal.momentum", {"rows": len(df)})

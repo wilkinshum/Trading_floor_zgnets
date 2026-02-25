@@ -25,12 +25,8 @@ class BreakoutSignalAgent:
         
         # Position within range: 0 = at low, 1 = at high
         position = (last - recent_low) / (recent_high - recent_low)
-        
-        # Only signal when near extremes (>75th percentile or <25th)
-        # Middle 50% of range = no signal
-        if position > 0.75:
-            return float((position - 0.75) * 4)   # 0.75->0, 1.0->1.0
-        elif position < 0.25:
-            return float((position - 0.25) * 4)   # 0.25->0, 0.0->-1.0
-        else:
-            return 0.0
+
+        # Smooth score across range, normalized to [-1, +1]
+        # 0.0 at midpoint, +1.0 at range high, -1.0 at range low
+        score = (position * 2.0) - 1.0
+        return float(score)

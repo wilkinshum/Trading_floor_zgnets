@@ -242,6 +242,49 @@ class TradingFloor:
                     signals[sym] = score
                     signal_details[sym] = details
 
+            all_signals = dict(signals)
+            all_signal_details = dict(signal_details)
+
+            # Signal persistence filter (require 2 consecutive cycles)
+            filtered_signals = {}
+            filtered_details = {}
+            if signals:
+                try:
+                    conn = self.db._get_conn()
+                    cursor = conn.cursor()
+                    for sym, score in signals.items():
+                        cursor.execute(
+                            "SELECT final_score FROM signals WHERE symbol = ? ORDER BY id DESC LIMIT 1",
+                            (sym,),
+                        )
+                        row = cursor.fetchone()
+                        prev_score = row[0] if row else None
+                        if prev_score is None:
+                            filtered_signals[sym] = score
+                            filtered_details[sym] = signal_details[sym]
+                            continue
+
+                        current_sign = 1 if score > 0 else -1 if score < 0 else 0
+                        prev_sign = 1 if prev_score > 0 else -1 if prev_score < 0 else 0
+
+                        if current_sign != 0 and prev_sign != 0 and current_sign != prev_sign:
+                            print(f"[TradingFloor] {sym} signal not persistent")
+                            continue
+
+                        filtered_signals[sym] = score
+                        filtered_details[sym] = signal_details[sym]
+                    conn.close()
+                except Exception as e:
+                    print(f"[TradingFloor] persistence check failed: {e}")
+                    filtered_signals = signals
+                    filtered_details = signal_details
+            else:
+                filtered_signals = signals
+                filtered_details = signal_details
+
+            signals = filtered_signals
+            signal_details = filtered_details
+
             context.update({
                 "ranked": ranked,
                 "signals": signals,
@@ -249,10 +292,10 @@ class TradingFloor:
             })
 
             # --- Always log signals (even if approval pending) ---
-            for sym, details in signal_details.items():
+            for sym, details in all_signal_details.items():
                 details["timestamp"] = context["timestamp"]
                 details["symbol"] = sym
-                details["side"] = "BUY" if signals.get(sym, 0) > 0 else "SELL"
+                details["side"] = "BUY" if all_signals.get(sym, 0) > 0 else "SELL"
                 try:
                     self.signal_logger.log_signal(details)
                     self.db.log_signal(details)
