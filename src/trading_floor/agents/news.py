@@ -10,6 +10,7 @@ from html import unescape
 import yfinance as yf
 
 from trading_floor.agent_memory import AgentMemory
+from trading_floor.agents.news_finnhub import get_finnhub_news
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,18 @@ _NEG_MEDIUM = {
 }
 _NEG_WEAK = {
     "low", "cut", "cuts", "fear",
+}
+
+_ANALYST_TERMS = {
+    "analyst", "upgrade", "upgrades", "downgrade", "downgrades",
+    "price target", "initiates", "initiation", "reiterates",
+    "overweight", "underweight", "outperform", "underperform",
+    "buy", "sell", "hold",
+}
+
+_EARNINGS_TERMS = {
+    "earnings", "eps", "revenue", "guidance", "quarter",
+    "q1", "q2", "q3", "q4",
 }
 
 
@@ -105,6 +118,14 @@ def _keyword_score(text: str) -> float:
     return (pos_weight - neg_weight) / total  # Range: -1 to +1
 
 
+def _has_term(headlines: list[str], terms: set[str]) -> bool:
+    for headline in headlines:
+        text = headline.lower()
+        if any(term in text for term in terms):
+            return True
+    return False
+
+
 def _scrape_google_news(symbol: str, max_headlines: int = 8) -> list[str]:
     """Scrape Google News RSS for headlines. No API key needed."""
     try:
@@ -137,7 +158,11 @@ class NewsSentimentAgent:
         self.cfg = cfg
         self.tracer = tracer
         self.cache: dict[str, float] = {}
+        self.event_flags: dict[str, dict] = {}
         self._seen_headlines: set[str] = set()  # dedup hashes
+
+        finnhub_cfg = cfg.get("finnhub", {})
+        self.finnhub_enabled = finnhub_cfg.get("enabled", False)
 
         # Memory integration
         mem_cfg = cfg.get("agent_memory", {})
@@ -165,6 +190,24 @@ class NewsSentimentAgent:
 
         headlines: list[str] = []
 
+        finnhub_data = None
+        if self.finnhub_enabled:
+            try:
+                finnhub_data = get_finnhub_news(symbol)
+            except Exception:
+                finnhub_data = None
+
+        if finnhub_data:
+            self.event_flags[symbol] = {
+                "has_earnings_event": finnhub_data.get("has_earnings_event", False),
+                "has_analyst_action": finnhub_data.get("has_analyst_action", False),
+                "news_volume_abnormal": finnhub_data.get("news_volume_abnormal", False),
+                "categories": finnhub_data.get("categories", []),
+            }
+            if finnhub_data.get("article_count", 0) > 0 and finnhub_data.get("avg_sentiment") is not None:
+                self.cache[symbol] = float(finnhub_data["avg_sentiment"])
+                return self.cache[symbol]
+
         # Source 1: yfinance
         try:
             ticker = yf.Ticker(symbol)
@@ -185,6 +228,13 @@ class NewsSentimentAgent:
             headlines.extend(_scrape_google_news(symbol))
 
         if not headlines:
+            if symbol not in self.event_flags:
+                self.event_flags[symbol] = {
+                    "has_earnings_event": False,
+                    "has_analyst_action": False,
+                    "news_volume_abnormal": False,
+                    "categories": [],
+                }
             self.cache[symbol] = 0.0
             return 0.0
 
@@ -199,6 +249,14 @@ class NewsSentimentAgent:
         if not unique_headlines:
             self.cache[symbol] = self.cache.get(symbol, 0.0)
             return self.cache[symbol]
+
+        if symbol not in self.event_flags:
+            self.event_flags[symbol] = {
+                "has_earnings_event": _has_term(unique_headlines, _EARNINGS_TERMS),
+                "has_analyst_action": _has_term(unique_headlines, _ANALYST_TERMS),
+                "news_volume_abnormal": len(unique_headlines) > 10,
+                "categories": [],
+            }
 
         # Score each headline, applying memory-based keyword weight reduction
         scores = []

@@ -57,11 +57,15 @@ signals:
   sizing_method: volatility          # volatility | kelly | fixed_fractional
   fixed_fraction: 0.02               # for fixed_fractional sizing
   weights:
-    momentum: 0.45
+    momentum: 0.50
     meanrev: 0.00
-    breakout: 0.05
-    news: 0.35
+    breakout: 0.10
+    news: 0.20
     reserve: 0.00
+
+finnhub:
+  api_key: "d6fpbk1r01qqnmbpi120d6fpbk1r01qqnmbpi12g"
+  enabled: true
 logging:
   trades_csv: trading_logs/trades.csv
   events_csv: trading_logs/events.csv

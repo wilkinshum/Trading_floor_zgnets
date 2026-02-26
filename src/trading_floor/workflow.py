@@ -208,12 +208,49 @@ class TradingFloor:
                 brk = self.normalizer.normalize(sym, "breakout", brk_raw)
                 news = news_raw
 
-                score = (
-                    (mom * weights.get("momentum", 0.25)) +
-                    (mean * weights.get("meanrev", 0.25)) +
-                    (brk * weights.get("breakout", 0.25)) +
-                    (news * weights.get("news", 0.25))
-                )
+                momentum_w = weights.get("momentum", 0.25)
+                meanrev_w = weights.get("meanrev", 0.25)
+                breakout_w = weights.get("breakout", 0.25)
+                news_w = weights.get("news", 0.25)
+
+                if news is None or news == 0:
+                    total_non_news = momentum_w + meanrev_w + breakout_w
+                    if total_non_news > 0:
+                        adj_momentum_w = momentum_w / total_non_news
+                        adj_meanrev_w = meanrev_w / total_non_news
+                        adj_breakout_w = breakout_w / total_non_news
+                        score = (
+                            (mom * adj_momentum_w) +
+                            (mean * adj_meanrev_w) +
+                            (brk * adj_breakout_w)
+                        )
+                        weights_used = {
+                            "momentum": adj_momentum_w,
+                            "meanrev": adj_meanrev_w,
+                            "breakout": adj_breakout_w,
+                            "news": 0.0,
+                        }
+                    else:
+                        score = 0.0
+                        weights_used = {
+                            "momentum": 0.0,
+                            "meanrev": 0.0,
+                            "breakout": 0.0,
+                            "news": 0.0,
+                        }
+                else:
+                    score = (
+                        (mom * momentum_w) +
+                        (mean * meanrev_w) +
+                        (brk * breakout_w) +
+                        (news * news_w)
+                    )
+                    weights_used = {
+                        "momentum": momentum_w,
+                        "meanrev": meanrev_w,
+                        "breakout": breakout_w,
+                        "news": news_w,
+                    }
 
                 details = {
                     "components": {
@@ -225,6 +262,7 @@ class TradingFloor:
                         "breakout": brk_raw, "news": news_raw
                     },
                     "weights": weights,
+                    "weights_used": weights_used,
                     "final_score": score
                 }
                 return sym, score, details
