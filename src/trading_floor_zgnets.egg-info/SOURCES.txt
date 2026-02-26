@@ -10,6 +10,7 @@ src/trading_floor/kalman.py
 src/trading_floor/lightning.py
 src/trading_floor/logging.py
 src/trading_floor/portfolio.py
+src/trading_floor/pre_execution_filters.py
 src/trading_floor/regime.py
 src/trading_floor/run.py
 src/trading_floor/sector_filter.py

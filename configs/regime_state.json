@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-02-26T13:05:13.290598-05:00",
+  "timestamp": "2026-02-26T16:55:06.937595-05:00",
   "error": null,
   "hmm": {
-    "state_label": "transition",
-    "confidence": 0.6045,
+    "state_label": "bull",
+    "confidence": 0.9668,
     "probabilities": {
-      "bull": 0.3733,
-      "bear": 0.0223,
-      "transition": 0.6045
+      "bull": 0.9668,
+      "bear": 0.0071,
+      "transition": 0.0261
     },
-    "transition_risk": 0.0783
+    "transition_risk": 0.0111
   },
   "simple_regime": {
     "spy_trend": "sideways",
@@ -17,82 +17,82 @@
     "label": "sideways_low_vol"
   },
   "btc": {
-    "price": 66842.21,
-    "momentum_10": -0.001417,
+    "price": 67526.17,
+    "momentum_10": 0.003958,
     "trending": "flat"
   },
   "history": [
     {
-      "ts": "2026-02-26T12:10:12.183449-05:00",
+      "ts": "2026-02-26T16:00:30.455534-05:00",
       "label": "bull",
-      "confidence": 0.936,
-      "bear_prob": 0.0048
+      "confidence": 0.9572,
+      "bear_prob": 0.0013
     },
     {
-      "ts": "2026-02-26T12:16:14.671608-05:00",
+      "ts": "2026-02-26T16:05:06.034521-05:00",
       "label": "bull",
-      "confidence": 0.8582,
-      "bear_prob": 0.0054
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:20:28.811289-05:00",
+      "ts": "2026-02-26T16:10:07.726506-05:00",
       "label": "bull",
-      "confidence": 0.915,
-      "bear_prob": 0.0029
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:25:13.849423-05:00",
+      "ts": "2026-02-26T16:15:53.377920-05:00",
       "label": "bull",
-      "confidence": 0.9416,
-      "bear_prob": 0.0018
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:31:12.239282-05:00",
+      "ts": "2026-02-26T16:20:06.500756-05:00",
       "label": "bull",
-      "confidence": 0.954,
-      "bear_prob": 0.0012
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:35:12.774566-05:00",
+      "ts": "2026-02-26T16:25:06.896775-05:00",
       "label": "bull",
-      "confidence": 0.9551,
-      "bear_prob": 0.0026
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:40:14.798809-05:00",
+      "ts": "2026-02-26T16:30:52.079376-05:00",
       "label": "bull",
-      "confidence": 0.9141,
-      "bear_prob": 0.0091
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:46:12.703608-05:00",
+      "ts": "2026-02-26T16:35:06.209174-05:00",
       "label": "bull",
-      "confidence": 0.8164,
-      "bear_prob": 0.008
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:50:14.020924-05:00",
+      "ts": "2026-02-26T16:40:06.697216-05:00",
       "label": "bull",
-      "confidence": 0.6531,
-      "bear_prob": 0.0147
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T12:55:13.245444-05:00",
+      "ts": "2026-02-26T16:45:30.595586-05:00",
       "label": "bull",
-      "confidence": 0.573,
-      "bear_prob": 0.0462
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T13:01:13.340072-05:00",
-      "label": "transition",
-      "confidence": 0.4923,
-      "bear_prob": 0.0243
+      "ts": "2026-02-26T16:50:06.234510-05:00",
+      "label": "bull",
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     },
     {
-      "ts": "2026-02-26T13:05:13.290598-05:00",
-      "label": "transition",
-      "confidence": 0.6045,
-      "bear_prob": 0.0223
+      "ts": "2026-02-26T16:55:06.937595-05:00",
+      "label": "bull",
+      "confidence": 0.9668,
+      "bear_prob": 0.0071
     }
   ],
   "regime_change": null

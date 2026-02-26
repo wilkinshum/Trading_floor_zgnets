@@ -98,24 +98,28 @@ class TradeChallengeSystem:
     def _check_signal_disagreement(self, sym: str, side: str, signals: dict) -> Optional[Challenge]:
         """
         If signals violently disagree, that's a red flag.
-        E.g., breakout=+1.0 but mean_rev=-1.0 → spread of 2.0
+        E.g., breakout=+1.0 but momentum=-1.0 → spread of 2.0
+        Only considers signals with weight > 0 (zero-weight signals are disabled).
         """
+        weights = self.cfg.get("signals", {}).get("weights", {})
         scores = []
+        active_keys = []
         for key in ['momentum', 'meanrev', 'breakout', 'news']:
+            if weights.get(key, 0) <= 0:
+                continue  # skip zero-weight signals
             val = signals.get(key)
             if val is not None:
                 scores.append(val)
+                active_keys.append(key)
 
         if len(scores) < 2:
             return None
 
         spread = max(scores) - min(scores)
         if spread >= self.disagreement_threshold:
-            # Check which signals disagree
-            bull_signals = [k for k in ['momentum', 'meanrev', 'breakout', 'news']
-                          if signals.get(k, 0) > 0.3]
-            bear_signals = [k for k in ['momentum', 'meanrev', 'breakout', 'news']
-                          if signals.get(k, 0) < -0.3]
+            # Check which active signals disagree
+            bull_signals = [k for k in active_keys if signals.get(k, 0) > 0.3]
+            bear_signals = [k for k in active_keys if signals.get(k, 0) < -0.3]
 
             return Challenge(
                 agent="risk",
