@@ -288,6 +288,11 @@ class TradeChallengeSystem:
         """
         Determine if trade should proceed given challenges.
         Returns (proceed, summary).
+
+        Possible outcomes:
+        - True, "No challenges raised"
+        - False, "BLOCKED ..."
+        - "caution", "CAUTION ..." — needs finance agent review
         """
         if not challenges:
             return True, "No challenges raised"
@@ -304,5 +309,8 @@ class TradeChallengeSystem:
             reasons = "; ".join(c.reason for c in warns)
             return False, f"BLOCKED (multiple warnings): {reasons}"
 
-        # Single warning — proceed with caution
-        return True, f"PROCEED with caution ({len(warns)} warnings): {warns[0].reason}"
+        # Single warning — route to finance agent for review (was auto-pass)
+        if len(warns) == 1:
+            return "caution", f"CAUTION (needs finance agent review): {warns[0].reason}"
+
+        return True, "No actionable challenges"

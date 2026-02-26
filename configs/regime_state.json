@@ -1,0 +1,99 @@
+{
+  "timestamp": "2026-02-26T13:05:13.290598-05:00",
+  "error": null,
+  "hmm": {
+    "state_label": "transition",
+    "confidence": 0.6045,
+    "probabilities": {
+      "bull": 0.3733,
+      "bear": 0.0223,
+      "transition": 0.6045
+    },
+    "transition_risk": 0.0783
+  },
+  "simple_regime": {
+    "spy_trend": "sideways",
+    "vix_level": "low",
+    "label": "sideways_low_vol"
+  },
+  "btc": {
+    "price": 66842.21,
+    "momentum_10": -0.001417,
+    "trending": "flat"
+  },
+  "history": [
+    {
+      "ts": "2026-02-26T12:10:12.183449-05:00",
+      "label": "bull",
+      "confidence": 0.936,
+      "bear_prob": 0.0048
+    },
+    {
+      "ts": "2026-02-26T12:16:14.671608-05:00",
+      "label": "bull",
+      "confidence": 0.8582,
+      "bear_prob": 0.0054
+    },
+    {
+      "ts": "2026-02-26T12:20:28.811289-05:00",
+      "label": "bull",
+      "confidence": 0.915,
+      "bear_prob": 0.0029
+    },
+    {
+      "ts": "2026-02-26T12:25:13.849423-05:00",
+      "label": "bull",
+      "confidence": 0.9416,
+      "bear_prob": 0.0018
+    },
+    {
+      "ts": "2026-02-26T12:31:12.239282-05:00",
+      "label": "bull",
+      "confidence": 0.954,
+      "bear_prob": 0.0012
+    },
+    {
+      "ts": "2026-02-26T12:35:12.774566-05:00",
+      "label": "bull",
+      "confidence": 0.9551,
+      "bear_prob": 0.0026
+    },
+    {
+      "ts": "2026-02-26T12:40:14.798809-05:00",
+      "label": "bull",
+      "confidence": 0.9141,
+      "bear_prob": 0.0091
+    },
+    {
+      "ts": "2026-02-26T12:46:12.703608-05:00",
+      "label": "bull",
+      "confidence": 0.8164,
+      "bear_prob": 0.008
+    },
+    {
+      "ts": "2026-02-26T12:50:14.020924-05:00",
+      "label": "bull",
+      "confidence": 0.6531,
+      "bear_prob": 0.0147
+    },
+    {
+      "ts": "2026-02-26T12:55:13.245444-05:00",
+      "label": "bull",
+      "confidence": 0.573,
+      "bear_prob": 0.0462
+    },
+    {
+      "ts": "2026-02-26T13:01:13.340072-05:00",
+      "label": "transition",
+      "confidence": 0.4923,
+      "bear_prob": 0.0243
+    },
+    {
+      "ts": "2026-02-26T13:05:13.290598-05:00",
+      "label": "transition",
+      "confidence": 0.6045,
+      "bear_prob": 0.0223
+    }
+  ],
+  "regime_change": null
+}

@@ -26,6 +26,7 @@ from trading_floor.lightning import LightningTracer
 from trading_floor.db import Database
 from trading_floor.shadow import ShadowRunner
 from trading_floor.challenger import TradeChallengeSystem
+from trading_floor.pre_execution_filters import run_all_pre_execution_filters
 
 
 class TradingFloor:
@@ -69,6 +70,71 @@ class TradingFloor:
             )
         else:
             self.shadow = None
+
+    def _request_finance_review(self, symbol: str, side: str, score: float, challenge_summary: str) -> bool:
+        """
+        Route a cautioned trade to the finance agent for review.
+        Returns True if approved, False if rejected.
+
+        The finance agent checks:
+        - Position sizing relative to portfolio
+        - Recent P&L on this symbol
+        - Overall portfolio exposure
+        - The nature of the caution flag
+        """
+        try:
+            # Check with the reviewer/compliance for a second opinion
+            review_context = {
+                "symbol": symbol,
+                "side": side,
+                "score": score,
+                "caution_reason": challenge_summary,
+                "portfolio_equity": self.portfolio.state.equity,
+                "portfolio_cash": self.portfolio.state.cash,
+                "existing_positions": list(self.portfolio.state.positions.keys()),
+            }
+
+            # Finance agent logic: reject if portfolio is already stressed
+            cash_ratio = self.portfolio.state.cash / max(self.portfolio.state.equity, 1)
+            if cash_ratio < 0.15:
+                print(f"[FinanceAgent] Rejecting {side} {symbol}: cash ratio {cash_ratio:.1%} too low for cautioned trade")
+                return False
+
+            # Reject if we already have too many positions
+            max_positions = self.cfg.get("risk", {}).get("max_positions", 10)
+            if len(self.portfolio.state.positions) >= max_positions and side == "BUY":
+                print(f"[FinanceAgent] Rejecting {side} {symbol}: at max positions ({max_positions})")
+                return False
+
+            # Reject weak scores on cautioned trades
+            caution_min_score = self.cfg.get("pre_execution", {}).get("caution_min_score", 0.5)
+            if abs(score) < caution_min_score:
+                print(f"[FinanceAgent] Rejecting {side} {symbol}: score {score:.3f} too weak for cautioned trade")
+                return False
+
+            # Check recent losses on this symbol
+            try:
+                import sqlite3
+                conn = sqlite3.connect(str(self.db.db_path))
+                today = datetime.now().strftime("%Y-%m-%d")
+                rows = conn.execute(
+                    "SELECT pnl FROM trades WHERE symbol = ? AND date(timestamp) = ?",
+                    (symbol, today)
+                ).fetchall()
+                conn.close()
+                today_pnl = sum(r[0] for r in rows if r[0])
+                if today_pnl < -50:  # Lost >$50 on this symbol today
+                    print(f"[FinanceAgent] Rejecting {side} {symbol}: already lost ${today_pnl:.2f} today")
+                    return False
+            except Exception:
+                pass
+
+            print(f"[FinanceAgent] Approving cautioned trade: {side} {symbol} (score={score:.3f})")
+            return True
+
+        except Exception as e:
+            print(f"[FinanceAgent] Review error: {e}")
+            return False
 
     def _approval_check(self):
         approval_cfg = self.cfg.get("approval", {})
@@ -137,7 +203,7 @@ class TradingFloor:
 
         with self.tracer.run_context("trading_floor.run", input_payload=context):
             # Fetch Universe + Market Indicators
-            fetch_list = list(set(self.cfg["universe"] + ["SPY", "^VIX"]))
+            fetch_list = list(set(self.cfg["universe"] + ["SPY", "^VIX", "BTC-USD"]))
             md = self.data.fetch(fetch_list)
 
             # Market Regime Calculation
@@ -341,6 +407,8 @@ class TradingFloor:
                     pass
 
             # --- Shadow Mode: Kalman + HMM ---
+            kalman_results = {}
+            hmm_regime_label = None
             if self.shadow is not None:
                 try:
                     spy_prices = md["SPY"].df["close"] if "SPY" in md and not md["SPY"].df.empty else None
@@ -360,7 +428,21 @@ class TradingFloor:
                     hmm_str = ""
                     if hmm:
                         hmm_str = f", HMM sees {hmm['state_label']} regime ({hmm['confidence']:.0%} confidence)"
+                        hmm_regime_label = hmm["state_label"]
                     print(f"[Shadow] Kalman agrees with {agree}/{total} signals{hmm_str}")
+
+                    # Extract kalman results for pre-execution filters
+                    for sym in price_series:
+                        kf = self.shadow._get_kalman(sym)
+                        if kf._initialized:
+                            import math
+                            unc = math.sqrt(max(kf.P[0, 0], 1e-12))
+                            kalman_results[sym] = {
+                                "level": float(kf.x[0]),
+                                "trend": float(kf.x[1]),
+                                "signal": float(kf.x[1] / unc) if unc > 1e-12 else 0.0,
+                                "uncertainty": unc,
+                            }
                 except Exception as e:
                     print(f"[Shadow] Error: {e}")
 
@@ -439,8 +521,49 @@ class TradingFloor:
                         proceed, challenge_summary = self.challenger.should_proceed(challenges)
                         if challenges:
                             print(f"[TradingFloor] Challenges for {side} {sym}: {challenge_summary}")
-                        if not proceed:
+                        if proceed == "caution":
+                            # Route to finance agent for review
+                            print(f"[TradingFloor] CAUTION FLAG → routing {side} {sym} to finance agent")
+                            try:
+                                from trading_floor.agents.reviewer import NextDayReviewer
+                                finance_ok = self._request_finance_review(sym, side, score, challenge_summary)
+                                if not finance_ok:
+                                    print(f"[TradingFloor] Finance agent REJECTED: {side} {sym}")
+                                    continue
+                                print(f"[TradingFloor] Finance agent APPROVED: {side} {sym}")
+                            except Exception as e:
+                                print(f"[TradingFloor] Finance review failed ({e}), blocking cautioned trade")
+                                continue
+                        elif not proceed:
                             print(f"[TradingFloor] TRADE BLOCKED by challenge system: {side} {sym}")
+                            continue
+
+                        # --- Pre-execution filters (all 6 improvements) ---
+                        spy_prices = md["SPY"].df["close"] if "SPY" in md and not md["SPY"].df.empty else None
+                        btc_prices = md.get("BTC-USD")
+                        btc_series = btc_prices.df["close"] if btc_prices and not btc_prices.df.empty else None
+
+                        # Get volume DataFrame for this symbol
+                        vol_df = None
+                        if sym in md and not md[sym].df.empty:
+                            vol_df = md[sym].df
+
+                        filter_ok, filter_reasons = run_all_pre_execution_filters(
+                            symbol=sym,
+                            side=side,
+                            score=score,
+                            cfg=self.cfg,
+                            hmm=self.shadow.hmm if self.shadow else None,
+                            spy_data=spy_prices,
+                            original_regime_label=hmm_regime_label,
+                            volume_df=vol_df,
+                            crypto_benchmark_prices=btc_series,
+                            kalman_results=kalman_results,
+                        )
+
+                        if not filter_ok:
+                            block_reasons = [r for r in filter_reasons if not r.split(": ", 1)[-1].startswith(("OK", "outside", "not crypto", "no "))]
+                            print(f"[TradingFloor] PRE-EXEC BLOCKED {side} {sym}: {'; '.join(block_reasons)}")
                             continue
 
                     pnl = 0.0

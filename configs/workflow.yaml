@@ -4,7 +4,7 @@ min_avg_volume: 100000
 hours:
   tz: America/New_York
   start: "09:30"
-  end: "11:30"
+  end: "14:00"
   holidays:
     - "2026-02-16"  # Presidents' Day
     - "2026-04-03"  # Good Friday
