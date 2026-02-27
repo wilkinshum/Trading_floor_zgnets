@@ -32,7 +32,7 @@ risk:
   portfolio_kill_pct: 0.05           # kill switch: close ALL if unrealized loss > 5% equity
   sector_filter_threshold: -0.15     # block entry if sector sentiment < -0.15
 challenges:
-  disagreement_threshold: 1.2        # signal spread that triggers challenge (max - min, excluding zero-weight signals)
+  disagreement_threshold: 0.9        # signal spread that triggers challenge (max - min, excluding zero-weight signals)
   reentry_cooldown_minutes: 60       # block re-entry after stop-out for N minutes
   min_news_score: 0.0                # warn if news = 0
   max_consecutive_losses: 3          # block after N consecutive losses on same stock
@@ -46,7 +46,7 @@ signals:
   momentum_short: 10
   meanrev_long: 20
   breakout_lookback: 50
-  trade_threshold: 0.15              # raised from 0.05: need stronger conviction for entry
+  trade_threshold: 0.25              # raised from 0.15: need stronger conviction for entry
   min_momentum_score: 0.40           # #5: require momentum > 0.40 for entry
   norm_lookback: 100                 # rolling window for z-score normalization
   max_trades_per_cycle: 2            # only top N conviction trades
@@ -59,9 +59,9 @@ signals:
   weights:
     momentum: 0.50
     meanrev: 0.00
-    breakout: 0.10
-    news: 0.20
-    reserve: 0.00
+    breakout: 0.15
+    news: 0.25
+    reserve: 0.10
 
 finnhub:
   api_key: "d6fpbk1r01qqnmbpi120d6fpbk1r01qqnmbpi12g"

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -42,6 +42,9 @@ DEFAULTS = {
     ],
     "crypto_sectors": ["Crypto/AI Infra"],
     "kalman_agreement_required": True,
+    "min_price": 5.0,
+    "last_entry_minutes": 30,
+    "crypto_momentum_threshold": 0.003,
 }
 
 
@@ -258,8 +261,8 @@ def check_crypto_correlation(
 
         # Simple momentum: compare current price to N periods ago
         btc_momentum = (prices[-1] - prices[-momentum_periods]) / prices[-momentum_periods]
-        btc_trending_up = btc_momentum > 0.005  # 0.5% threshold
-        btc_trending_down = btc_momentum < -0.005
+        btc_trending_up = btc_momentum > _get_cfg(cfg, "crypto_momentum_threshold")
+        btc_trending_down = btc_momentum < -_get_cfg(cfg, "crypto_momentum_threshold")
 
         if side == "SELL" and btc_trending_up:
             return False, (
@@ -300,19 +303,61 @@ def check_kalman_agreement(
             return False, f"Kalman has no data for {symbol} — required but unavailable", False
         return True, "no Kalman data (not required)", False
 
-    kalman_signal = kr.get("signal", 0.0)
+    kalman_trend = kr.get("trend", 0.0)
     agrees = (
-        (side == "BUY" and kalman_signal > 0)
-        or (side == "SELL" and kalman_signal < 0)
+        (side == "BUY" and kalman_trend > 0)
+        or (side == "SELL" and kalman_trend < 0)
     )
 
     if not agrees and required:
         return False, (
-            f"Kalman disagrees: signal={kalman_signal:+.3f} vs side={side}. "
+            f"Kalman disagrees: trend={kalman_trend:+.6f} vs side={side}. "
             f"Kalman agreement is mandatory."
         ), False
 
-    return True, f"Kalman {'agrees' if agrees else 'disagrees'} (signal={kalman_signal:+.3f})", agrees
+    return True, f"Kalman {'agrees' if agrees else 'disagrees'} (trend={kalman_trend:+.6f})", agrees
+
+
+# ---------------------------------------------------------------------------
+# 6. Minimum price filter
+# ---------------------------------------------------------------------------
+
+def check_min_price(
+    price: float,
+    cfg: dict,
+) -> tuple[bool, str]:
+    """Block stocks trading below a minimum price threshold."""
+    min_price = _get_cfg(cfg, "min_price")
+    if price <= 0:
+        return True, "no price data"
+    if price < min_price:
+        return False, f"Price ${price:.2f} below ${min_price:.2f} minimum"
+    return True, f"price OK: ${price:.2f}"
+
+
+# ---------------------------------------------------------------------------
+# 7. Last-entry cutoff
+# ---------------------------------------------------------------------------
+
+def check_last_entry_cutoff(
+    cfg: dict,
+) -> tuple[bool, str]:
+    """Block new entries in the last N minutes of the trading window."""
+    cutoff_minutes = _get_cfg(cfg, "last_entry_minutes")
+    tz = ZoneInfo(cfg.get("hours", {}).get("tz", "America/New_York"))
+    now = datetime.now(tz)
+
+    end_parts = cfg.get("hours", {}).get("end", "11:30").split(":")
+    end_time = now.replace(hour=int(end_parts[0]), minute=int(end_parts[1]), second=0, microsecond=0)
+
+    cutoff_time = end_time - timedelta(minutes=cutoff_minutes)
+
+    if now >= cutoff_time:
+        return False, (
+            f"Last-entry cutoff: {cutoff_minutes} min before window end "
+            f"({cutoff_time.strftime('%H:%M')}–{end_time.strftime('%H:%M')}). No new entries."
+        )
+    return True, "within entry window"
 
 
 # ---------------------------------------------------------------------------
@@ -331,6 +376,7 @@ def run_all_pre_execution_filters(
     volume_df=None,
     crypto_benchmark_prices=None,
     kalman_results: dict | None = None,
+    price: float = 0.0,
 ) -> tuple[bool, list[str]]:
     """
     Run all pre-execution filters. Returns (proceed, list_of_reasons).
@@ -371,5 +417,18 @@ def run_all_pre_execution_filters(
     if not ok:
         blocked = True
     reasons.append(f"crypto: {msg}")
+
+    # 6. Minimum price
+    if price > 0:
+        ok, msg = check_min_price(price, cfg)
+        if not ok:
+            blocked = True
+        reasons.append(f"min_price: {msg}")
+
+    # 7. Last-entry cutoff (new entries only)
+    ok, msg = check_last_entry_cutoff(cfg)
+    if not ok:
+        blocked = True
+    reasons.append(f"last_entry: {msg}")
 
     return (not blocked), reasons

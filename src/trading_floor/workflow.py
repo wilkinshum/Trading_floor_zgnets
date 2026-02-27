@@ -280,20 +280,19 @@ class TradingFloor:
                 news_w = weights.get("news", 0.25)
 
                 if news is None or news == 0:
+                    # No news: use non-news weights, normalize so thresholds are consistent
                     total_non_news = momentum_w + meanrev_w + breakout_w
                     if total_non_news > 0:
-                        adj_momentum_w = momentum_w / total_non_news
-                        adj_meanrev_w = meanrev_w / total_non_news
-                        adj_breakout_w = breakout_w / total_non_news
-                        score = (
-                            (mom * adj_momentum_w) +
-                            (mean * adj_meanrev_w) +
-                            (brk * adj_breakout_w)
+                        raw_score = (
+                            (mom * momentum_w) +
+                            (mean * meanrev_w) +
+                            (brk * breakout_w)
                         )
+                        score = raw_score / total_non_news  # normalize to [-1, +1]
                         weights_used = {
-                            "momentum": adj_momentum_w,
-                            "meanrev": adj_meanrev_w,
-                            "breakout": adj_breakout_w,
+                            "momentum": momentum_w / total_non_news,
+                            "meanrev": meanrev_w / total_non_news,
+                            "breakout": breakout_w / total_non_news,
                             "news": 0.0,
                         }
                     else:
@@ -305,12 +304,15 @@ class TradingFloor:
                             "news": 0.0,
                         }
                 else:
-                    score = (
+                    # With news: compute weighted sum and normalize by active weight sum
+                    raw_score = (
                         (mom * momentum_w) +
                         (mean * meanrev_w) +
                         (brk * breakout_w) +
                         (news * news_w)
                     )
+                    active_weight_sum = momentum_w + meanrev_w + breakout_w + news_w
+                    score = raw_score / active_weight_sum if active_weight_sum > 0 else 0.0
                     weights_used = {
                         "momentum": momentum_w,
                         "meanrev": meanrev_w,
@@ -559,6 +561,7 @@ class TradingFloor:
                             volume_df=vol_df,
                             crypto_benchmark_prices=btc_series,
                             kalman_results=kalman_results,
+                            price=price,
                         )
 
                         if not filter_ok:

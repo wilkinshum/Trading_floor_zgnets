@@ -89,6 +89,11 @@ class TradeChallengeSystem:
         if c:
             challenges.append(c)
 
+        # 6. Mean Reversion Opposition
+        c = self._check_meanrev_opposition(sym, side, signals)
+        if c:
+            challenges.append(c)
+
         if challenges:
             for ch in challenges:
                 logger.warning("Challenge on %s %s: %s", side, sym, ch)
@@ -123,7 +128,7 @@ class TradeChallengeSystem:
 
             return Challenge(
                 agent="risk",
-                severity="block" if spread >= 1.8 else "warn",
+                severity="block" if spread >= 1.5 else "warn",
                 reason=(
                     f"Signal disagreement: spread={spread:.2f}. "
                     f"Bull signals: {bull_signals}, Bear signals: {bear_signals}. "
@@ -286,6 +291,30 @@ class TradeChallengeSystem:
                     )
         except Exception as e:
             logger.debug("Consecutive loss check failed: %s", e)
+        return None
+
+    def _check_meanrev_opposition(self, sym: str, side: str, signals: dict) -> Optional[Challenge]:
+        """
+        If mean reversion strongly opposes trade direction, warn.
+        meanrev has weight=0 in composite but its value is still computed.
+        """
+        mr = signals.get("meanrev", 0)
+        if mr is None:
+            return None
+        if side == "BUY" and mr < -0.5:
+            return Challenge(
+                agent="strategy",
+                severity="warn",
+                reason=f"Mean reversion strongly bearish ({mr:+.2f}) — opposes BUY on {sym}",
+                details={"meanrev": mr}
+            )
+        if side == "SELL" and mr > 0.5:
+            return Challenge(
+                agent="strategy",
+                severity="warn",
+                reason=f"Mean reversion strongly bullish ({mr:+.2f}) — opposes SELL on {sym}",
+                details={"meanrev": mr}
+            )
         return None
 
     def should_proceed(self, challenges: list[Challenge]) -> tuple[bool, str]:

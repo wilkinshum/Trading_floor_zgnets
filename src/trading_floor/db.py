@@ -147,10 +147,10 @@ class Database:
             signal.get("components", {}).get("meanrev", 0.0),
             signal.get("components", {}).get("breakout", 0.0),
             signal.get("components", {}).get("news", 0.0),
-            signal.get("weights", {}).get("momentum", 0.0),
-            signal.get("weights", {}).get("meanrev", 0.0),
-            signal.get("weights", {}).get("breakout", 0.0),
-            signal.get("weights", {}).get("news", 0.0),
+            signal.get("weights_used", signal.get("weights", {})).get("momentum", 0.0),
+            signal.get("weights_used", signal.get("weights", {})).get("meanrev", 0.0),
+            signal.get("weights_used", signal.get("weights", {})).get("breakout", 0.0),
+            signal.get("weights_used", signal.get("weights", {})).get("news", 0.0),
             signal.get("final_score", 0.0)
         ))
         conn.commit()

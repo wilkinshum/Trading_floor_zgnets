@@ -30,10 +30,10 @@ class SignalLogger:
             "score_mean": data.get("components", {}).get("meanrev", 0.0),
             "score_break": data.get("components", {}).get("breakout", 0.0),
             "score_news": data.get("components", {}).get("news", 0.0),
-            "weight_mom": data.get("weights", {}).get("momentum", 0.0),
-            "weight_mean": data.get("weights", {}).get("meanrev", 0.0),
-            "weight_break": data.get("weights", {}).get("breakout", 0.0),
-            "weight_news": data.get("weights", {}).get("news", 0.0),
+            "weight_mom": data.get("weights_used", data.get("weights", {})).get("momentum", 0.0),
+            "weight_mean": data.get("weights_used", data.get("weights", {})).get("meanrev", 0.0),
+            "weight_break": data.get("weights_used", data.get("weights", {})).get("breakout", 0.0),
+            "weight_news": data.get("weights_used", data.get("weights", {})).get("news", 0.0),
             "final_score": data.get("final_score", 0.0),
             "outcome_pnl": 0.0 # Filled later when trade closes
         }
