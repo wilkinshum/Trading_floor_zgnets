@@ -1,0 +1,11 @@
+﻿[Shadow] Kalman agrees with 4/5 signals, HMM sees bull regime (81% confidence)
+[RiskAgent] VOLATILITY FILTER: NFLX too flat (ATR 0.47% < min 0.50%) - REJECTED
+[Reviewer] ## Review for 2026-02-26
+- **Trades:** 2
+- **Win Rate:** 0%
+- **Total PnL:** $-8.33
+- **Best Trade:** BITF ($0.00)
+- **Worst Trade:** BITF ($-8.33)
+
+### Signal Insights
+- Γ¥î BITF: PnL $0.00, strongest 
