@@ -295,7 +295,15 @@ class TradeChallengeSystem:
 
     def _check_meanrev_opposition(self, sym: str, side: str, signals: dict) -> Optional[Challenge]:
         """
-        If mean reversion strongly opposes trade direction, warn.
+        If mean reversion strongly opposes trade direction, warn — but only for BUYs.
+        
+        For SELL signals: meanrev opposition (positive/oversold) actually CONFIRMS
+        a momentum breakdown. A stock that's "oversold" and still being sold is showing
+        strong bearish momentum — don't penalize this.
+        
+        For BUY signals: meanrev opposition (negative/overbought) is a legitimate
+        concern — buying an overbought stock is risky.
+        
         meanrev has weight=0 in composite but its value is still computed.
         """
         mr = signals.get("meanrev", 0)
@@ -308,13 +316,8 @@ class TradeChallengeSystem:
                 reason=f"Mean reversion strongly bearish ({mr:+.2f}) — opposes BUY on {sym}",
                 details={"meanrev": mr}
             )
-        if side == "SELL" and mr > 0.5:
-            return Challenge(
-                agent="strategy",
-                severity="warn",
-                reason=f"Mean reversion strongly bullish ({mr:+.2f}) — opposes SELL on {sym}",
-                details={"meanrev": mr}
-            )
+        # For SELL: meanrev > 0.5 means "oversold, should bounce" but this actually
+        # confirms momentum breakdown — do NOT challenge sells on meanrev opposition
         return None
 
     def should_proceed(self, challenges: list[Challenge]) -> tuple[bool, str]:

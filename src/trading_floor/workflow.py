@@ -358,10 +358,11 @@ class TradingFloor:
                 try:
                     conn = self.db._get_conn()
                     cursor = conn.cursor()
+                    today = datetime.utcnow().strftime("%Y-%m-%d")
                     for sym, score in signals.items():
                         cursor.execute(
-                            "SELECT final_score FROM signals WHERE symbol = ? ORDER BY id DESC LIMIT 1",
-                            (sym,),
+                            "SELECT final_score FROM signals WHERE symbol = ? AND date(timestamp) = ? ORDER BY id DESC LIMIT 1",
+                            (sym, today),
                         )
                         row = cursor.fetchone()
                         prev_score = row[0] if row else None
