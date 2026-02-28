@@ -225,8 +225,8 @@ async def api_signals():
 
 @app.get("/api/tokens")
 async def api_tokens():
-    """Token usage — parses real data from session transcripts."""
-    sessions_dir = Path(r"C:\Users\moltbot\.openclaw\agents\main\sessions")
+    """Token usage — parses real data from ALL agent session transcripts dynamically."""
+    agents_root = Path(r"C:\Users\moltbot\.openclaw\agents")
     
     total_input = 0
     total_output = 0
@@ -234,70 +234,102 @@ async def api_tokens():
     by_model = {}
     by_day = {}
     by_model_day = {}  # model -> day -> {input, output}
+    by_agent = {}      # agent_id -> {input, output, cost, calls, sessions}
     session_count = 0
     
+    def parse_usage_entry(entry, agent_id):
+        """Parse a single JSONL entry and accumulate stats."""
+        nonlocal total_input, total_output, total_cost, session_count
+        
+        msg = entry.get("message") or {}
+        usage = msg.get("usage") or {}
+        inp = usage.get("input") or usage.get("inputTokens") or usage.get("prompt_tokens") or 0
+        out = usage.get("output") or usage.get("outputTokens") or usage.get("completion_tokens") or 0
+        cache_read = usage.get("cacheRead") or 0
+        cost_obj = usage.get("cost") or {}
+        cost = cost_obj.get("total", 0) if isinstance(cost_obj, dict) else (cost_obj or 0)
+        
+        if not (inp or out or usage.get("totalTokens")):
+            return
+        
+        total_toks = usage.get("totalTokens") or 0
+        if total_toks > 0 and total_toks > (inp + cache_read + out):
+            actual_input = total_toks - out
+        else:
+            actual_input = inp + cache_read
+        
+        total_input += actual_input
+        total_output += out
+        total_cost += cost
+        
+        # Per-agent
+        if agent_id not in by_agent:
+            by_agent[agent_id] = {"input": 0, "output": 0, "cost": 0.0, "calls": 0, "sessions": 0}
+        by_agent[agent_id]["input"] += actual_input
+        by_agent[agent_id]["output"] += out
+        by_agent[agent_id]["cost"] += cost
+        by_agent[agent_id]["calls"] += 1
+        
+        # Per-model
+        model = msg.get("model") or entry.get("model") or "unknown"
+        model_short = model.split("/")[-1] if "/" in model else model
+        if model_short not in by_model:
+            by_model[model_short] = {"input": 0, "output": 0, "cost": 0.0, "calls": 0}
+        by_model[model_short]["input"] += actual_input
+        by_model[model_short]["output"] += out
+        by_model[model_short]["cost"] += cost
+        by_model[model_short]["calls"] += 1
+        
+        # Daily breakdown
+        ts = entry.get("timestamp") or msg.get("timestamp") or ""
+        if ts:
+            day = str(ts)[:10]
+            if len(day) == 10 and day[4] == "-":
+                if day not in by_day:
+                    by_day[day] = {"input": 0, "output": 0, "cost": 0.0}
+                by_day[day]["input"] += actual_input
+                by_day[day]["output"] += out
+                by_day[day]["cost"] += cost
+                # Per-model-day
+                if model_short not in by_model_day:
+                    by_model_day[model_short] = {}
+                if day not in by_model_day[model_short]:
+                    by_model_day[model_short][day] = {"input": 0, "output": 0}
+                by_model_day[model_short][day]["input"] += actual_input
+                by_model_day[model_short][day]["output"] += out
+    
     try:
-        for jsonl_file in sessions_dir.glob("*.jsonl"):
-            session_count += 1
-            try:
-                for line in jsonl_file.read_text(encoding="utf-8", errors="ignore").splitlines():
-                    if not line.strip():
-                        continue
+        # Dynamically discover all agent directories
+        if agents_root.exists():
+            for agent_dir in sorted(agents_root.iterdir()):
+                if not agent_dir.is_dir():
+                    continue
+                agent_id = agent_dir.name
+                sessions_dir = agent_dir / "sessions"
+                if not sessions_dir.exists():
+                    continue
+                
+                agent_sessions = 0
+                for jsonl_file in sessions_dir.glob("*.jsonl"):
+                    session_count += 1
+                    agent_sessions += 1
                     try:
-                        entry = json.loads(line)
-                    except json.JSONDecodeError:
+                        for line in jsonl_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+                            if not line.strip():
+                                continue
+                            try:
+                                entry = json.loads(line)
+                            except json.JSONDecodeError:
+                                continue
+                            parse_usage_entry(entry, agent_id)
+                    except Exception:
                         continue
-                    
-                    # Usage is nested: entry.message.usage
-                    msg = entry.get("message") or {}
-                    usage = msg.get("usage") or {}
-                    inp = usage.get("input") or usage.get("inputTokens") or usage.get("prompt_tokens") or 0
-                    out = usage.get("output") or usage.get("outputTokens") or usage.get("completion_tokens") or 0
-                    cache_read = usage.get("cacheRead") or 0
-                    cost_obj = usage.get("cost") or {}
-                    cost = cost_obj.get("total", 0) if isinstance(cost_obj, dict) else (cost_obj or 0)
-                    
-                    if inp or out or usage.get("totalTokens"):
-                        # For Claude, 'input' is delta only; real input = totalTokens - output
-                        total_toks = usage.get("totalTokens") or 0
-                        if total_toks > 0 and total_toks > (inp + cache_read + out):
-                            actual_input = total_toks - out
-                        else:
-                            actual_input = inp + cache_read
-                        
-                        total_input += actual_input
-                        total_output += out
-                        total_cost += cost
-                        
-                        model = msg.get("model") or entry.get("model") or "unknown"
-                        # Simplify model name
-                        model_short = model.split("/")[-1] if "/" in model else model
-                        if model_short not in by_model:
-                            by_model[model_short] = {"input": 0, "output": 0, "cost": 0.0, "calls": 0}
-                        by_model[model_short]["input"] += actual_input
-                        by_model[model_short]["output"] += out
-                        by_model[model_short]["cost"] += cost
-                        by_model[model_short]["calls"] += 1
-                        
-                        # Daily breakdown
-                        ts = entry.get("timestamp") or msg.get("timestamp") or ""
-                        if ts:
-                            day = str(ts)[:10]
-                            if len(day) == 10 and day[4] == "-":
-                                if day not in by_day:
-                                    by_day[day] = {"input": 0, "output": 0, "cost": 0.0}
-                                by_day[day]["input"] += actual_input
-                                by_day[day]["output"] += out
-                                by_day[day]["cost"] += cost
-                                # Per-model-day
-                                if model_short not in by_model_day:
-                                    by_model_day[model_short] = {}
-                                if day not in by_model_day[model_short]:
-                                    by_model_day[model_short][day] = {"input": 0, "output": 0}
-                                by_model_day[model_short][day]["input"] += actual_input
-                                by_model_day[model_short][day]["output"] += out
-            except Exception:
-                continue
+                
+                # Track session count per agent
+                if agent_id in by_agent:
+                    by_agent[agent_id]["sessions"] = agent_sessions
+                elif agent_sessions > 0:
+                    by_agent[agent_id] = {"input": 0, "output": 0, "cost": 0.0, "calls": 0, "sessions": agent_sessions}
     except Exception as e:
         logging.error(f"Token parsing error: {e}")
     
@@ -339,9 +371,16 @@ async def api_tokens():
             for k, v in sorted(by_model.items(), key=lambda x: x[1]["input"] + x[1]["output"], reverse=True)
         ],
         "by_agent": [
-            {"agent": "boybot (main)", "cost": round(total_cost * 0.7, 2), "tokens": int(total_tokens * 0.7)},
-            {"agent": "travel", "cost": round(total_cost * 0.15, 2), "tokens": int(total_tokens * 0.15)},
-            {"agent": "vita", "cost": round(total_cost * 0.15, 2), "tokens": int(total_tokens * 0.15)},
+            {
+                "agent": agent_id,
+                "cost": round(data["cost"], 2),
+                "tokens": data["input"] + data["output"],
+                "input": data["input"],
+                "output": data["output"],
+                "calls": data["calls"],
+                "sessions": data["sessions"],
+            }
+            for agent_id, data in sorted(by_agent.items(), key=lambda x: x[1]["input"] + x[1]["output"], reverse=True)
         ],
         "by_model_day": {
             model: [{"date": d, "tokens": v["input"] + v["output"]} for d, v in sorted(days.items())]
@@ -657,6 +696,10 @@ async def api_receipts(start: str = "", end: str = "", category: str = ""):
         rows = [r for r in rows if r.get("category", "").lower() == category.lower()]
     # build summary
     total_spent = 0
+    total_hst = 0
+    total_gst = 0
+    total_tax = 0
+    total_tip = 0
     by_category = {}
     by_month = {}
     by_store = {}
@@ -667,6 +710,20 @@ async def api_receipts(start: str = "", end: str = "", category: str = ""):
         except (ValueError, TypeError):
             pass
         total_spent += amt
+        # Accumulate tax columns
+        for field, accum_name in [("tax", "total_tax"), ("hst", "total_hst"), ("gst", "total_gst"), ("tip", "total_tip")]:
+            try:
+                val = float(r.get(field, 0) or 0)
+            except (ValueError, TypeError):
+                val = 0
+            if field == "tax":
+                total_tax += val
+            elif field == "hst":
+                total_hst += val
+            elif field == "gst":
+                total_gst += val
+            elif field == "tip":
+                total_tip += val
         cat = r.get("category", "Uncategorized") or "Uncategorized"
         by_category[cat] = round(by_category.get(cat, 0) + amt, 2)
         month = r.get("date", "")[:7]
@@ -683,6 +740,10 @@ async def api_receipts(start: str = "", end: str = "", category: str = ""):
         "receipts": rows,
         "summary": {
             "total_spent": round(total_spent, 2),
+            "total_tax": round(total_tax, 2),
+            "total_hst": round(total_hst, 2),
+            "total_gst": round(total_gst, 2),
+            "total_tip": round(total_tip, 2),
             "receipt_count": len(rows),
             "by_category": dict(sorted(by_category.items(), key=lambda x: -x[1])),
             "by_month": dict(sorted_months),

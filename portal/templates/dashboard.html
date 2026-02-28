@@ -438,6 +438,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card accent-teal"><div class="stat-label">Avg per Receipt</div><div class="stat-value text-teal" id="fin-avg">$0</div></div>
     <div class="card accent-yellow"><div class="stat-label">Top Category</div><div class="stat-value text-yellow" id="fin-top-cat">-</div></div>
   </div>
+  <div class="grid grid-4" style="margin-bottom:24px">
+    <div class="card accent-orange"><div class="stat-label">Total Tax</div><div class="stat-value text-orange" id="fin-tax">$0</div></div>
+    <div class="card accent-red"><div class="stat-label">Total HST</div><div class="stat-value text-red" id="fin-hst">$0</div></div>
+    <div class="card accent-teal"><div class="stat-label">Total GST</div><div class="stat-value text-teal" id="fin-gst">$0</div></div>
+    <div class="card accent-green"><div class="stat-label">Total Tips</div><div class="stat-value text-green" id="fin-tips">$0</div></div>
+  </div>
 
   <!-- Charts Row -->
   <div class="grid grid-2" style="margin-bottom:24px">
@@ -465,7 +471,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="table-wrap">
       <table id="fin-table">
-        <thead><tr><th>Date</th><th>Store</th><th>Category</th><th>Total</th><th>Payment</th><th>Items</th></tr></thead>
+        <thead><tr><th>Date</th><th>Store</th><th>Category</th><th>Total</th><th>HST</th><th>GST</th><th>Tip</th><th>Payment</th><th>Items</th></tr></thead>
         <tbody id="fin-tbody"></tbody>
       </table>
     </div>
@@ -1071,6 +1077,12 @@ async function loadFinance() {
   const topCat = Object.entries(s.by_category)[0];
   document.getElementById('fin-top-cat').textContent = topCat ? topCat[0] : '-';
 
+  // Tax summary cards
+  document.getElementById('fin-tax').textContent = fmt$(s.total_tax || 0);
+  document.getElementById('fin-hst').textContent = fmt$(s.total_hst || 0);
+  document.getElementById('fin-gst').textContent = fmt$(s.total_gst || 0);
+  document.getElementById('fin-tips').textContent = fmt$(s.total_tip || 0);
+
   // Populate category dropdown (only on first load)
   const sel = document.getElementById('fin-category');
   if (sel.options.length <= 1 && s.categories) {
@@ -1136,6 +1148,9 @@ function renderReceiptTable(receipts) {
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.store||'').replace(/"/g,'&quot;')}">${r.store || '-'}</td>
       <td><select class="cat-select badge-${c}" data-idx="${idx}" onchange="updateCategory(this)" style="background:rgba(var(--${c}-rgb,109,94,246),.15);color:var(--${c},#6D5EF6);border:1px solid rgba(var(--${c}-rgb,109,94,246),.3);border-radius:12px;padding:3px 8px;font-size:12px;cursor:pointer;outline:none">${opts}</select></td>
       <td style="font-weight:600;color:var(--green)">$${parseFloat(r.total||0).toFixed(2)}</td>
+      <td style="color:var(--text-muted);font-size:12px">${r.hst ? '$'+parseFloat(r.hst).toFixed(2) : '-'}</td>
+      <td style="color:var(--text-muted);font-size:12px">${r.gst ? '$'+parseFloat(r.gst).toFixed(2) : '-'}</td>
+      <td style="color:var(--text-muted);font-size:12px">${r.tip ? '$'+parseFloat(r.tip).toFixed(2) : '-'}</td>
       <td style="color:var(--text-muted);font-size:12px">${r.payment_method || '-'}</td>
       <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dim);font-size:12px" title="${(r.items||'').replace(/"/g,'&quot;')}">${r.items || '-'}</td>
     </tr>`;
