@@ -153,6 +153,120 @@ def _scrape_google_news(symbol: str, max_headlines: int = 8) -> list[str]:
         return []
 
 
+_MACRO_QUERIES = [
+    "US Iran war conflict military",
+    "US China trade war tariff",
+    "Federal Reserve interest rate decision",
+    "oil price crisis middle east",
+    "geopolitical risk stock market",
+]
+
+_MACRO_BEARISH = {
+    "war", "conflict", "strike", "strikes", "attack", "attacks", "bomb", "bombing",
+    "missile", "missiles", "invasion", "invade", "troops", "military",
+    "tariff", "tariffs", "sanctions", "sanction", "embargo", "retaliation",
+    "escalation", "escalate", "tension", "tensions", "threat", "threatens",
+    "shutdown", "default", "crisis", "panic", "contagion", "emergency",
+}
+
+_MACRO_BULLISH = {
+    "ceasefire", "peace", "deal", "agreement", "talks", "negotiate", "negotiation",
+    "de-escalation", "truce", "treaty", "resolve", "resolved", "easing",
+    "diplomacy", "diplomatic", "lift", "lifted", "relief",
+}
+
+
+def _scrape_macro_news(max_headlines: int = 10) -> list[str]:
+    """Scrape Google News RSS for geopolitical/macro headlines."""
+    all_headlines = []
+    seen = set()
+    for query_str in _MACRO_QUERIES:
+        try:
+            query = urllib.parse.quote(query_str)
+            url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                xml = resp.read().decode("utf-8", errors="replace")
+            titles = re.findall(r"<title><!\[CDATA\[(.*?)\]\]></title>", xml)
+            if not titles:
+                titles = re.findall(r"<title>(.*?)</title>", xml)
+            for t in titles:
+                headline = unescape(t).strip()
+                if not headline or headline.lower() == "google news":
+                    continue
+                h_lower = headline.lower()
+                if h_lower not in seen:
+                    seen.add(h_lower)
+                    all_headlines.append(headline)
+                if len(all_headlines) >= max_headlines:
+                    break
+        except Exception:
+            continue
+        if len(all_headlines) >= max_headlines:
+            break
+    return all_headlines
+
+
+def get_macro_sentiment() -> dict:
+    """
+    Returns macro/geopolitical sentiment.
+    {
+        "score": float (-1 to +1, negative = bearish macro risk),
+        "headlines": list[str],
+        "risk_level": "low" | "moderate" | "high" | "extreme",
+        "key_themes": list[str]
+    }
+    """
+    headlines = _scrape_macro_news()
+    if not headlines:
+        return {"score": 0.0, "headlines": [], "risk_level": "low", "key_themes": []}
+
+    bearish_hits = 0
+    bullish_hits = 0
+    themes = set()
+
+    for h in headlines:
+        tokens = set(re.findall(r"[a-z]+", h.lower()))
+        b_count = len(tokens & _MACRO_BEARISH)
+        g_count = len(tokens & _MACRO_BULLISH)
+        bearish_hits += b_count
+        bullish_hits += g_count
+        # Track themes
+        if tokens & {"war", "conflict", "military", "attack", "missile", "invasion", "troops"}:
+            themes.add("military-conflict")
+        if tokens & {"tariff", "tariffs", "trade", "sanctions", "embargo"}:
+            themes.add("trade-war")
+        if tokens & {"oil", "energy", "crude"}:
+            themes.add("oil-crisis")
+        if tokens & {"iran"}:
+            themes.add("us-iran")
+        if tokens & {"china"}:
+            themes.add("us-china")
+
+    total = bearish_hits + bullish_hits
+    if total == 0:
+        score = 0.0
+    else:
+        score = (bullish_hits - bearish_hits) / total  # -1 to +1
+
+    # Risk level
+    if bearish_hits >= 8:
+        risk_level = "extreme"
+    elif bearish_hits >= 5:
+        risk_level = "high"
+    elif bearish_hits >= 2:
+        risk_level = "moderate"
+    else:
+        risk_level = "low"
+
+    return {
+        "score": round(score, 3),
+        "headlines": headlines,
+        "risk_level": risk_level,
+        "key_themes": sorted(themes),
+    }
+
+
 class NewsSentimentAgent:
     def __init__(self, cfg, tracer):
         self.cfg = cfg

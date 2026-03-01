@@ -13,7 +13,7 @@ from trading_floor.agents.scout import ScoutAgent
 from trading_floor.agents.signal_momentum import MomentumSignalAgent
 from trading_floor.agents.signal_meanreversion import MeanReversionSignalAgent
 from trading_floor.agents.signal_breakout import BreakoutSignalAgent
-from trading_floor.agents.news import NewsSentimentAgent
+from trading_floor.agents.news import NewsSentimentAgent, get_macro_sentiment
 from trading_floor.agents.exits import ExitManager
 from trading_floor.agents.risk import RiskAgent
 from trading_floor.agents.pm import PMAgent
@@ -92,10 +92,23 @@ class TradingFloor:
                 "portfolio_equity": self.portfolio.state.equity,
                 "portfolio_cash": self.portfolio.state.cash,
                 "existing_positions": list(self.portfolio.state.positions.keys()),
+                "macro_sentiment": getattr(self, '_last_macro', {}),
             }
 
             # Finance agent logic: reject if portfolio is already stressed
             cash_ratio = self.portfolio.state.cash / max(self.portfolio.state.equity, 1)
+
+            # Check macro/geopolitical risk
+            macro = review_context.get("macro_sentiment", {})
+            macro_risk = macro.get("risk_level", "low")
+            if macro_risk == "extreme" and side == "BUY":
+                themes = ", ".join(macro.get("key_themes", []))
+                print(f"[FinanceAgent] Rejecting BUY {symbol}: EXTREME macro risk ({themes})")
+                return False
+            if macro_risk == "high" and side == "BUY" and abs(score) < 0.7:
+                themes = ", ".join(macro.get("key_themes", []))
+                print(f"[FinanceAgent] Rejecting weak BUY {symbol}: HIGH macro risk ({themes}), score {score:.3f} < 0.7")
+                return False
             if cash_ratio < 0.15:
                 print(f"[FinanceAgent] Rejecting {side} {symbol}: cash ratio {cash_ratio:.1%} too low for cautioned trade")
                 return False
@@ -220,6 +233,22 @@ class TradingFloor:
                 market_regime["is_fear"] = vix_val > 25.0
 
             context["market_regime"] = market_regime
+
+            # Macro/Geopolitical News Scan (once per run, not per symbol)
+            try:
+                macro = get_macro_sentiment()
+                context["macro_sentiment"] = macro
+                self._last_macro = macro  # Store for finance agent review
+                if macro["risk_level"] in ("high", "extreme"):
+                    print(f"[Macro] ⚠️ {macro['risk_level'].upper()} geopolitical risk detected! "
+                          f"Score: {macro['score']}, Themes: {', '.join(macro['key_themes'])}")
+                    for h in macro["headlines"][:5]:
+                        print(f"  → {h}")
+                elif macro["key_themes"]:
+                    print(f"[Macro] Risk: {macro['risk_level']}, Themes: {', '.join(macro['key_themes'])}")
+            except Exception as e:
+                print(f"[Macro] Error fetching macro news: {e}")
+                context["macro_sentiment"] = {"score": 0.0, "risk_level": "low", "headlines": [], "key_themes": []}
 
             windowed = {}
             current_prices = {}
