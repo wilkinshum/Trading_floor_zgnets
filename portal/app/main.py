@@ -132,11 +132,15 @@ async def db_query(sql, params=None):
     """Run a read query against trading.db, return list of dicts."""
     if not DB_PATH.exists():
         return []
-    async with aiosqlite.connect(DB_PATH) as db:
-        db.row_factory = aiosqlite.Row
-        async with db.execute(sql, params or []) as cur:
-            rows = await cur.fetchall()
-            return [dict(r) for r in rows]
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute(sql, params or []) as cur:
+                rows = await cur.fetchall()
+                return [dict(r) for r in rows]
+    except Exception as e:
+        logging.warning(f"DB query failed: {e}")
+        return []
 
 
 def list_memory_dates():
