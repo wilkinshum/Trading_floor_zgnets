@@ -7,8 +7,12 @@ import json
 import asyncio
 import re
 import subprocess
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import requests as http_requests
+import yaml as _yaml
 
 import aiosqlite
 from fastapi import FastAPI, WebSocket, Request
@@ -23,6 +27,7 @@ PROJECT_ROOT = BASE_DIR.parent
 DB_PATH = PROJECT_ROOT / "trading.db"
 RECEIPTS_CSV = Path(r"C:\Users\moltbot\OneDrive\Desktop\receipts_snake.csv")
 PORTFOLIO_PATH = PROJECT_ROOT / "portfolio.json"
+WORKFLOW_YAML = PROJECT_ROOT / "configs" / "workflow.yaml"
 MEMORY_DIR = Path(r"C:\Users\moltbot\.openclaw\workspace\memory")
 WORKSPACE_DIR = Path(r"C:\Users\moltbot\.openclaw\workspace")
 REVIEWS_DIR = PROJECT_ROOT / "trading_logs" / "daily_reviews"
@@ -44,12 +49,83 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 # ──────────────────────────────────────────────
 
 def read_portfolio():
+    """Read live portfolio from Alpaca paper account, fallback to portfolio.json."""
+    try:
+        cfg = _get_alpaca_cfg()
+        if cfg:
+            headers = {"APCA-API-KEY-ID": cfg["key"], "APCA-API-SECRET-KEY": cfg["secret"]}
+            base = cfg["base"]
+            acct = http_requests.get(f"{base}/account", headers=headers, timeout=5).json()
+            positions = http_requests.get(f"{base}/positions", headers=headers, timeout=5).json()
+            pos_dict = {}
+            for p in (positions if isinstance(positions, list) else []):
+                pos_dict[p["symbol"]] = {
+                    "quantity": float(p.get("qty", 0)),
+                    "avg_price": float(p.get("avg_entry_price", 0)),
+                    "current_price": float(p.get("current_price", 0)),
+                    "unrealized_pl": float(p.get("unrealized_pl", 0)),
+                    "unrealized_plpc": float(p.get("unrealized_plpc", 0)),
+                    "market_value": float(p.get("market_value", 0)),
+                    "side": p.get("side", "long"),
+                }
+            return {
+                "equity": float(acct.get("equity", 0)),
+                "cash": float(acct.get("cash", 0)),
+                "buying_power": float(acct.get("buying_power", 0)),
+                "positions": pos_dict,
+                "source": "alpaca",
+                "account_number": acct.get("account_number", ""),
+                "status": acct.get("status", ""),
+            }
+    except Exception as e:
+        logging.warning(f"Alpaca fetch failed, falling back to portfolio.json: {e}")
     if PORTFOLIO_PATH.exists():
         try:
             return json.loads(PORTFOLIO_PATH.read_text())
         except Exception:
             pass
     return {"cash": 0, "equity": 0, "positions": {}}
+
+
+def _get_alpaca_cfg():
+    """Load Alpaca API config from workflow.yaml or env vars."""
+    key = os.environ.get("ALPACA_API_KEY", "")
+    secret = os.environ.get("ALPACA_API_SECRET", "")
+    base = "https://paper-api.alpaca.markets/v2"
+    if key and secret:
+        return {"key": key, "secret": secret, "base": base}
+    if WORKFLOW_YAML.exists():
+        try:
+            cfg = _yaml.safe_load(WORKFLOW_YAML.read_text())
+            alpaca = cfg.get("alpaca", {})
+            key_val = alpaca.get("api_key", "")
+            sec_val = alpaca.get("api_secret", "")
+            base = alpaca.get("base_url", base)
+
+            def _get_user_env(name: str) -> str:
+                """Read user env var from registry (works even if process started before var was set)."""
+                try:
+                    import winreg
+                    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment") as k:
+                        val, _ = winreg.QueryValueEx(k, name)
+                        return str(val)
+                except Exception:
+                    return ""
+
+            def _resolve(v: str) -> str:
+                v = (v or "").strip()
+                if v.startswith("${") and v.endswith("}"):
+                    env_name = v[2:-1]
+                    return os.environ.get(env_name, "") or _get_user_env(env_name)
+                return v
+
+            key = _resolve(key_val)
+            secret = _resolve(sec_val)
+            if key and secret:
+                return {"key": key, "secret": secret, "base": base}
+        except Exception:
+            pass
+    return None
 
 
 async def db_query(sql, params=None):
@@ -122,6 +198,7 @@ async def api_overview():
     p = read_portfolio()
     equity = p.get("equity", 0)
     positions = p.get("positions", {})
+    starting_equity = 5000.0
 
     # Compute today's PnL from trades table
     today = datetime.now().strftime("%Y-%m-%d")
@@ -131,19 +208,62 @@ async def api_overview():
     )
     today_pnl = today_trades[0]["total_pnl"] if today_trades else 0
 
-    # Win rate
+    # Also check position_meta for V4 trades
+    today_v4 = await db_query(
+        "SELECT COALESCE(SUM(pnl),0) as total_pnl, COUNT(*) as cnt FROM position_meta WHERE exit_time LIKE ? AND pnl IS NOT NULL",
+        [f"{today}%"]
+    )
+    today_pnl_v4 = today_v4[0]["total_pnl"] if today_v4 else 0
+
+    # Win rate from both tables
     all_trades = await db_query("SELECT pnl FROM trades WHERE pnl IS NOT NULL")
-    wins = sum(1 for t in all_trades if (t.get("pnl") or 0) > 0)
-    total = len(all_trades)
+    all_v4 = await db_query("SELECT pnl FROM position_meta WHERE pnl IS NOT NULL")
+    all_pnls = [t.get("pnl", 0) or 0 for t in all_trades] + [t.get("pnl", 0) or 0 for t in all_v4]
+    wins = sum(1 for p in all_pnls if p > 0)
+    total = len(all_pnls)
     win_rate = round(wins / total * 100, 1) if total > 0 else 0
+
+    # Unrealized PnL from open positions
+    unrealized = sum(pos.get("unrealized_pl", 0) for pos in positions.values()) if isinstance(positions, dict) else 0
+
+    # Alpaca order history
+    recent_orders = []
+    try:
+        cfg = _get_alpaca_cfg()
+        if cfg:
+            headers = {"APCA-API-KEY-ID": cfg["key"], "APCA-API-SECRET-KEY": cfg["secret"]}
+            resp = http_requests.get(f"{cfg['base']}/orders?status=all&limit=20&direction=desc", headers=headers, timeout=5)
+            if resp.status_code == 200:
+                for o in resp.json():
+                    recent_orders.append({
+                        "symbol": o.get("symbol"),
+                        "side": o.get("side"),
+                        "qty": o.get("qty"),
+                        "status": o.get("status"),
+                        "filled_at": o.get("filled_at"),
+                        "filled_avg_price": o.get("filled_avg_price"),
+                        "created_at": o.get("created_at"),
+                        "type": o.get("type"),
+                    })
+    except Exception:
+        pass
 
     return {
         "equity": round(equity, 2),
-        "today_pnl": round(today_pnl, 2),
+        "starting_equity": starting_equity,
+        "total_return": round(equity - starting_equity, 2),
+        "total_return_pct": round((equity - starting_equity) / starting_equity * 100, 2) if starting_equity else 0,
+        "today_pnl": round(today_pnl + today_pnl_v4, 2),
+        "unrealized_pnl": round(unrealized, 2),
         "open_positions": len(positions),
         "win_rate": win_rate,
         "total_trades": total,
         "cash": round(p.get("cash", 0), 2),
+        "buying_power": round(p.get("buying_power", 0), 2),
+        "source": p.get("source", "portfolio.json"),
+        "account_number": p.get("account_number", ""),
+        "account_status": p.get("status", ""),
+        "recent_orders": recent_orders,
     }
 
 
@@ -160,15 +280,19 @@ async def api_positions():
         if isinstance(data, dict):
             qty = data.get("quantity", data.get("qty", 0))
             entry = data.get("avg_price", data.get("entry_price", 0))
-            highest = data.get("highest_price", entry)
+            current = data.get("current_price", 0)
+            unrealized = data.get("unrealized_pl", 0)
+            unrealized_pct = data.get("unrealized_plpc", 0)
+            market_val = data.get("market_value", 0)
             result.append({
                 "symbol": sym,
                 "qty": qty,
-                "entry": round(entry, 2),
-                "highest": round(highest, 2),
-                "current": 0,  # filled by frontend via live price
-                "pnl": 0,
-                "pnl_pct": 0,
+                "entry": round(float(entry), 2),
+                "current": round(float(current), 2),
+                "market_value": round(float(market_val), 2),
+                "pnl": round(float(unrealized), 2),
+                "pnl_pct": round(float(unrealized_pct) * 100, 2),
+                "side": data.get("side", "long"),
             })
     return result
 
@@ -181,36 +305,49 @@ async def api_trades():
 @app.get("/api/equity_history")
 async def api_equity_history():
     """
-    Build equity curve from trades with actual realized PnL.
-    Anchors backwards from current portfolio equity so the curve
-    ends at the real number regardless of unlogged legacy losses.
+    Build equity curve from both legacy trades and V4 position_meta.
+    Anchors from $5,000 starting equity.
     """
-    rows = await db_query(
+    # Legacy trades
+    legacy = await db_query(
         "SELECT timestamp, pnl, side, symbol FROM trades WHERE pnl IS NOT NULL AND pnl != 0.0 ORDER BY timestamp ASC"
     )
+    # V4 trades from position_meta
+    v4 = await db_query(
+        "SELECT exit_time as timestamp, pnl, strategy, symbol FROM position_meta WHERE pnl IS NOT NULL AND exit_time IS NOT NULL ORDER BY exit_time ASC"
+    )
+
     p = read_portfolio()
     current_equity = round(p.get("equity", 0) or p.get("cash", 0), 2)
+    starting = 5000.0
 
-    if not rows:
+    # Merge and sort all trades by timestamp
+    all_trades = []
+    for r in legacy:
+        all_trades.append({"timestamp": r["timestamp"], "pnl": r.get("pnl", 0), "label": f"{r.get('side','')} {r.get('symbol','')}", "source": "legacy"})
+    for r in v4:
+        all_trades.append({"timestamp": r["timestamp"], "pnl": r.get("pnl", 0), "label": f"{r.get('strategy','')} {r.get('symbol','')}", "source": "v4"})
+    all_trades.sort(key=lambda x: x["timestamp"] or "")
+
+    if not all_trades:
         return [
-            {"timestamp": "start", "equity": 5000},
+            {"timestamp": "start", "equity": starting},
             {"timestamp": datetime.now().isoformat(), "equity": current_equity}
         ]
 
-    # Anchor: work backwards from current equity
-    total_realized_pnl = sum(r.get("pnl", 0) or 0 for r in rows)
-    starting = round(current_equity - total_realized_pnl, 2)
-
     equity = starting
     curve = [{"timestamp": "start", "equity": starting}]
-    for r in rows:
-        pnl = r.get("pnl") or 0.0
+    for t in all_trades:
+        pnl = t.get("pnl") or 0.0
         equity += pnl
         curve.append({
-            "timestamp": r["timestamp"],
+            "timestamp": t["timestamp"],
             "equity": round(equity, 2),
-            "trade": f"{r.get('side', '')} {r.get('symbol', '')} PnL:{pnl:+.2f}"
+            "trade": f"{t['label']} PnL:{pnl:+.2f}",
+            "source": t["source"],
         })
+    # Add current live equity as final point
+    curve.append({"timestamp": datetime.now().isoformat(), "equity": current_equity, "trade": "current"})
     return curve
 
 
@@ -805,6 +942,52 @@ async def api_report_detail(date: str):
 
 
 # ──────────────────────────────────────────────
+# Backtest Results API
+# ──────────────────────────────────────────────
+
+BACKTEST_RESULTS = PROJECT_ROOT / "backtest_results.json"
+SWING_BACKTEST_RESULTS = PROJECT_ROOT / "swing_backtest_results.json"
+
+@app.get("/api/backtest")
+async def api_backtest():
+    if not BACKTEST_RESULTS.exists():
+        return {"status": "no_results", "message": "No backtest results yet. Run the backtester first."}
+    try:
+        data = json.loads(BACKTEST_RESULTS.read_text(encoding="utf-8"))
+        return {"status": "ok", **data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/api/swing_backtest")
+async def api_swing_backtest():
+    if not SWING_BACKTEST_RESULTS.exists():
+        return {"status": "no_results", "message": "No swing backtest results yet. Run scripts/backtest_swing.py first."}
+    try:
+        data = json.loads(SWING_BACKTEST_RESULTS.read_text(encoding="utf-8"))
+        return {"status": "ok", **data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/backtest/run")
+async def api_backtest_run(request: Request):
+    """Trigger a backtest run (async)."""
+    body = await request.json() if request.headers.get("content-type") == "application/json" else {}
+    days = body.get("days", 30)
+    step = body.get("step", 0.05)
+    script = PROJECT_ROOT / "scripts" / "backtest_weights.py"
+    if not script.exists():
+        return JSONResponse({"error": "Backtest script not found"}, 404)
+    # Run in background
+    proc = await asyncio.create_subprocess_exec(
+        "python", str(script), "--days", str(days), "--step", str(step),
+        cwd=str(PROJECT_ROOT),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    return {"status": "started", "pid": proc.pid, "days": days, "step": step}
+
+
+# ──────────────────────────────────────────────
 # WebSocket — Live Updates
 # ──────────────────────────────────────────────
 
@@ -814,13 +997,26 @@ async def ws_feed(websocket: WebSocket):
     try:
         while True:
             p = read_portfolio()
+            positions = p.get("positions", {})
+            pos_list = []
+            for sym, data in positions.items():
+                if isinstance(data, dict):
+                    pos_list.append({
+                        "symbol": sym,
+                        "qty": data.get("quantity", 0),
+                        "pnl": round(float(data.get("unrealized_pl", 0)), 2),
+                        "current": round(float(data.get("current_price", 0)), 2),
+                    })
             await websocket.send_json({
                 "type": "status_update",
                 "equity": round(p.get("equity", 0), 2),
                 "cash": round(p.get("cash", 0), 2),
-                "positions": len(p.get("positions", {})),
+                "buying_power": round(p.get("buying_power", 0), 2),
+                "positions": len(positions),
+                "positions_detail": pos_list,
+                "source": p.get("source", "unknown"),
             })
-            await asyncio.sleep(5)
+            await asyncio.sleep(10)
     except Exception:
         pass
     finally:

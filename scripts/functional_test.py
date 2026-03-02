@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 End-to-end functional test for V4.0 on Alpaca paper account.
-Tests the full trade lifecycle: signal → entry → exit → self-learning.
+Tests the full trade lifecycle: signal  entry  exit  self-learning.
 Uses real Alpaca API (paper trading).
 
 Usage: python scripts/functional_test.py
@@ -29,21 +29,21 @@ def step(name, fn):
     try:
         result = fn()
         STEPS.append(("PASS", name, result or ""))
-        print(f"  ✅ {name}")
+        print(f"  [PASS] {name}")
         return result
     except Exception as e:
         STEPS.append(("FAIL", name, str(e)))
-        print(f"  ❌ {name}: {e}")
+        print(f"  [FAIL] {name}: {e}")
         return None
 
 
 def main():
     print("=" * 60)
-    print("Trading Floor V4.0 — Functional Test")
+    print("Trading Floor V4.0  Functional Test")
     print(f"Time: {datetime.now()}")
     print("=" * 60)
 
-    # ── Step 1: Load config ──
+    #  Step 1: Load config 
     def load_cfg():
         from trading_floor.run import load_config, _resolve_env
         cfg = load_config("configs/workflow.yaml")
@@ -55,7 +55,7 @@ def main():
         print("\nFATAL: Cannot load config")
         sys.exit(1)
 
-    # ── Step 2: Init components ──
+    #  Step 2: Init components 
     components = {}
 
     def init_all():
@@ -100,7 +100,7 @@ def main():
     portfolio = components["portfolio"]
     sl = components["self_learner"]
 
-    # ── Step 3: Check account ──
+    #  Step 3: Check account 
     def check_account():
         acct = broker.get_account()
         bp = float(acct.buying_power)
@@ -109,7 +109,7 @@ def main():
 
     step("3. Check Alpaca account", check_account)
 
-    # ── Step 4: Buy 1 share of SPY ──
+    #  Step 4: Buy 1 share of SPY 
     buy_result = {}
 
     def buy_spy():
@@ -144,7 +144,7 @@ def main():
 
     step("4. Submit market BUY 1 SPY", buy_spy)
 
-    # ── Step 5: Wait for fill ──
+    #  Step 5: Wait for fill 
     def wait_buy_fill():
         order_id = buy_result.get("order_id")
         if not order_id:
@@ -163,7 +163,7 @@ def main():
 
     step("5. Wait for BUY fill", wait_buy_fill)
 
-    # ── Step 6: Verify DB records ──
+    #  Step 6: Verify DB records 
     def verify_db():
         conn = db._get_conn()
         try:
@@ -180,7 +180,7 @@ def main():
 
     step("6. Verify orders/fills in DB", verify_db)
 
-    # ── Step 7: Update position_meta with entry price ──
+    #  Step 7: Update position_meta with entry price 
     def update_entry_price():
         conn = db._get_conn()
         try:
@@ -198,7 +198,7 @@ def main():
 
     step("7. Record entry price in position_meta", update_entry_price)
 
-    # ── Step 8: Close position (sell SPY) ──
+    #  Step 8: Close position (sell SPY) 
     sell_result = {}
 
     def sell_spy():
@@ -215,7 +215,7 @@ def main():
 
     step("8. Submit market SELL 1 SPY", sell_spy)
 
-    # ── Step 9: Wait for sell fill ──
+    #  Step 9: Wait for sell fill 
     def wait_sell_fill():
         order_id = sell_result.get("order_id")
         if not order_id:
@@ -233,7 +233,7 @@ def main():
 
     step("9. Wait for SELL fill", wait_sell_fill)
 
-    # ── Step 10: Close position_meta + compute PnL ──
+    #  Step 10: Close position_meta + compute PnL 
     def close_meta():
         conn = db._get_conn()
         try:
@@ -261,7 +261,7 @@ def main():
 
     step("10. Close position_meta + PnL", close_meta)
 
-    # ── Step 11: Self-learner process_trade ──
+    #  Step 11: Self-learner process_trade 
     def process_trade():
         from trading_floor.run import _get_position_trade_data, _load_regime_state
         trade_data = _get_position_trade_data(db, buy_result["pos_id"], "intraday")
@@ -281,7 +281,7 @@ def main():
 
     step("11. Self-learner process_trade", process_trade)
 
-    # ── Step 12: Check mw_state.json updated ──
+    #  Step 12: Check mw_state.json updated 
     def check_mw():
         mw_path = Path("configs/mw_state.json")
         assert mw_path.exists(), "mw_state.json not found"
@@ -291,7 +291,7 @@ def main():
 
     step("12. Verify mw_state.json", check_mw)
 
-    # ── Step 13: Nightly review ──
+    #  Step 13: Nightly review 
     def nightly():
         report = sl.nightly_review()
         assert len(report) > 50, "Report too short"
@@ -301,7 +301,7 @@ def main():
 
     step("13. Nightly review", nightly)
 
-    # ── Step 14: Verify flat ──
+    #  Step 14: Verify flat 
     def check_flat():
         portfolio.invalidate()
         spy_pos = [p for p in portfolio.positions if p["symbol"] == "SPY"]
@@ -311,14 +311,14 @@ def main():
 
     step("14. Verify portfolio flat", check_flat)
 
-    # ── Summary ──
+    #  Summary 
     print("\n" + "=" * 60)
     print("FUNCTIONAL TEST SUMMARY")
     print("=" * 60)
     passes = sum(1 for s in STEPS if s[0] == "PASS")
     fails = sum(1 for s in STEPS if s[0] == "FAIL")
     for status, name, detail in STEPS:
-        icon = "✅" if status == "PASS" else "❌"
+        icon = "" if status == "PASS" else ""
         print(f"  {icon} {name}: {detail}")
     print(f"\n{passes} PASSED, {fails} FAILED out of {len(STEPS)} steps")
     sys.exit(0 if fails == 0 else 1)
