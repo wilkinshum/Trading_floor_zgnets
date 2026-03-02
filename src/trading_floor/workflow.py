@@ -19,7 +19,7 @@ from trading_floor.agents.risk import RiskAgent
 from trading_floor.agents.pm import PMAgent
 from trading_floor.agents.compliance import ComplianceAgent
 from trading_floor.agents.reviewer import NextDayReviewer
-from trading_floor.logging import TradeLogger
+from trading_floor.trade_logging import TradeLogger
 from trading_floor.signal_log import SignalLogger
 from trading_floor.signal_normalizer import SignalNormalizer
 from trading_floor.lightning import LightningTracer
