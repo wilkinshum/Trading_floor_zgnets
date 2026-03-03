@@ -194,6 +194,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       Finance
     </div>
+    <div class="nav-item" data-tab="backtest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-8"/></svg>
+      Backtest
+    </div>
   </nav>
   <div class="sidebar-footer">
     <div style="display:flex;align-items:center;gap:8px"><span class="status-dot on"></span> System Online</div>
@@ -490,6 +494,86 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- ═══ BACKTEST ═══ -->
+<div class="section" id="sec-backtest">
+  <div class="page-header">
+    <h1>V4 Backtest Results</h1>
+    <p id="bt-subtitle">Integrated intraday + swing simulation</p>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-4">
+    <div class="card accent-green"><div class="stat-label">Final Equity</div><div class="stat-value" id="bt-equity">—</div><div class="stat-sub" id="bt-return">—</div></div>
+    <div class="card accent-purple"><div class="stat-label">Total P&L</div><div class="stat-value" id="bt-pnl">—</div></div>
+    <div class="card accent-yellow"><div class="stat-label">Total Trades</div><div class="stat-value text-yellow" id="bt-trades">—</div></div>
+    <div class="card accent-teal"><div class="stat-label">Win Rate</div><div class="stat-value text-teal" id="bt-winrate">—</div></div>
+  </div>
+
+  <!-- Strategy Breakdown -->
+  <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-purple">
+      <div class="stat-label" style="margin-bottom:12px">Intraday</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="stat-label">Trades</div><div class="stat-value" style="font-size:20px" id="bt-intra-trades">—</div></div>
+        <div><div class="stat-label">P&L</div><div class="stat-value" style="font-size:20px" id="bt-intra-pnl">—</div></div>
+        <div><div class="stat-label">Win Rate</div><div class="stat-value" style="font-size:20px" id="bt-intra-wr">—</div></div>
+        <div><div class="stat-label">Profit Factor</div><div class="stat-value" style="font-size:20px" id="bt-intra-pf">—</div></div>
+      </div>
+    </div>
+    <div class="card accent-teal">
+      <div class="stat-label" style="margin-bottom:12px">Swing</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="stat-label">Trades</div><div class="stat-value" style="font-size:20px" id="bt-swing-trades">—</div></div>
+        <div><div class="stat-label">P&L</div><div class="stat-value" style="font-size:20px" id="bt-swing-pnl">—</div></div>
+        <div><div class="stat-label">Win Rate</div><div class="stat-value" style="font-size:20px" id="bt-swing-wr">—</div></div>
+        <div><div class="stat-label">Profit Factor</div><div class="stat-value" style="font-size:20px" id="bt-swing-pf">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Max DD + Best/Worst -->
+  <div class="grid grid-3" style="margin-top:20px">
+    <div class="card accent-red"><div class="stat-label">Max Drawdown</div><div class="stat-value text-red" id="bt-dd">—</div></div>
+    <div class="card accent-green"><div class="stat-label">Best Day</div><div class="stat-value text-green" id="bt-best">—</div><div class="stat-sub" id="bt-best-date">—</div></div>
+    <div class="card accent-red"><div class="stat-label">Worst Day</div><div class="stat-value text-red" id="bt-worst">—</div><div class="stat-sub" id="bt-worst-date">—</div></div>
+  </div>
+
+  <!-- Equity Curve Chart -->
+  <div class="card accent-purple" style="margin-top:20px">
+    <div class="stat-label" style="margin-bottom:16px">Equity Curve</div>
+    <div style="height:300px"><canvas id="bt-equity-chart"></canvas></div>
+  </div>
+
+  <!-- Daily P&L Chart -->
+  <div class="card accent-teal" style="margin-top:20px">
+    <div class="stat-label" style="margin-bottom:16px">Daily P&L</div>
+    <div style="height:250px"><canvas id="bt-daily-pnl-chart"></canvas></div>
+  </div>
+
+  <!-- Trade Tables -->
+  <div class="grid grid-2" style="margin-top:20px">
+    <div class="card accent-orange">
+      <div class="stat-label" style="margin-bottom:12px">Intraday Exit Reasons</div>
+      <div id="bt-intra-exits" style="font-size:14px;color:var(--text-dim)">—</div>
+    </div>
+    <div class="card accent-orange">
+      <div class="stat-label" style="margin-bottom:12px">Swing Exit Reasons</div>
+      <div id="bt-swing-exits" style="font-size:14px;color:var(--text-dim)">—</div>
+    </div>
+  </div>
+
+  <!-- All Trades Table -->
+  <div class="card accent-purple" style="margin-top:20px">
+    <div class="stat-label" style="margin-bottom:12px">All Trades</div>
+    <div class="table-wrap" style="max-height:500px;overflow-y:auto">
+      <table>
+        <thead><tr><th>Strategy</th><th>Symbol</th><th>Date</th><th>Entry</th><th>Exit</th><th>Qty</th><th>P&L</th><th>Reason</th></tr></thead>
+        <tbody id="bt-trades-body"><tr><td colspan="8" style="text-align:center;color:var(--text-muted)">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </div><!-- /main -->
 
 <script>
@@ -549,6 +633,7 @@ async function loadTab(tab) {
   else if (tab === 'journal') await loadJournal();
   else if (tab === 'brain') await loadBrain();
   else if (tab === 'finance') await loadFinance();
+  else if (tab === 'backtest') await loadBacktest();
 }
 
 async function loadOverview() {
@@ -1290,6 +1375,179 @@ document.querySelectorAll('.nav-item').forEach(n => {
 loadOverview();
 connectWS();
 startAutoRefresh();
+
+// ── Backtest ──
+let btEquityChart = null;
+let btDailyPnlChart = null;
+
+async function loadBacktest() {
+  const d = await api('/api/backtest_v4');
+  if (!d || d.status !== 'ok') {
+    document.getElementById('bt-subtitle').textContent = d?.message || 'No V4 results available';
+    return;
+  }
+
+  const s = d.summary;
+  const cfg = d.config;
+  const days = d.daily_results?.length || cfg?.days || 30;
+
+  document.getElementById('bt-subtitle').textContent =
+    `${days} trading days · $${cfg.starting_equity.toLocaleString()} start · Intraday $${cfg.intraday_budget.toLocaleString()} + Swing $${cfg.swing_budget.toLocaleString()}`;
+
+  // Summary
+  document.getElementById('bt-equity').textContent = fmt$(s.final_equity);
+  const retEl = document.getElementById('bt-return');
+  retEl.textContent = (s.total_return_pct >= 0 ? '+' : '') + s.total_return_pct + '%';
+  retEl.style.color = s.total_return_pct >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const pnlEl = document.getElementById('bt-pnl');
+  pnlEl.textContent = (s.total_pnl >= 0 ? '+' : '') + fmt$(s.total_pnl);
+  pnlEl.className = 'stat-value ' + (s.total_pnl >= 0 ? 'text-green' : 'text-red');
+
+  document.getElementById('bt-trades').textContent = s.intraday_trades + s.swing_trades;
+
+  const combinedWR = ((s.intraday_win_rate * s.intraday_trades + s.swing_win_rate * s.swing_trades) /
+    Math.max(s.intraday_trades + s.swing_trades, 1)).toFixed(1);
+  document.getElementById('bt-winrate').textContent = combinedWR + '%';
+
+  // Intraday breakdown
+  document.getElementById('bt-intra-trades').textContent = s.intraday_trades;
+  const ipEl = document.getElementById('bt-intra-pnl');
+  ipEl.textContent = (s.intraday_pnl >= 0 ? '+' : '') + fmt$(s.intraday_pnl);
+  ipEl.style.color = s.intraday_pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('bt-intra-wr').textContent = s.intraday_win_rate + '%';
+
+  // Compute intraday PF
+  const iWins = (d.intraday_trades || []).filter(t => t.pnl > 0).reduce((a, t) => a + t.pnl, 0);
+  const iLoss = Math.abs((d.intraday_trades || []).filter(t => t.pnl < 0).reduce((a, t) => a + t.pnl, 0));
+  document.getElementById('bt-intra-pf').textContent = iLoss > 0 ? (iWins / iLoss).toFixed(2) : '∞';
+
+  // Swing breakdown
+  document.getElementById('bt-swing-trades').textContent = s.swing_trades;
+  const spEl = document.getElementById('bt-swing-pnl');
+  spEl.textContent = (s.swing_pnl >= 0 ? '+' : '') + fmt$(s.swing_pnl);
+  spEl.style.color = s.swing_pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('bt-swing-wr').textContent = s.swing_win_rate + '%';
+
+  const sWins = (d.swing_trades || []).filter(t => t.pnl > 0).reduce((a, t) => a + t.pnl, 0);
+  const sLoss = Math.abs((d.swing_trades || []).filter(t => t.pnl < 0).reduce((a, t) => a + t.pnl, 0));
+  document.getElementById('bt-swing-pf').textContent = sLoss > 0 ? (sWins / sLoss).toFixed(2) : '∞';
+
+  // Max DD
+  let peak = cfg.starting_equity;
+  let maxDD = 0;
+  for (const pt of (d.equity_curve || [])) {
+    peak = Math.max(peak, pt.equity);
+    maxDD = Math.max(maxDD, (peak - pt.equity) / peak);
+  }
+  document.getElementById('bt-dd').textContent = (maxDD * 100).toFixed(1) + '%';
+
+  // Best / Worst
+  const dr = d.daily_results || [];
+  if (dr.length) {
+    const best = dr.reduce((a, b) => b.daily_pnl > a.daily_pnl ? b : a);
+    const worst = dr.reduce((a, b) => b.daily_pnl < a.daily_pnl ? b : a);
+    document.getElementById('bt-best').textContent = '+' + fmt$(best.daily_pnl);
+    document.getElementById('bt-best-date').textContent = best.date;
+    document.getElementById('bt-worst').textContent = fmt$(worst.daily_pnl);
+    document.getElementById('bt-worst-date').textContent = worst.date;
+  }
+
+  // Exit reasons
+  const intraTrades = d.intraday_trades || [];
+  const swingTrades = d.swing_trades || [];
+  const iExits = {};
+  intraTrades.forEach(t => { iExits[t.exit_reason] = (iExits[t.exit_reason] || 0) + 1; });
+  const sExits = {};
+  swingTrades.forEach(t => { sExits[t.exit_reason] = (sExits[t.exit_reason] || 0) + 1; });
+
+  document.getElementById('bt-intra-exits').innerHTML = Object.entries(iExits)
+    .map(([k, v]) => `<span class="badge badge-purple" style="margin:2px">${k}: ${v}</span>`).join(' ') || '—';
+  document.getElementById('bt-swing-exits').innerHTML = Object.entries(sExits)
+    .map(([k, v]) => `<span class="badge badge-teal" style="margin:2px">${k}: ${v}</span>`).join(' ') || '—';
+
+  // Equity chart
+  const ec = d.equity_curve || [];
+  if (btEquityChart) btEquityChart.destroy();
+  btEquityChart = new Chart(document.getElementById('bt-equity-chart'), {
+    type: 'line',
+    data: {
+      labels: ec.map(p => p.date.slice(5)),
+      datasets: [{
+        label: 'Equity',
+        data: ec.map(p => p.equity),
+        borderColor: '#6D5EF6',
+        backgroundColor: 'rgba(109,94,246,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+      }, {
+        label: 'Starting',
+        data: ec.map(() => cfg.starting_equity),
+        borderColor: 'rgba(148,163,184,0.3)',
+        borderDash: [5, 5],
+        pointRadius: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#94A3B8' } } },
+      scales: {
+        x: { ticks: { color: '#64748B', maxTicksLimit: 10 }, grid: { color: 'rgba(30,41,59,0.5)' } },
+        y: { ticks: { color: '#64748B', callback: v => '$' + v.toLocaleString() }, grid: { color: 'rgba(30,41,59,0.5)' } }
+      }
+    }
+  });
+
+  // Daily PnL bar chart
+  if (btDailyPnlChart) btDailyPnlChart.destroy();
+  btDailyPnlChart = new Chart(document.getElementById('bt-daily-pnl-chart'), {
+    type: 'bar',
+    data: {
+      labels: dr.map(d => d.date.slice(5)),
+      datasets: [{
+        label: 'Daily P&L',
+        data: dr.map(d => d.daily_pnl),
+        backgroundColor: dr.map(d => d.daily_pnl >= 0 ? 'rgba(37,210,123,0.7)' : 'rgba(239,68,68,0.7)'),
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#64748B', maxTicksLimit: 10 }, grid: { display: false } },
+        y: { ticks: { color: '#64748B', callback: v => '$' + v }, grid: { color: 'rgba(30,41,59,0.5)' } }
+      }
+    }
+  });
+
+  // Trade table
+  const allTrades = [
+    ...intraTrades.map(t => ({...t, strategy: 'Intraday'})),
+    ...swingTrades.map(t => ({...t, strategy: 'Swing', date: t.entry_date})),
+  ].sort((a, b) => (a.date || a.entry_date || '').localeCompare(b.date || b.entry_date || ''));
+
+  const tbody = document.getElementById('bt-trades-body');
+  if (allTrades.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted)">No trades</td></tr>';
+  } else {
+    tbody.innerHTML = allTrades.map(t => {
+      const pnlClass = t.pnl >= 0 ? 'text-green' : 'text-red';
+      const stratBadge = t.strategy === 'Intraday' ? 'badge-purple' : 'badge-teal';
+      return `<tr>
+        <td><span class="badge ${stratBadge}">${t.strategy}</span></td>
+        <td style="font-weight:600">${t.symbol}</td>
+        <td style="color:var(--text-dim);font-size:12px">${t.date || t.entry_date}</td>
+        <td>$${t.entry.toFixed(2)}</td>
+        <td>$${t.exit.toFixed(2)}</td>
+        <td>${t.qty}</td>
+        <td class="${pnlClass}" style="font-weight:600">${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}</td>
+        <td><span class="badge badge-yellow">${t.exit_reason || t.days_held ? t.exit_reason + (t.days_held ? ' (' + t.days_held + 'd)' : '') : '-'}</span></td>
+      </tr>`;
+    }).join('');
+  }
+}
 </script>
 </body>
 </html>

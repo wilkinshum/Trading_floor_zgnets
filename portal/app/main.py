@@ -951,6 +951,17 @@ async def api_report_detail(date: str):
 
 BACKTEST_RESULTS = PROJECT_ROOT / "backtest_results.json"
 SWING_BACKTEST_RESULTS = PROJECT_ROOT / "swing_backtest_results.json"
+V4_BACKTEST_RESULTS = PROJECT_ROOT / "backtest_v4_results.json"
+
+@app.get("/api/backtest_v4")
+async def api_backtest_v4():
+    if not V4_BACKTEST_RESULTS.exists():
+        return {"status": "no_results", "message": "No V4 backtest results. Run scripts/backtest_v4.py first."}
+    try:
+        data = json.loads(V4_BACKTEST_RESULTS.read_text(encoding="utf-8"))
+        return {"status": "ok", **data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 @app.get("/api/backtest")
 async def api_backtest():
