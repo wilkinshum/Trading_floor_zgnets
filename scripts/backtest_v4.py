@@ -50,9 +50,9 @@ SWING_BUDGET = 3000.0
 
 INTRADAY_CFG = {
     "max_positions": 3,
-    "weights": {"momentum": 0.50, "meanrev": 0.00, "breakout": 0.15, "news": 0.25},
-    "threshold": 0.25,
-    "take_profit": 0.025,
+    "weights": {"momentum": 0.65, "meanrev": 0.00, "breakout": 0.00, "news": 0.25},
+    "threshold": 0.30,
+    "take_profit": 0.035,
     "stop_loss_atr": 2.0,
     "close_by_bar": -3,  # force close ~3 bars before market close
     "entry_start_bar": 0,  # first bar of day
