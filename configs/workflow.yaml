@@ -134,7 +134,7 @@ strategies:
     max_per_sector: 1
     weights: {momentum: 0.55, meanrev: 0.35, breakout: 0.00, news: 0.10}
     threshold: 0.25
-    take_profit: 0.15
+    take_profit: 0.09
     stop_loss: 0.08
     max_hold_days: 10
     trailing_trigger: 0.08
@@ -145,6 +145,7 @@ strategies:
       - {start: "09:35", end: "10:00", bias: "gap_continuation"}
       - {start: "15:45", end: "15:55", bias: "trend_confirmation"}
     universe_exclude: [RKLB, ONDS, HUT, IONQ, RGTI, AVAV, MP, POWL]
+    sl_cooldown_days: 5  # block re-entry after SL for N trading days
 
 self_learning:
   enabled: true

@@ -67,7 +67,7 @@ SWING_CFG = {
     "max_per_sector": 1,
     "weights": {"momentum": 0.55, "meanrev": 0.35, "breakout": 0.00, "news": 0.10},
     "threshold": 0.25,
-    "take_profit": 0.15,
+    "take_profit": 0.09,
     "stop_loss": 0.08,
     "max_hold_days": 10,
     "trailing_trigger": 0.08,
@@ -77,6 +77,7 @@ SWING_CFG = {
     "exclusions": {"RKLB", "ONDS", "HUT", "IONQ", "RGTI", "AVAV", "MP", "POWL"},
     "slippage_bps": 5,
     "max_trades_per_day": 2,
+    "sl_cooldown_days": 5,
 }
 
 KILL_SWITCHES = {
@@ -360,6 +361,7 @@ class V4Backtester:
         self.closed_swing: List[SwingTrade] = []
         self.daily_results: List[DayResult] = []
         self.equity_curve: List[dict] = []
+        self.swing_sl_cooldowns: Dict[str, str] = {}  # symbol -> cooldown_expiry_date
 
         universe = cfg.get("universe", [])
         self.universe = [s for s in universe if s not in ("SPY", "QQQ")]  # trade everything except ETFs
@@ -725,6 +727,9 @@ class V4Backtester:
                 trade._exit_date = day_str
                 pnl += trade.pnl
                 self.closed_swing.append(trade)
+                # Cooldown after SL
+                if exit_reason == "sl" and cfg.get("sl_cooldown_days", 0) > 0:
+                    self.swing_sl_cooldowns[trade.symbol] = day_str
             else:
                 still_open.append(trade)
 
@@ -767,6 +772,17 @@ class V4Backtester:
             # Already in a swing trade?
             if any(t.symbol == sym for t in self.open_swing):
                 continue
+
+            # SL cooldown check
+            cooldown_days = cfg.get("sl_cooldown_days", 0)
+            if cooldown_days > 0 and sym in self.swing_sl_cooldowns:
+                sl_date = pd.Timestamp(self.swing_sl_cooldowns[sym])
+                current_date = pd.Timestamp(day_str)
+                # Count trading days between (approximate with calendar days)
+                if (current_date - sl_date).days < cooldown_days:
+                    continue
+                else:
+                    del self.swing_sl_cooldowns[sym]  # cooldown expired
 
             # Sector check
             sector = SECTOR_MAP.get(sym, "Other")
