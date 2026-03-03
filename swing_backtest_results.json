@@ -1,0 +1,7002 @@
+{
+  "version": "swing-v1",
+  "timestamp": "2026-03-02T01:04:21.825919",
+  "config": {
+    "days": 365,
+    "step": 0.05,
+    "universe_size": 69,
+    "effective_universe": 66,
+    "signal_events": 14762,
+    "excluded_symbols": [
+      "HUT",
+      "ONDS",
+      "RKLB"
+    ],
+    "max_hold_days": 10,
+    "atr_stop_mult": 2.0,
+    "tp_grid": [
+      0.05,
+      0.08,
+      0.1,
+      0.15
+    ],
+    "slippage_bps": 10.0,
+    "commission": 0.005,
+    "trailing": {
+      "be": 0.03,
+      "trail": 0.05,
+      "trail_pct": 0.025,
+      "wide": 0.08,
+      "wide_pct": 0.04
+    },
+    "news_lookback_days": 3,
+    "entry": "next-day open",
+    "data_source": "Alpaca daily bars + Benzinga news (3-day trailing)",
+    "compounding": true,
+    "starting_equity": 3651.0
+  },
+  "top_10": [
+    {
+      "weights": {
+        "momentum": 0.55,
+        "meanrev": 0.35,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.05
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 161,
+        "win_rate": 0.665,
+        "pf": 2.9,
+        "pnl": 8203.45,
+        "composite": 0.83,
+        "sharpe": 0.375,
+        "avg_pnl_pct": 3.0
+      },
+      "test": {
+        "trades": 139,
+        "win_rate": 0.583,
+        "pf": 1.79,
+        "pnl": 3096.42,
+        "composite": 0.7,
+        "sharpe": 0.215,
+        "avg_pnl_pct": 1.86,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 41,
+          "take_profit": 18,
+          "trailing_stop": 54,
+          "time_exit": 26
+        },
+        "time_exit_pnl": -1342.63,
+        "final_equity": 6747.42,
+        "total_return": 84.81,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.082,
+      "consistency": 0.836,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 504.02000000000004,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 407.86,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 4,
+          "losses": 4,
+          "pnl": 337.65,
+          "avg_days": 3.9,
+          "count": 8
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 306.65999999999997,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "XYZ": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 293.09,
+          "avg_days": 4.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -281.03999999999996,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -222.64,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -186.64,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -174.85000000000002,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -152.83999999999997,
+          "avg_days": 6.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.55,
+        "meanrev": 0.35,
+        "breakout": 0.0,
+        "news": 0.1,
+        "reserve": 0.0
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 172,
+        "win_rate": 0.663,
+        "pf": 2.85,
+        "pnl": 9355.53,
+        "composite": 0.832,
+        "sharpe": 0.375,
+        "avg_pnl_pct": 3.03
+      },
+      "test": {
+        "trades": 139,
+        "win_rate": 0.597,
+        "pf": 1.64,
+        "pnl": 3046.53,
+        "composite": 0.692,
+        "sharpe": 0.177,
+        "avg_pnl_pct": 1.85,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 38,
+          "take_profit": 19,
+          "trailing_stop": 56,
+          "time_exit": 26
+        },
+        "time_exit_pnl": -2341.56,
+        "final_equity": 6697.53,
+        "total_return": 83.44,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.066,
+      "consistency": 0.869,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 563.65,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 465.15999999999997,
+          "avg_days": 2.0,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 412.65,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 342.94,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 319.07000000000005,
+          "avg_days": 2.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": -323.89,
+          "avg_days": 4.3,
+          "count": 3
+        },
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -314.27,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -248.97,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -225.01,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -208.72,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.3
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 169,
+        "win_rate": 0.663,
+        "pf": 3.03,
+        "pnl": 9709.54,
+        "composite": 0.839,
+        "sharpe": 0.388,
+        "avg_pnl_pct": 3.14
+      },
+      "test": {
+        "trades": 142,
+        "win_rate": 0.57,
+        "pf": 1.72,
+        "pnl": 2800.06,
+        "composite": 0.685,
+        "sharpe": 0.199,
+        "avg_pnl_pct": 1.69,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 45,
+          "take_profit": 17,
+          "trailing_stop": 56,
+          "time_exit": 24
+        },
+        "time_exit_pnl": -1324.76,
+        "final_equity": 6451.06,
+        "total_return": 76.69,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.092,
+      "consistency": 0.815,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 499.35999999999996,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 438.37,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 311.59,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 289.90999999999997,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "XYZ": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 287.16999999999996,
+          "avg_days": 4.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -278.44,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -224.68,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -220.57999999999998,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -184.92000000000002,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -173.23000000000002,
+          "avg_days": 4.0,
+          "count": 3
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.0,
+        "meanrev": 0.25,
+        "breakout": 0.45,
+        "news": 0.0,
+        "reserve": 0.3
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 180,
+        "win_rate": 0.639,
+        "pf": 3.03,
+        "pnl": 8789.36,
+        "composite": 0.824,
+        "sharpe": 0.395,
+        "avg_pnl_pct": 2.79
+      },
+      "test": {
+        "trades": 109,
+        "win_rate": 0.56,
+        "pf": 1.65,
+        "pnl": 1624.96,
+        "composite": 0.64,
+        "sharpe": 0.19,
+        "avg_pnl_pct": 1.41,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 41,
+          "take_profit": 6,
+          "trailing_stop": 49,
+          "time_exit": 13
+        },
+        "time_exit_pnl": 18.89,
+        "final_equity": 5275.96,
+        "total_return": 44.51,
+        "max_drawdown": 7.3
+      },
+      "train_test_gap": 0.079,
+      "consistency": 0.841,
+      "top_symbols": {
+        "ORCL": {
+          "wins": 4,
+          "losses": 0,
+          "pnl": 436.63,
+          "avg_days": 4.2,
+          "count": 4
+        },
+        "EOSE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 275.46000000000004,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "CRML": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 237.63,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 143.67000000000002,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 140.39000000000001,
+          "avg_days": 2.7,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "IDR": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -217.51000000000002,
+          "avg_days": 4.5,
+          "count": 2
+        },
+        "SYM": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -123.22,
+          "avg_days": 5.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -98.87,
+          "avg_days": 4.5,
+          "count": 2
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -92.97999999999999,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "MSTR": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -88.44,
+          "avg_days": 4.7,
+          "count": 3
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.25
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 65,
+        "win_rate": 0.723,
+        "pf": 7.09,
+        "pnl": 4022.59,
+        "composite": 0.821,
+        "sharpe": 0.703,
+        "avg_pnl_pct": 4.64
+      },
+      "test": {
+        "trades": 49,
+        "win_rate": 0.551,
+        "pf": 2.69,
+        "pnl": 1180.55,
+        "composite": 0.66,
+        "sharpe": 0.378,
+        "avg_pnl_pct": 2.34,
+        "avg_hold_days": 5.0,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 3,
+          "trailing_stop": 19,
+          "time_exit": 11
+        },
+        "time_exit_pnl": 65.72,
+        "final_equity": 4831.55,
+        "total_return": 32.33,
+        "max_drawdown": 4.55
+      },
+      "train_test_gap": 0.172,
+      "consistency": 0.656,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 379.9,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 155.8,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 145.07,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 105.65,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "PLTR": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 104.6,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -190.98000000000002,
+          "avg_days": 6.7,
+          "count": 3
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -86.58,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -75.22000000000001,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -62.77,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -61.37,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.3
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 170,
+        "win_rate": 0.659,
+        "pf": 2.65,
+        "pnl": 7266.76,
+        "composite": 0.82,
+        "sharpe": 0.37,
+        "avg_pnl_pct": 2.64
+      },
+      "test": {
+        "trades": 144,
+        "win_rate": 0.562,
+        "pf": 1.4,
+        "pnl": 1439.36,
+        "composite": 0.621,
+        "sharpe": 0.128,
+        "avg_pnl_pct": 0.99,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 47,
+          "take_profit": 31,
+          "trailing_stop": 43,
+          "time_exit": 23
+        },
+        "time_exit_pnl": -1261.19,
+        "final_equity": 5090.36,
+        "total_return": 39.42,
+        "max_drawdown": 12.54
+      },
+      "train_test_gap": 0.096,
+      "consistency": 0.807,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 291.78999999999996,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 251.20000000000002,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 199.01,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 191.19,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 189.70999999999998,
+          "avg_days": 2.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -206.71000000000004,
+          "avg_days": 4.7,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -188.51999999999998,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -179.78,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -178.28,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -168.7,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.25,
+        "breakout": 0.2,
+        "news": 0.2,
+        "reserve": 0.05
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 174,
+        "win_rate": 0.649,
+        "pf": 2.86,
+        "pnl": 7798.75,
+        "composite": 0.822,
+        "sharpe": 0.362,
+        "avg_pnl_pct": 2.69
+      },
+      "test": {
+        "trades": 112,
+        "win_rate": 0.545,
+        "pf": 1.64,
+        "pnl": 1731.11,
+        "composite": 0.623,
+        "sharpe": 0.185,
+        "avg_pnl_pct": 1.45,
+        "avg_hold_days": 4.2,
+        "exit_breakdown": {
+          "stop_loss": 44,
+          "take_profit": 8,
+          "trailing_stop": 45,
+          "time_exit": 15
+        },
+        "time_exit_pnl": -101.58,
+        "final_equity": 5382.11,
+        "total_return": 47.41,
+        "max_drawdown": 13.61
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 1,
+          "pnl": 539.43,
+          "avg_days": 1.4,
+          "count": 5
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 276.96,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "ANET": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 203.93,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "TMC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 201.07,
+          "avg_days": 2.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 183.0,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -215.45,
+          "avg_days": 3.3,
+          "count": 3
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -158.17,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -155.4,
+          "avg_days": 6.0,
+          "count": 3
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -107.57,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -106.89,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 82,
+        "win_rate": 0.695,
+        "pf": 6.58,
+        "pnl": 4577.12,
+        "composite": 0.822,
+        "sharpe": 0.655,
+        "avg_pnl_pct": 4.02
+      },
+      "test": {
+        "trades": 61,
+        "win_rate": 0.59,
+        "pf": 1.97,
+        "pnl": 1175.59,
+        "composite": 0.614,
+        "sharpe": 0.237,
+        "avg_pnl_pct": 1.9,
+        "avg_hold_days": 4.8,
+        "exit_breakdown": {
+          "stop_loss": 18,
+          "take_profit": 4,
+          "trailing_stop": 27,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -278.09,
+        "final_equity": 4826.59,
+        "total_return": 32.2,
+        "max_drawdown": 10.81
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 388.74,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 247.82999999999998,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 167.69,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 157.74,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 105.62,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -320.09,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -135.47,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -127.51,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -86.49,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -73.82,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 82,
+        "win_rate": 0.695,
+        "pf": 6.27,
+        "pnl": 4220.7,
+        "composite": 0.823,
+        "sharpe": 0.689,
+        "avg_pnl_pct": 3.8
+      },
+      "test": {
+        "trades": 61,
+        "win_rate": 0.59,
+        "pf": 1.82,
+        "pnl": 967.97,
+        "composite": 0.599,
+        "sharpe": 0.216,
+        "avg_pnl_pct": 1.6,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 18,
+          "take_profit": 12,
+          "trailing_stop": 21,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -517.67,
+        "final_equity": 4618.97,
+        "total_return": 26.51,
+        "max_drawdown": 10.81
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 291.97,
+          "avg_days": 1.0,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 218.05,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 113.44,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 112.64,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 108.58,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -305.61,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -131.55999999999997,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -121.75,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -82.77,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -70.47999999999999,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 84,
+        "win_rate": 0.69,
+        "pf": 5.81,
+        "pnl": 3722.17,
+        "composite": 0.823,
+        "sharpe": 0.699,
+        "avg_pnl_pct": 3.39
+      },
+      "test": {
+        "trades": 62,
+        "win_rate": 0.581,
+        "pf": 1.68,
+        "pnl": 830.19,
+        "composite": 0.586,
+        "sharpe": 0.191,
+        "avg_pnl_pct": 1.38,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 19,
+          "take_profit": 18,
+          "trailing_stop": 15,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -507.79,
+        "final_equity": 4481.19,
+        "total_return": 22.74,
+        "max_drawdown": 10.27
+      },
+      "train_test_gap": 0.11,
+      "consistency": 0.78,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 231.36,
+          "avg_days": 1.0,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 170.65,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "IREN": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 148.29000000000002,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 110.19,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 88.82,
+          "avg_days": 8.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -300.53999999999996,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -129.39000000000001,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -119.72,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -80.3,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -69.73,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    }
+  ],
+  "all_validated": [
+    {
+      "weights": {
+        "momentum": 0.55,
+        "meanrev": 0.35,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.05
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 161,
+        "win_rate": 0.665,
+        "pf": 2.9,
+        "pnl": 8203.45,
+        "composite": 0.83,
+        "sharpe": 0.375,
+        "avg_pnl_pct": 3.0
+      },
+      "test": {
+        "trades": 139,
+        "win_rate": 0.583,
+        "pf": 1.79,
+        "pnl": 3096.42,
+        "composite": 0.7,
+        "sharpe": 0.215,
+        "avg_pnl_pct": 1.86,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 41,
+          "take_profit": 18,
+          "trailing_stop": 54,
+          "time_exit": 26
+        },
+        "time_exit_pnl": -1342.63,
+        "final_equity": 6747.42,
+        "total_return": 84.81,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.082,
+      "consistency": 0.836,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 504.02000000000004,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 407.86,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 4,
+          "losses": 4,
+          "pnl": 337.65,
+          "avg_days": 3.9,
+          "count": 8
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 306.65999999999997,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "XYZ": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 293.09,
+          "avg_days": 4.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -281.03999999999996,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -222.64,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -186.64,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -174.85000000000002,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -152.83999999999997,
+          "avg_days": 6.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.55,
+        "meanrev": 0.35,
+        "breakout": 0.0,
+        "news": 0.1,
+        "reserve": 0.0
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 172,
+        "win_rate": 0.663,
+        "pf": 2.85,
+        "pnl": 9355.53,
+        "composite": 0.832,
+        "sharpe": 0.375,
+        "avg_pnl_pct": 3.03
+      },
+      "test": {
+        "trades": 139,
+        "win_rate": 0.597,
+        "pf": 1.64,
+        "pnl": 3046.53,
+        "composite": 0.692,
+        "sharpe": 0.177,
+        "avg_pnl_pct": 1.85,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 38,
+          "take_profit": 19,
+          "trailing_stop": 56,
+          "time_exit": 26
+        },
+        "time_exit_pnl": -2341.56,
+        "final_equity": 6697.53,
+        "total_return": 83.44,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.066,
+      "consistency": 0.869,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 563.65,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 465.15999999999997,
+          "avg_days": 2.0,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 412.65,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 342.94,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 319.07000000000005,
+          "avg_days": 2.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": -323.89,
+          "avg_days": 4.3,
+          "count": 3
+        },
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -314.27,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -248.97,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -225.01,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -208.72,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.3
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 169,
+        "win_rate": 0.663,
+        "pf": 3.03,
+        "pnl": 9709.54,
+        "composite": 0.839,
+        "sharpe": 0.388,
+        "avg_pnl_pct": 3.14
+      },
+      "test": {
+        "trades": 142,
+        "win_rate": 0.57,
+        "pf": 1.72,
+        "pnl": 2800.06,
+        "composite": 0.685,
+        "sharpe": 0.199,
+        "avg_pnl_pct": 1.69,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 45,
+          "take_profit": 17,
+          "trailing_stop": 56,
+          "time_exit": 24
+        },
+        "time_exit_pnl": -1324.76,
+        "final_equity": 6451.06,
+        "total_return": 76.69,
+        "max_drawdown": 13.19
+      },
+      "train_test_gap": 0.092,
+      "consistency": 0.815,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 499.35999999999996,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 438.37,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 311.59,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 289.90999999999997,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "XYZ": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 287.16999999999996,
+          "avg_days": 4.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -278.44,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -224.68,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -220.57999999999998,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -184.92000000000002,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -173.23000000000002,
+          "avg_days": 4.0,
+          "count": 3
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.0,
+        "meanrev": 0.25,
+        "breakout": 0.45,
+        "news": 0.0,
+        "reserve": 0.3
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 180,
+        "win_rate": 0.639,
+        "pf": 3.03,
+        "pnl": 8789.36,
+        "composite": 0.824,
+        "sharpe": 0.395,
+        "avg_pnl_pct": 2.79
+      },
+      "test": {
+        "trades": 109,
+        "win_rate": 0.56,
+        "pf": 1.65,
+        "pnl": 1624.96,
+        "composite": 0.64,
+        "sharpe": 0.19,
+        "avg_pnl_pct": 1.41,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 41,
+          "take_profit": 6,
+          "trailing_stop": 49,
+          "time_exit": 13
+        },
+        "time_exit_pnl": 18.89,
+        "final_equity": 5275.96,
+        "total_return": 44.51,
+        "max_drawdown": 7.3
+      },
+      "train_test_gap": 0.079,
+      "consistency": 0.841,
+      "top_symbols": {
+        "ORCL": {
+          "wins": 4,
+          "losses": 0,
+          "pnl": 436.63,
+          "avg_days": 4.2,
+          "count": 4
+        },
+        "EOSE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 275.46000000000004,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "CRML": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 237.63,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 143.67000000000002,
+          "avg_days": 5.0,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 140.39000000000001,
+          "avg_days": 2.7,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "IDR": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -217.51000000000002,
+          "avg_days": 4.5,
+          "count": 2
+        },
+        "SYM": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -123.22,
+          "avg_days": 5.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -98.87,
+          "avg_days": 4.5,
+          "count": 2
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -92.97999999999999,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "MSTR": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -88.44,
+          "avg_days": 4.7,
+          "count": 3
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.25
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 65,
+        "win_rate": 0.723,
+        "pf": 7.09,
+        "pnl": 4022.59,
+        "composite": 0.821,
+        "sharpe": 0.703,
+        "avg_pnl_pct": 4.64
+      },
+      "test": {
+        "trades": 49,
+        "win_rate": 0.551,
+        "pf": 2.69,
+        "pnl": 1180.55,
+        "composite": 0.66,
+        "sharpe": 0.378,
+        "avg_pnl_pct": 2.34,
+        "avg_hold_days": 5.0,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 3,
+          "trailing_stop": 19,
+          "time_exit": 11
+        },
+        "time_exit_pnl": 65.72,
+        "final_equity": 4831.55,
+        "total_return": 32.33,
+        "max_drawdown": 4.55
+      },
+      "train_test_gap": 0.172,
+      "consistency": 0.656,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 379.9,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 155.8,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 145.07,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 105.65,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "PLTR": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 104.6,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -190.98000000000002,
+          "avg_days": 6.7,
+          "count": 3
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -86.58,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -75.22000000000001,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -62.77,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -61.37,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.05,
+        "reserve": 0.3
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 170,
+        "win_rate": 0.659,
+        "pf": 2.65,
+        "pnl": 7266.76,
+        "composite": 0.82,
+        "sharpe": 0.37,
+        "avg_pnl_pct": 2.64
+      },
+      "test": {
+        "trades": 144,
+        "win_rate": 0.562,
+        "pf": 1.4,
+        "pnl": 1439.36,
+        "composite": 0.621,
+        "sharpe": 0.128,
+        "avg_pnl_pct": 0.99,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 47,
+          "take_profit": 31,
+          "trailing_stop": 43,
+          "time_exit": 23
+        },
+        "time_exit_pnl": -1261.19,
+        "final_equity": 5090.36,
+        "total_return": 39.42,
+        "max_drawdown": 12.54
+      },
+      "train_test_gap": 0.096,
+      "consistency": 0.807,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 291.78999999999996,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "UUUU": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 251.20000000000002,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 199.01,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 191.19,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "LUNR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 189.70999999999998,
+          "avg_days": 2.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "IONQ": {
+          "wins": 1,
+          "losses": 2,
+          "pnl": -206.71000000000004,
+          "avg_days": 4.7,
+          "count": 3
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -188.51999999999998,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 4,
+          "pnl": -179.78,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -178.28,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -168.7,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.25,
+        "breakout": 0.2,
+        "news": 0.2,
+        "reserve": 0.05
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 174,
+        "win_rate": 0.649,
+        "pf": 2.86,
+        "pnl": 7798.75,
+        "composite": 0.822,
+        "sharpe": 0.362,
+        "avg_pnl_pct": 2.69
+      },
+      "test": {
+        "trades": 112,
+        "win_rate": 0.545,
+        "pf": 1.64,
+        "pnl": 1731.11,
+        "composite": 0.623,
+        "sharpe": 0.185,
+        "avg_pnl_pct": 1.45,
+        "avg_hold_days": 4.2,
+        "exit_breakdown": {
+          "stop_loss": 44,
+          "take_profit": 8,
+          "trailing_stop": 45,
+          "time_exit": 15
+        },
+        "time_exit_pnl": -101.58,
+        "final_equity": 5382.11,
+        "total_return": 47.41,
+        "max_drawdown": 13.61
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 1,
+          "pnl": 539.43,
+          "avg_days": 1.4,
+          "count": 5
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 276.96,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "ANET": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 203.93,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "TMC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 201.07,
+          "avg_days": 2.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 183.0,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -215.45,
+          "avg_days": 3.3,
+          "count": 3
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -158.17,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -155.4,
+          "avg_days": 6.0,
+          "count": 3
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -107.57,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -106.89,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 82,
+        "win_rate": 0.695,
+        "pf": 6.58,
+        "pnl": 4577.12,
+        "composite": 0.822,
+        "sharpe": 0.655,
+        "avg_pnl_pct": 4.02
+      },
+      "test": {
+        "trades": 61,
+        "win_rate": 0.59,
+        "pf": 1.97,
+        "pnl": 1175.59,
+        "composite": 0.614,
+        "sharpe": 0.237,
+        "avg_pnl_pct": 1.9,
+        "avg_hold_days": 4.8,
+        "exit_breakdown": {
+          "stop_loss": 18,
+          "take_profit": 4,
+          "trailing_stop": 27,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -278.09,
+        "final_equity": 4826.59,
+        "total_return": 32.2,
+        "max_drawdown": 10.81
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 388.74,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 247.82999999999998,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 167.69,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 157.74,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 105.62,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -320.09,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -135.47,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -127.51,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -86.49,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -73.82,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 82,
+        "win_rate": 0.695,
+        "pf": 6.27,
+        "pnl": 4220.7,
+        "composite": 0.823,
+        "sharpe": 0.689,
+        "avg_pnl_pct": 3.8
+      },
+      "test": {
+        "trades": 61,
+        "win_rate": 0.59,
+        "pf": 1.82,
+        "pnl": 967.97,
+        "composite": 0.599,
+        "sharpe": 0.216,
+        "avg_pnl_pct": 1.6,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 18,
+          "take_profit": 12,
+          "trailing_stop": 21,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -517.67,
+        "final_equity": 4618.97,
+        "total_return": 26.51,
+        "max_drawdown": 10.81
+      },
+      "train_test_gap": 0.105,
+      "consistency": 0.79,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 291.97,
+          "avg_days": 1.0,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 218.05,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 113.44,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 112.64,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 108.58,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -305.61,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -131.55999999999997,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -121.75,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -82.77,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -70.47999999999999,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 84,
+        "win_rate": 0.69,
+        "pf": 5.81,
+        "pnl": 3722.17,
+        "composite": 0.823,
+        "sharpe": 0.699,
+        "avg_pnl_pct": 3.39
+      },
+      "test": {
+        "trades": 62,
+        "win_rate": 0.581,
+        "pf": 1.68,
+        "pnl": 830.19,
+        "composite": 0.586,
+        "sharpe": 0.191,
+        "avg_pnl_pct": 1.38,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 19,
+          "take_profit": 18,
+          "trailing_stop": 15,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -507.79,
+        "final_equity": 4481.19,
+        "total_return": 22.74,
+        "max_drawdown": 10.27
+      },
+      "train_test_gap": 0.11,
+      "consistency": 0.78,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 231.36,
+          "avg_days": 1.0,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 170.65,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "IREN": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 148.29000000000002,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 110.19,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 88.82,
+          "avg_days": 8.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -300.53999999999996,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -129.39000000000001,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -119.72,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -80.3,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -69.73,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.25,
+        "breakout": 0.1,
+        "news": 0.25,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 69,
+        "win_rate": 0.768,
+        "pf": 6.37,
+        "pnl": 3938.95,
+        "composite": 0.831,
+        "sharpe": 0.679,
+        "avg_pnl_pct": 4.31
+      },
+      "test": {
+        "trades": 43,
+        "win_rate": 0.535,
+        "pf": 2.47,
+        "pnl": 916.44,
+        "composite": 0.633,
+        "sharpe": 0.342,
+        "avg_pnl_pct": 2.14,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 3,
+          "trailing_stop": 16,
+          "time_exit": 8
+        },
+        "time_exit_pnl": 20.97,
+        "final_equity": 4567.44,
+        "total_return": 25.1,
+        "max_drawdown": 4.54
+      },
+      "train_test_gap": 0.233,
+      "consistency": 0.534,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 371.01,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 148.86,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 138.61,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 106.69,
+          "avg_days": 5.0,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 92.77,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -186.52,
+          "avg_days": 6.7,
+          "count": 3
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -81.84,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -72.71,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -62.92,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -61.53,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.15,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.3
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 83,
+        "win_rate": 0.747,
+        "pf": 4.56,
+        "pnl": 5850.83,
+        "composite": 0.824,
+        "sharpe": 0.577,
+        "avg_pnl_pct": 4.7
+      },
+      "test": {
+        "trades": 79,
+        "win_rate": 0.544,
+        "pf": 1.81,
+        "pnl": 1476.7,
+        "composite": 0.618,
+        "sharpe": 0.202,
+        "avg_pnl_pct": 1.81,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 28,
+          "take_profit": 9,
+          "trailing_stop": 30,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -876.15,
+        "final_equity": 5127.7,
+        "total_return": 40.45,
+        "max_drawdown": 9.74
+      },
+      "train_test_gap": 0.203,
+      "consistency": 0.595,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 317.09000000000003,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "MSTR": {
+          "wins": 3,
+          "losses": 4,
+          "pnl": 309.18999999999994,
+          "avg_days": 3.3,
+          "count": 7
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 241.86,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "AMD": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 182.32999999999998,
+          "avg_days": 4.2,
+          "count": 4
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 166.98,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -458.92,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -133.28,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -123.18,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "IONQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -121.74,
+          "avg_days": 7.0,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -109.95,
+          "avg_days": 2.5,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.25,
+        "meanrev": 0.15,
+        "breakout": 0.1,
+        "news": 0.2,
+        "reserve": 0.3
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.05,
+      "train": {
+        "trades": 126,
+        "win_rate": 0.675,
+        "pf": 3.36,
+        "pnl": 3776.22,
+        "composite": 0.821,
+        "sharpe": 0.462,
+        "avg_pnl_pct": 2.28
+      },
+      "test": {
+        "trades": 77,
+        "win_rate": 0.545,
+        "pf": 1.58,
+        "pnl": 711.91,
+        "composite": 0.588,
+        "sharpe": 0.187,
+        "avg_pnl_pct": 0.96,
+        "avg_hold_days": 3.5,
+        "exit_breakdown": {
+          "stop_loss": 30,
+          "take_profit": 39,
+          "trailing_stop": 0,
+          "time_exit": 8
+        },
+        "time_exit_pnl": -158.36,
+        "final_equity": 4362.91,
+        "total_return": 19.5,
+        "max_drawdown": 6.7
+      },
+      "train_test_gap": 0.129,
+      "consistency": 0.742,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 1,
+          "pnl": 180.95,
+          "avg_days": 1.8,
+          "count": 5
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 153.44,
+          "avg_days": 2.5,
+          "count": 4
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 103.47,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "PLTR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 103.15,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "PATH": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 99.53,
+          "avg_days": 1.7,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 1,
+          "losses": 3,
+          "pnl": -130.78,
+          "avg_days": 5.2,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -119.33,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -117.47,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -84.59,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -78.18,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.25,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 77,
+        "win_rate": 0.753,
+        "pf": 6.13,
+        "pnl": 4348.48,
+        "composite": 0.821,
+        "sharpe": 0.649,
+        "avg_pnl_pct": 4.14
+      },
+      "test": {
+        "trades": 42,
+        "win_rate": 0.548,
+        "pf": 2.17,
+        "pnl": 853.02,
+        "composite": 0.617,
+        "sharpe": 0.307,
+        "avg_pnl_pct": 2.06,
+        "avg_hold_days": 4.8,
+        "exit_breakdown": {
+          "stop_loss": 15,
+          "take_profit": 3,
+          "trailing_stop": 15,
+          "time_exit": 9
+        },
+        "time_exit_pnl": 83.79,
+        "final_equity": 4504.02,
+        "total_return": 23.36,
+        "max_drawdown": 4.44
+      },
+      "train_test_gap": 0.206,
+      "consistency": 0.589,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 359.55,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 153.28,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 144.23,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "PLTR": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 97.51,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 91.48,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -124.77,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.49,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -80.71,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -69.82,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -64.01,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.45,
+        "meanrev": 0.2,
+        "breakout": 0.0,
+        "news": 0.3,
+        "reserve": 0.05
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 89,
+        "win_rate": 0.73,
+        "pf": 4.32,
+        "pnl": 6195.8,
+        "composite": 0.822,
+        "sharpe": 0.546,
+        "avg_pnl_pct": 4.55
+      },
+      "test": {
+        "trades": 74,
+        "win_rate": 0.554,
+        "pf": 1.71,
+        "pnl": 1182.93,
+        "composite": 0.602,
+        "sharpe": 0.179,
+        "avg_pnl_pct": 1.6,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 27,
+          "take_profit": 7,
+          "trailing_stop": 29,
+          "time_exit": 11
+        },
+        "time_exit_pnl": -676.36,
+        "final_equity": 4833.93,
+        "total_return": 32.4,
+        "max_drawdown": 9.74
+      },
+      "train_test_gap": 0.176,
+      "consistency": 0.647,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 313.53,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 233.95,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 172.49,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "UUUU": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 163.26,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "ISRG": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 148.38,
+          "avg_days": 4.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -474.24,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -128.91,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -119.18,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -103.84,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -86.62,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.25,
+        "breakout": 0.1,
+        "news": 0.25,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 69,
+        "win_rate": 0.768,
+        "pf": 5.93,
+        "pnl": 3491.1,
+        "composite": 0.827,
+        "sharpe": 0.716,
+        "avg_pnl_pct": 3.94
+      },
+      "test": {
+        "trades": 44,
+        "win_rate": 0.523,
+        "pf": 2.32,
+        "pnl": 811.4,
+        "composite": 0.619,
+        "sharpe": 0.327,
+        "avg_pnl_pct": 1.87,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 17,
+          "take_profit": 9,
+          "trailing_stop": 11,
+          "time_exit": 7
+        },
+        "time_exit_pnl": -114.73,
+        "final_equity": 4462.4,
+        "total_return": 22.22,
+        "max_drawdown": 4.54
+      },
+      "train_test_gap": 0.245,
+      "consistency": 0.509,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 280.73,
+          "avg_days": 2.0,
+          "count": 4
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 121.68,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 109.59,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MSTR": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 106.06,
+          "avg_days": 5.5,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 100.04,
+          "avg_days": 9.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 0,
+          "losses": 3,
+          "pnl": -183.06,
+          "avg_days": 6.7,
+          "count": 3
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -79.96,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -70.18,
+          "avg_days": 8.0,
+          "count": 2
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -62.92,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "AMZN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -61.53,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.45,
+        "meanrev": 0.2,
+        "breakout": 0.0,
+        "news": 0.25,
+        "reserve": 0.1
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 79,
+        "win_rate": 0.747,
+        "pf": 4.64,
+        "pnl": 5319.07,
+        "composite": 0.822,
+        "sharpe": 0.581,
+        "avg_pnl_pct": 4.64
+      },
+      "test": {
+        "trades": 72,
+        "win_rate": 0.542,
+        "pf": 1.72,
+        "pnl": 1143.68,
+        "composite": 0.597,
+        "sharpe": 0.178,
+        "avg_pnl_pct": 1.6,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 26,
+          "take_profit": 7,
+          "trailing_stop": 28,
+          "time_exit": 11
+        },
+        "time_exit_pnl": -682.28,
+        "final_equity": 4794.68,
+        "total_return": 31.33,
+        "max_drawdown": 9.74
+      },
+      "train_test_gap": 0.205,
+      "consistency": 0.59,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 310.98,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 237.43,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 171.09,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "UUUU": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 161.94,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "ISRG": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 147.17,
+          "avg_days": 4.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -470.39,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -130.84,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -120.95,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -103.0,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -85.92,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.25,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 77,
+        "win_rate": 0.753,
+        "pf": 5.72,
+        "pnl": 3826.83,
+        "composite": 0.822,
+        "sharpe": 0.677,
+        "avg_pnl_pct": 3.78
+      },
+      "test": {
+        "trades": 43,
+        "win_rate": 0.535,
+        "pf": 2.02,
+        "pnl": 722.24,
+        "composite": 0.602,
+        "sharpe": 0.285,
+        "avg_pnl_pct": 1.73,
+        "avg_hold_days": 4.7,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 10,
+          "trailing_stop": 10,
+          "time_exit": 7
+        },
+        "time_exit_pnl": -157.83,
+        "final_equity": 4373.24,
+        "total_return": 19.78,
+        "max_drawdown": 4.44
+      },
+      "train_test_gap": 0.218,
+      "consistency": 0.563,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 269.81,
+          "avg_days": 2.0,
+          "count": 4
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 107.4,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MSTR": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 103.94000000000001,
+          "avg_days": 5.5,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 103.23,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "PLTR": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 102.5,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -119.42,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.01,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -78.37,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -66.82,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -64.01,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.1,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.5
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 129,
+        "win_rate": 0.674,
+        "pf": 3.41,
+        "pnl": 4872.13,
+        "composite": 0.82,
+        "sharpe": 0.445,
+        "avg_pnl_pct": 2.68
+      },
+      "test": {
+        "trades": 71,
+        "win_rate": 0.493,
+        "pf": 1.8,
+        "pnl": 1099.5,
+        "composite": 0.587,
+        "sharpe": 0.228,
+        "avg_pnl_pct": 1.54,
+        "avg_hold_days": 3.9,
+        "exit_breakdown": {
+          "stop_loss": 32,
+          "take_profit": 17,
+          "trailing_stop": 16,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -191.83,
+        "final_equity": 4750.5,
+        "total_return": 30.12,
+        "max_drawdown": 11.06
+      },
+      "train_test_gap": 0.181,
+      "consistency": 0.637,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 367.08,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 251.23,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 223.12,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 118.3,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 116.67,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -157.35,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -146.59,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -137.9,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -114.13,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -94.75,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.2,
+        "news": 0.3,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 129,
+        "win_rate": 0.674,
+        "pf": 3.41,
+        "pnl": 4872.13,
+        "composite": 0.82,
+        "sharpe": 0.445,
+        "avg_pnl_pct": 2.68
+      },
+      "test": {
+        "trades": 71,
+        "win_rate": 0.493,
+        "pf": 1.8,
+        "pnl": 1099.5,
+        "composite": 0.587,
+        "sharpe": 0.228,
+        "avg_pnl_pct": 1.54,
+        "avg_hold_days": 3.9,
+        "exit_breakdown": {
+          "stop_loss": 32,
+          "take_profit": 17,
+          "trailing_stop": 16,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -191.83,
+        "final_equity": 4750.5,
+        "total_return": 30.12,
+        "max_drawdown": 11.06
+      },
+      "train_test_gap": 0.181,
+      "consistency": 0.637,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 367.08,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 251.23,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 223.12,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 118.3,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 116.67,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -157.35,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -146.59,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -137.9,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -114.13,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -94.75,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.15,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.35
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 63,
+        "win_rate": 0.746,
+        "pf": 5.92,
+        "pnl": 3908.09,
+        "composite": 0.82,
+        "sharpe": 0.65,
+        "avg_pnl_pct": 4.7
+      },
+      "test": {
+        "trades": 58,
+        "win_rate": 0.5,
+        "pf": 2.14,
+        "pnl": 1019.09,
+        "composite": 0.61,
+        "sharpe": 0.268,
+        "avg_pnl_pct": 1.75,
+        "avg_hold_days": 4.2,
+        "exit_breakdown": {
+          "stop_loss": 29,
+          "take_profit": 5,
+          "trailing_stop": 19,
+          "time_exit": 5
+        },
+        "time_exit_pnl": 44.8,
+        "final_equity": 4670.09,
+        "total_return": 27.91,
+        "max_drawdown": 6.99
+      },
+      "train_test_gap": 0.246,
+      "consistency": 0.508,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 233.95,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "UUUU": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 161.28,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 156.71,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TE": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 147.52,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 145.81,
+          "avg_days": 3.0,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "CCJ": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -129.1,
+          "avg_days": 5.0,
+          "count": 2
+        },
+        "PATH": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -124.29,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -117.77,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -106.56,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "AMTM": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -73.01,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.45,
+        "meanrev": 0.2,
+        "breakout": 0.0,
+        "news": 0.3,
+        "reserve": 0.05
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 89,
+        "win_rate": 0.73,
+        "pf": 3.98,
+        "pnl": 5075.19,
+        "composite": 0.822,
+        "sharpe": 0.546,
+        "avg_pnl_pct": 3.99
+      },
+      "test": {
+        "trades": 75,
+        "win_rate": 0.547,
+        "pf": 1.57,
+        "pnl": 908.18,
+        "composite": 0.583,
+        "sharpe": 0.151,
+        "avg_pnl_pct": 1.26,
+        "avg_hold_days": 4.3,
+        "exit_breakdown": {
+          "stop_loss": 28,
+          "take_profit": 15,
+          "trailing_stop": 21,
+          "time_exit": 11
+        },
+        "time_exit_pnl": -643.72,
+        "final_equity": 4559.18,
+        "total_return": 24.87,
+        "max_drawdown": 9.74
+      },
+      "train_test_gap": 0.184,
+      "consistency": 0.633,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 202.97,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 191.13,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 136.49,
+          "avg_days": 3.0,
+          "count": 3
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 124.56,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 111.97,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -451.7,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -127.74000000000001,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -118.09,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -97.72,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -81.7,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.15,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.3
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 84,
+        "win_rate": 0.75,
+        "pf": 4.17,
+        "pnl": 4894.96,
+        "composite": 0.825,
+        "sharpe": 0.581,
+        "avg_pnl_pct": 4.12
+      },
+      "test": {
+        "trades": 80,
+        "win_rate": 0.537,
+        "pf": 1.62,
+        "pnl": 1083.88,
+        "composite": 0.592,
+        "sharpe": 0.166,
+        "avg_pnl_pct": 1.38,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 29,
+          "take_profit": 17,
+          "trailing_stop": 22,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -834.25,
+        "final_equity": 4734.88,
+        "total_return": 29.69,
+        "max_drawdown": 9.89
+      },
+      "train_test_gap": 0.213,
+      "consistency": 0.575,
+      "top_symbols": {
+        "MSTR": {
+          "wins": 3,
+          "losses": 4,
+          "pnl": 211.71,
+          "avg_days": 3.7,
+          "count": 7
+        },
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 204.98,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "AMD": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 197.71,
+          "avg_days": 3.5,
+          "count": 4
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 197.58999999999997,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 131.87,
+          "avg_days": 3.0,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -436.46,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -132.04999999999998,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -122.03999999999999,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -102.06,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -84.84,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.15,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 73,
+        "win_rate": 0.699,
+        "pf": 7.59,
+        "pnl": 4036.7,
+        "composite": 0.821,
+        "sharpe": 0.696,
+        "avg_pnl_pct": 4.14
+      },
+      "test": {
+        "trades": 57,
+        "win_rate": 0.544,
+        "pf": 1.61,
+        "pnl": 708.76,
+        "composite": 0.562,
+        "sharpe": 0.163,
+        "avg_pnl_pct": 1.31,
+        "avg_hold_days": 5.0,
+        "exit_breakdown": {
+          "stop_loss": 19,
+          "take_profit": 3,
+          "trailing_stop": 23,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -253.46,
+        "final_equity": 4359.76,
+        "total_return": 19.41,
+        "max_drawdown": 12.0
+      },
+      "train_test_gap": 0.155,
+      "consistency": 0.69,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 388.74,
+          "avg_days": 1.3,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 228.40999999999997,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 147.36,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 105.62,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CRWD": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 96.07,
+          "avg_days": 9.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -299.02,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -135.47,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -119.12,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -78.12,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -68.03,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.1,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.5
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 131,
+        "win_rate": 0.672,
+        "pf": 3.34,
+        "pnl": 4851.84,
+        "composite": 0.823,
+        "sharpe": 0.45,
+        "avg_pnl_pct": 2.63
+      },
+      "test": {
+        "trades": 73,
+        "win_rate": 0.493,
+        "pf": 1.6,
+        "pnl": 827.17,
+        "composite": 0.569,
+        "sharpe": 0.188,
+        "avg_pnl_pct": 1.16,
+        "avg_hold_days": 3.7,
+        "exit_breakdown": {
+          "stop_loss": 33,
+          "take_profit": 21,
+          "trailing_stop": 13,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -181.22,
+        "final_equity": 4478.17,
+        "total_return": 22.66,
+        "max_drawdown": 10.52
+      },
+      "train_test_gap": 0.179,
+      "consistency": 0.643,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 285.53,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 200.66,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 169.46,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "PLTR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 127.39,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 89.7,
+          "avg_days": 8.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -149.68,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -139.42,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -130.39,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.03,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -90.14,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.2,
+        "news": 0.3,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 131,
+        "win_rate": 0.672,
+        "pf": 3.34,
+        "pnl": 4851.84,
+        "composite": 0.823,
+        "sharpe": 0.45,
+        "avg_pnl_pct": 2.63
+      },
+      "test": {
+        "trades": 73,
+        "win_rate": 0.493,
+        "pf": 1.6,
+        "pnl": 827.17,
+        "composite": 0.569,
+        "sharpe": 0.188,
+        "avg_pnl_pct": 1.16,
+        "avg_hold_days": 3.7,
+        "exit_breakdown": {
+          "stop_loss": 33,
+          "take_profit": 21,
+          "trailing_stop": 13,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -181.22,
+        "final_equity": 4478.17,
+        "total_return": 22.66,
+        "max_drawdown": 10.52
+      },
+      "train_test_gap": 0.179,
+      "consistency": 0.643,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 285.53,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 200.66,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 169.46,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "PLTR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 127.39,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 89.7,
+          "avg_days": 8.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -149.68,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -139.42,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -130.39,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.03,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -90.14,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.45,
+        "meanrev": 0.2,
+        "breakout": 0.0,
+        "news": 0.25,
+        "reserve": 0.1
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 79,
+        "win_rate": 0.747,
+        "pf": 4.3,
+        "pnl": 4500.21,
+        "composite": 0.822,
+        "sharpe": 0.59,
+        "avg_pnl_pct": 4.14
+      },
+      "test": {
+        "trades": 73,
+        "win_rate": 0.534,
+        "pf": 1.56,
+        "pnl": 864.48,
+        "composite": 0.577,
+        "sharpe": 0.148,
+        "avg_pnl_pct": 1.24,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 27,
+          "take_profit": 14,
+          "trailing_stop": 21,
+          "time_exit": 11
+        },
+        "time_exit_pnl": -649.02,
+        "final_equity": 4515.48,
+        "total_return": 23.68,
+        "max_drawdown": 9.74
+      },
+      "train_test_gap": 0.213,
+      "consistency": 0.575,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 201.03,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 193.96999999999997,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 135.18,
+          "avg_days": 3.0,
+          "count": 3
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 126.41,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 110.89,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -447.38,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -129.64000000000001,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -119.84,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -96.79,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -80.91,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.15,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.3
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 85,
+        "win_rate": 0.753,
+        "pf": 4.13,
+        "pnl": 4132.49,
+        "composite": 0.826,
+        "sharpe": 0.586,
+        "avg_pnl_pct": 3.62
+      },
+      "test": {
+        "trades": 81,
+        "win_rate": 0.531,
+        "pf": 1.51,
+        "pnl": 873.0,
+        "composite": 0.576,
+        "sharpe": 0.14,
+        "avg_pnl_pct": 1.13,
+        "avg_hold_days": 4.2,
+        "exit_breakdown": {
+          "stop_loss": 30,
+          "take_profit": 23,
+          "trailing_stop": 16,
+          "time_exit": 12
+        },
+        "time_exit_pnl": -816.99,
+        "final_equity": 4524.0,
+        "total_return": 23.91,
+        "max_drawdown": 10.33
+      },
+      "train_test_gap": 0.222,
+      "consistency": 0.556,
+      "top_symbols": {
+        "AMD": {
+          "wins": 3,
+          "losses": 2,
+          "pnl": 219.14999999999998,
+          "avg_days": 2.2,
+          "count": 5
+        },
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 162.06,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 158.32999999999998,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 3,
+          "losses": 4,
+          "pnl": 139.46000000000004,
+          "avg_days": 3.7,
+          "count": 7
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 129.37,
+          "avg_days": 3.0,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -427.62,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -131.80999999999997,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -121.82,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "IONQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -104.20000000000002,
+          "avg_days": 6.5,
+          "count": 2
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -99.63,
+          "avg_days": 2.5,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.15,
+        "news": 0.15,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 73,
+        "win_rate": 0.699,
+        "pf": 7.25,
+        "pnl": 3711.22,
+        "composite": 0.823,
+        "sharpe": 0.733,
+        "avg_pnl_pct": 3.89
+      },
+      "test": {
+        "trades": 57,
+        "win_rate": 0.544,
+        "pf": 1.48,
+        "pnl": 538.62,
+        "composite": 0.549,
+        "sharpe": 0.136,
+        "avg_pnl_pct": 1.02,
+        "avg_hold_days": 4.9,
+        "exit_breakdown": {
+          "stop_loss": 19,
+          "take_profit": 9,
+          "trailing_stop": 19,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -487.62,
+        "final_equity": 4189.62,
+        "total_return": 14.75,
+        "max_drawdown": 12.01
+      },
+      "train_test_gap": 0.155,
+      "consistency": 0.69,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 291.97,
+          "avg_days": 1.0,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 202.67,
+          "avg_days": 4.0,
+          "count": 3
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 106.11,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "PLTR": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 98.19,
+          "avg_days": 2.0,
+          "count": 1
+        },
+        "IREN": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 92.94,
+          "avg_days": 4.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -287.92,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -131.55999999999997,
+          "avg_days": 5.8,
+          "count": 4
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -114.7,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -75.08,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -65.52,
+          "avg_days": 8.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.35,
+        "meanrev": 0.2,
+        "breakout": 0.0,
+        "news": 0.15,
+        "reserve": 0.3
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 99,
+        "win_rate": 0.707,
+        "pf": 3.34,
+        "pnl": 4146.35,
+        "composite": 0.82,
+        "sharpe": 0.494,
+        "avg_pnl_pct": 3.12
+      },
+      "test": {
+        "trades": 82,
+        "win_rate": 0.537,
+        "pf": 1.29,
+        "pnl": 566.34,
+        "composite": 0.546,
+        "sharpe": 0.085,
+        "avg_pnl_pct": 0.78,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 28,
+          "take_profit": 24,
+          "trailing_stop": 15,
+          "time_exit": 15
+        },
+        "time_exit_pnl": -1108.23,
+        "final_equity": 4217.34,
+        "total_return": 15.51,
+        "max_drawdown": 12.99
+      },
+      "train_test_gap": 0.17,
+      "consistency": 0.659,
+      "top_symbols": {
+        "TE": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 238.77,
+          "avg_days": 1.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 155.81,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 146.31,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "MSTR": {
+          "wins": 3,
+          "losses": 4,
+          "pnl": 130.01,
+          "avg_days": 3.7,
+          "count": 7
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 124.57000000000001,
+          "avg_days": 3.0,
+          "count": 3
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -430.71,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -179.72999999999996,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": -129.72,
+          "avg_days": 4.8,
+          "count": 4
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -118.48,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "IONQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -103.35000000000001,
+          "avg_days": 6.5,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.35,
+        "reserve": 0.0
+      },
+      "threshold": 0.3,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 49,
+        "win_rate": 0.816,
+        "pf": 13.96,
+        "pnl": 3103.09,
+        "composite": 0.82,
+        "sharpe": 0.901,
+        "avg_pnl_pct": 5.09
+      },
+      "test": {
+        "trades": 23,
+        "win_rate": 0.478,
+        "pf": 2.55,
+        "pnl": 527.57,
+        "composite": 0.607,
+        "sharpe": 0.364,
+        "avg_pnl_pct": 2.41,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 11,
+          "take_profit": 2,
+          "trailing_stop": 7,
+          "time_exit": 3
+        },
+        "time_exit_pnl": 49.52,
+        "final_equity": 4178.57,
+        "total_return": 14.45,
+        "max_drawdown": 3.11
+      },
+      "train_test_gap": 0.338,
+      "consistency": 0.324,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 220.18,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 145.22,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "AMD": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 104.07,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 84.87,
+          "avg_days": 2.0,
+          "count": 1
+        },
+        "VST": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 80.37,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -114.41,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -74.88,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -63.52,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "SBUX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -48.96,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "QQQ": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -32.16,
+          "avg_days": 6.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.3,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 130,
+        "win_rate": 0.662,
+        "pf": 3.3,
+        "pnl": 4894.63,
+        "composite": 0.82,
+        "sharpe": 0.445,
+        "avg_pnl_pct": 2.66
+      },
+      "test": {
+        "trades": 74,
+        "win_rate": 0.473,
+        "pf": 1.34,
+        "pnl": 519.54,
+        "composite": 0.538,
+        "sharpe": 0.117,
+        "avg_pnl_pct": 0.77,
+        "avg_hold_days": 4.1,
+        "exit_breakdown": {
+          "stop_loss": 33,
+          "take_profit": 20,
+          "trailing_stop": 12,
+          "time_exit": 9
+        },
+        "time_exit_pnl": -228.07,
+        "final_equity": 4170.54,
+        "total_return": 14.23,
+        "max_drawdown": 10.86
+      },
+      "train_test_gap": 0.189,
+      "consistency": 0.623,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 216.37,
+          "avg_days": 2.0,
+          "count": 4
+        },
+        "IREN": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 142.02999999999997,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 118.05000000000001,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 3,
+          "pnl": 91.29,
+          "avg_days": 5.0,
+          "count": 5
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 86.14,
+          "avg_days": 8.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -172.02,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -137.26999999999998,
+          "avg_days": 7.0,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -136.51,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -125.23,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -115.05000000000001,
+          "avg_days": 3.5,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.1,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.5
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.05,
+      "train": {
+        "trades": 134,
+        "win_rate": 0.679,
+        "pf": 3.01,
+        "pnl": 3770.84,
+        "composite": 0.823,
+        "sharpe": 0.428,
+        "avg_pnl_pct": 2.15
+      },
+      "test": {
+        "trades": 74,
+        "win_rate": 0.486,
+        "pf": 1.26,
+        "pnl": 340.91,
+        "composite": 0.533,
+        "sharpe": 0.094,
+        "avg_pnl_pct": 0.51,
+        "avg_hold_days": 3.4,
+        "exit_breakdown": {
+          "stop_loss": 34,
+          "take_profit": 34,
+          "trailing_stop": 0,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -164.17,
+        "final_equity": 3991.91,
+        "total_return": 9.34,
+        "max_drawdown": 9.91
+      },
+      "train_test_gap": 0.193,
+      "consistency": 0.615,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 171.38,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 141.99,
+          "avg_days": 2.0,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 100.75,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 94.66999999999999,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "PLTR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 94.37,
+          "avg_days": 1.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -137.2,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -118.7,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -111.87,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -106.94999999999999,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -82.46,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.2,
+        "news": 0.3,
+        "reserve": 0.0
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.05,
+      "train": {
+        "trades": 134,
+        "win_rate": 0.679,
+        "pf": 3.01,
+        "pnl": 3770.84,
+        "composite": 0.823,
+        "sharpe": 0.428,
+        "avg_pnl_pct": 2.15
+      },
+      "test": {
+        "trades": 74,
+        "win_rate": 0.486,
+        "pf": 1.26,
+        "pnl": 340.91,
+        "composite": 0.533,
+        "sharpe": 0.094,
+        "avg_pnl_pct": 0.51,
+        "avg_hold_days": 3.4,
+        "exit_breakdown": {
+          "stop_loss": 34,
+          "take_profit": 34,
+          "trailing_stop": 0,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -164.17,
+        "final_equity": 3991.91,
+        "total_return": 9.34,
+        "max_drawdown": 9.91
+      },
+      "train_test_gap": 0.193,
+      "consistency": 0.615,
+      "top_symbols": {
+        "RDW": {
+          "wins": 4,
+          "losses": 2,
+          "pnl": 171.38,
+          "avg_days": 1.8,
+          "count": 6
+        },
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 141.99,
+          "avg_days": 2.0,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 100.75,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "MSTR": {
+          "wins": 2,
+          "losses": 2,
+          "pnl": 94.66999999999999,
+          "avg_days": 3.8,
+          "count": 4
+        },
+        "PLTR": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 94.37,
+          "avg_days": 1.0,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -137.2,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -118.7,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -111.87,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -106.94999999999999,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "COIN": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -82.46,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.2,
+        "meanrev": 0.15,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.4
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 74,
+        "win_rate": 0.757,
+        "pf": 7.72,
+        "pnl": 4251.43,
+        "composite": 0.833,
+        "sharpe": 0.722,
+        "avg_pnl_pct": 4.23
+      },
+      "test": {
+        "trades": 37,
+        "win_rate": 0.486,
+        "pf": 1.65,
+        "pnl": 453.78,
+        "composite": 0.558,
+        "sharpe": 0.195,
+        "avg_pnl_pct": 1.32,
+        "avg_hold_days": 5.3,
+        "exit_breakdown": {
+          "stop_loss": 14,
+          "take_profit": 2,
+          "trailing_stop": 11,
+          "time_exit": 10
+        },
+        "time_exit_pnl": 84.67,
+        "final_equity": 4104.78,
+        "total_return": 12.43,
+        "max_drawdown": 4.52
+      },
+      "train_test_gap": 0.27,
+      "consistency": 0.459,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 218.41000000000003,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 145.92,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 135.87,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 83.37,
+          "avg_days": 2.0,
+          "count": 1
+        },
+        "VST": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 78.57,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -117.54,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.49,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -73.56,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -65.77,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -64.01,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.15
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 85,
+        "win_rate": 0.729,
+        "pf": 4.67,
+        "pnl": 5398.43,
+        "composite": 0.821,
+        "sharpe": 0.574,
+        "avg_pnl_pct": 4.35
+      },
+      "test": {
+        "trades": 68,
+        "win_rate": 0.485,
+        "pf": 1.37,
+        "pnl": 629.49,
+        "composite": 0.535,
+        "sharpe": 0.098,
+        "avg_pnl_pct": 1.03,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 30,
+          "take_profit": 6,
+          "trailing_stop": 21,
+          "time_exit": 11
+        },
+        "time_exit_pnl": -597.31,
+        "final_equity": 4280.49,
+        "total_return": 17.24,
+        "max_drawdown": 13.03
+      },
+      "train_test_gap": 0.244,
+      "consistency": 0.512,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 299.70000000000005,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 233.35999999999999,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 164.88,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 153.48,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "ISRG": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 141.83,
+          "avg_days": 4.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -460.1,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "CCJ": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -128.76,
+          "avg_days": 5.0,
+          "count": 2
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -118.00999999999996,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -117.44,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "PATH": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -111.39999999999999,
+          "avg_days": 4.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.2,
+        "meanrev": 0.15,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.4
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 74,
+        "win_rate": 0.757,
+        "pf": 7.2,
+        "pnl": 3759.42,
+        "composite": 0.834,
+        "sharpe": 0.759,
+        "avg_pnl_pct": 3.87
+      },
+      "test": {
+        "trades": 38,
+        "win_rate": 0.474,
+        "pf": 1.54,
+        "pnl": 374.42,
+        "composite": 0.547,
+        "sharpe": 0.173,
+        "avg_pnl_pct": 1.07,
+        "avg_hold_days": 5.2,
+        "exit_breakdown": {
+          "stop_loss": 15,
+          "take_profit": 8,
+          "trailing_stop": 7,
+          "time_exit": 8
+        },
+        "time_exit_pnl": -150.78,
+        "final_equity": 4025.42,
+        "total_return": 10.26,
+        "max_drawdown": 4.52
+      },
+      "train_test_gap": 0.283,
+      "consistency": 0.434,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 178.36,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 98.86,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 98.46,
+          "avg_days": 9.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 95.89,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MSTR": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": 95.67999999999999,
+          "avg_days": 5.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -113.89,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.01,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -72.13,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -64.01,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -63.73,
+          "avg_days": 6.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.3,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.3,
+        "reserve": 0.05
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.05,
+      "train": {
+        "trades": 133,
+        "win_rate": 0.669,
+        "pf": 3.04,
+        "pnl": 3739.6,
+        "composite": 0.82,
+        "sharpe": 0.427,
+        "avg_pnl_pct": 2.15
+      },
+      "test": {
+        "trades": 75,
+        "win_rate": 0.467,
+        "pf": 1.06,
+        "pnl": 87.94,
+        "composite": 0.507,
+        "sharpe": 0.024,
+        "avg_pnl_pct": 0.16,
+        "avg_hold_days": 3.8,
+        "exit_breakdown": {
+          "stop_loss": 34,
+          "take_profit": 32,
+          "trailing_stop": 0,
+          "time_exit": 9
+        },
+        "time_exit_pnl": -206.65,
+        "final_equity": 3738.94,
+        "total_return": 2.41,
+        "max_drawdown": 10.25
+      },
+      "train_test_gap": 0.203,
+      "consistency": 0.595,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 128.63,
+          "avg_days": 2.0,
+          "count": 4
+        },
+        "NFLX": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 97.49000000000001,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 93.21000000000001,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "IREN": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 86.87,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "MSFT": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 64.94999999999999,
+          "avg_days": 7.5,
+          "count": 2
+        }
+      },
+      "worst_symbols": {
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -158.84,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -137.89,
+          "avg_days": 7.0,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -114.84,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -112.21,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "QBTS": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -104.71999999999998,
+          "avg_days": 2.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.3,
+        "breakout": 0.35,
+        "news": 0.2,
+        "reserve": 0.0
+      },
+      "threshold": 0.2,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 173,
+        "win_rate": 0.647,
+        "pf": 3.04,
+        "pnl": 8440.55,
+        "composite": 0.829,
+        "sharpe": 0.396,
+        "avg_pnl_pct": 2.83
+      },
+      "test": {
+        "trades": 94,
+        "win_rate": 0.426,
+        "pf": 1.2,
+        "pnl": 460.24,
+        "composite": 0.512,
+        "sharpe": 0.068,
+        "avg_pnl_pct": 0.57,
+        "avg_hold_days": 4.5,
+        "exit_breakdown": {
+          "stop_loss": 46,
+          "take_profit": 5,
+          "trailing_stop": 30,
+          "time_exit": 13
+        },
+        "time_exit_pnl": -86.85,
+        "final_equity": 4111.24,
+        "total_return": 12.61,
+        "max_drawdown": 15.94
+      },
+      "train_test_gap": 0.222,
+      "consistency": 0.556,
+      "top_symbols": {
+        "RDW": {
+          "wins": 3,
+          "losses": 1,
+          "pnl": 361.25,
+          "avg_days": 1.5,
+          "count": 4
+        },
+        "EOSE": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 163.17,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "AMTM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 158.9,
+          "avg_days": 5.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 152.66,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "OKLO": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 142.41,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "IDR": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -181.31,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -175.23,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -123.78,
+          "avg_days": 4.0,
+          "count": 2
+        },
+        "GEV": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -113.74,
+          "avg_days": 4.5,
+          "count": 2
+        },
+        "SYM": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -113.63,
+          "avg_days": 5.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.4,
+        "meanrev": 0.25,
+        "breakout": 0.0,
+        "news": 0.2,
+        "reserve": 0.15
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 85,
+        "win_rate": 0.729,
+        "pf": 4.41,
+        "pnl": 4823.76,
+        "composite": 0.822,
+        "sharpe": 0.593,
+        "avg_pnl_pct": 4.03
+      },
+      "test": {
+        "trades": 69,
+        "win_rate": 0.478,
+        "pf": 1.24,
+        "pnl": 395.31,
+        "composite": 0.517,
+        "sharpe": 0.068,
+        "avg_pnl_pct": 0.68,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 31,
+          "take_profit": 14,
+          "trailing_stop": 14,
+          "time_exit": 10
+        },
+        "time_exit_pnl": -704.0,
+        "final_equity": 4046.31,
+        "total_return": 10.83,
+        "max_drawdown": 13.89
+      },
+      "train_test_gap": 0.251,
+      "consistency": 0.498,
+      "top_symbols": {
+        "TE": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 193.73000000000002,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 190.65,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "NFLX": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 124.33000000000001,
+          "avg_days": 3.0,
+          "count": 3
+        },
+        "AMD": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 124.25,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 108.25,
+          "avg_days": 9.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "CRML": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -433.93,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "TMQ": {
+          "wins": 1,
+          "losses": 1,
+          "pnl": -158.63,
+          "avg_days": 6.0,
+          "count": 2
+        },
+        "CCJ": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -127.58999999999999,
+          "avg_days": 5.0,
+          "count": 2
+        },
+        "KTOS": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -116.38,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "PATH": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -103.8,
+          "avg_days": 4.0,
+          "count": 2
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.2,
+        "meanrev": 0.15,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.4
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 75,
+        "win_rate": 0.747,
+        "pf": 6.79,
+        "pnl": 3465.68,
+        "composite": 0.827,
+        "sharpe": 0.786,
+        "avg_pnl_pct": 3.6
+      },
+      "test": {
+        "trades": 39,
+        "win_rate": 0.462,
+        "pf": 1.34,
+        "pnl": 250.64,
+        "composite": 0.529,
+        "sharpe": 0.122,
+        "avg_pnl_pct": 0.72,
+        "avg_hold_days": 4.9,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 11,
+          "trailing_stop": 4,
+          "time_exit": 8
+        },
+        "time_exit_pnl": -146.19,
+        "final_equity": 3901.64,
+        "total_return": 6.86,
+        "max_drawdown": 4.46
+      },
+      "train_test_gap": 0.285,
+      "consistency": 0.43,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 140.29000000000002,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 76.83,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "ANET": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 76.81,
+          "avg_days": 8.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 75.17,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "QCOM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 75.12,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -112.46000000000001,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -110.8,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -69.92,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -64.01,
+          "avg_days": 7.0,
+          "count": 1
+        },
+        "GS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -62.38,
+          "avg_days": 6.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.2,
+        "breakout": 0.25,
+        "news": 0.25,
+        "reserve": 0.15
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 103,
+        "win_rate": 0.709,
+        "pf": 4.42,
+        "pnl": 4592.14,
+        "composite": 0.82,
+        "sharpe": 0.557,
+        "avg_pnl_pct": 3.21
+      },
+      "test": {
+        "trades": 36,
+        "win_rate": 0.444,
+        "pf": 1.3,
+        "pnl": 249.18,
+        "composite": 0.519,
+        "sharpe": 0.108,
+        "avg_pnl_pct": 0.79,
+        "avg_hold_days": 4.6,
+        "exit_breakdown": {
+          "stop_loss": 16,
+          "take_profit": 9,
+          "trailing_stop": 6,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -174.74,
+        "final_equity": 3900.18,
+        "total_return": 6.82,
+        "max_drawdown": 5.31
+      },
+      "train_test_gap": 0.264,
+      "consistency": 0.471,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 177.45,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 129.8,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AMTM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 96.85,
+          "avg_days": 4.0,
+          "count": 1
+        },
+        "NFLX": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 95.96,
+          "avg_days": 4.0,
+          "count": 1
+        },
+        "MARA": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 95.78,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -154.97,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -112.43,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "MTZ": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -72.81,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -69.89,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -63.08,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.1,
+        "meanrev": 0.1,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.55
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 118,
+        "win_rate": 0.703,
+        "pf": 3.43,
+        "pnl": 4928.09,
+        "composite": 0.822,
+        "sharpe": 0.471,
+        "avg_pnl_pct": 2.95
+      },
+      "test": {
+        "trades": 46,
+        "win_rate": 0.435,
+        "pf": 1.21,
+        "pnl": 249.04,
+        "composite": 0.504,
+        "sharpe": 0.075,
+        "avg_pnl_pct": 0.64,
+        "avg_hold_days": 4.3,
+        "exit_breakdown": {
+          "stop_loss": 22,
+          "take_profit": 12,
+          "trailing_stop": 7,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -186.19,
+        "final_equity": 3900.04,
+        "total_return": 6.82,
+        "max_drawdown": 9.13
+      },
+      "train_test_gap": 0.269,
+      "consistency": 0.463,
+      "top_symbols": {
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 225.94,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 173.6,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 101.38,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 101.0,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "AMTM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 98.93,
+          "avg_days": 4.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -166.2,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -165.57,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -160.38,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.58,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -69.89,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.2,
+        "meanrev": 0.2,
+        "breakout": 0.2,
+        "news": 0.3,
+        "reserve": 0.1
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 118,
+        "win_rate": 0.703,
+        "pf": 3.43,
+        "pnl": 4928.09,
+        "composite": 0.822,
+        "sharpe": 0.471,
+        "avg_pnl_pct": 2.95
+      },
+      "test": {
+        "trades": 46,
+        "win_rate": 0.435,
+        "pf": 1.21,
+        "pnl": 249.04,
+        "composite": 0.504,
+        "sharpe": 0.075,
+        "avg_pnl_pct": 0.64,
+        "avg_hold_days": 4.3,
+        "exit_breakdown": {
+          "stop_loss": 22,
+          "take_profit": 12,
+          "trailing_stop": 7,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -186.19,
+        "final_equity": 3900.04,
+        "total_return": 6.82,
+        "max_drawdown": 9.13
+      },
+      "train_test_gap": 0.269,
+      "consistency": 0.463,
+      "top_symbols": {
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 225.94,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 173.6,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 101.38,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 101.0,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "AMTM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 98.93,
+          "avg_days": 4.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -166.2,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -165.57,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -160.38,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.58,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -69.89,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.15,
+        "meanrev": 0.2,
+        "breakout": 0.25,
+        "news": 0.25,
+        "reserve": 0.15
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 103,
+        "win_rate": 0.709,
+        "pf": 4.09,
+        "pnl": 4007.46,
+        "composite": 0.821,
+        "sharpe": 0.559,
+        "avg_pnl_pct": 2.91
+      },
+      "test": {
+        "trades": 37,
+        "win_rate": 0.432,
+        "pf": 1.1,
+        "pnl": 88.07,
+        "composite": 0.5,
+        "sharpe": 0.041,
+        "avg_pnl_pct": 0.31,
+        "avg_hold_days": 4.4,
+        "exit_breakdown": {
+          "stop_loss": 17,
+          "take_profit": 11,
+          "trailing_stop": 4,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -168.35,
+        "final_equity": 3739.07,
+        "total_return": 2.41,
+        "max_drawdown": 4.94
+      },
+      "train_test_gap": 0.276,
+      "consistency": 0.447,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 139.58,
+          "avg_days": 1.0,
+          "count": 2
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 107.77000000000001,
+          "avg_days": 3.0,
+          "count": 2
+        },
+        "AMTM": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 74.89,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "NFLX": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 74.49,
+          "avg_days": 4.0,
+          "count": 1
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 74.44,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -149.44,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -111.88999999999999,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "MTZ": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -70.84,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -67.0,
+          "avg_days": 10.0,
+          "count": 1
+        },
+        "META": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -63.08,
+          "avg_days": 7.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.1,
+        "meanrev": 0.1,
+        "breakout": 0.1,
+        "news": 0.15,
+        "reserve": 0.55
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 119,
+        "win_rate": 0.697,
+        "pf": 3.24,
+        "pnl": 4474.12,
+        "composite": 0.82,
+        "sharpe": 0.465,
+        "avg_pnl_pct": 2.73
+      },
+      "test": {
+        "trades": 47,
+        "win_rate": 0.426,
+        "pf": 1.06,
+        "pnl": 77.23,
+        "composite": 0.488,
+        "sharpe": 0.025,
+        "avg_pnl_pct": 0.24,
+        "avg_hold_days": 4.0,
+        "exit_breakdown": {
+          "stop_loss": 23,
+          "take_profit": 16,
+          "trailing_stop": 3,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -178.78,
+        "final_equity": 3728.23,
+        "total_return": 2.12,
+        "max_drawdown": 9.03
+      },
+      "train_test_gap": 0.272,
+      "consistency": 0.456,
+      "top_symbols": {
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 183.13,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 136.38,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 78.09,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 78.08,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 76.73,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -160.25,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -159.83,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -154.04,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.05,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -66.81,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.2,
+        "meanrev": 0.2,
+        "breakout": 0.2,
+        "news": 0.3,
+        "reserve": 0.1
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 119,
+        "win_rate": 0.697,
+        "pf": 3.24,
+        "pnl": 4474.12,
+        "composite": 0.82,
+        "sharpe": 0.465,
+        "avg_pnl_pct": 2.73
+      },
+      "test": {
+        "trades": 47,
+        "win_rate": 0.426,
+        "pf": 1.06,
+        "pnl": 77.23,
+        "composite": 0.488,
+        "sharpe": 0.025,
+        "avg_pnl_pct": 0.24,
+        "avg_hold_days": 4.0,
+        "exit_breakdown": {
+          "stop_loss": 23,
+          "take_profit": 16,
+          "trailing_stop": 3,
+          "time_exit": 5
+        },
+        "time_exit_pnl": -178.78,
+        "final_equity": 3728.23,
+        "total_return": 2.12,
+        "max_drawdown": 9.03
+      },
+      "train_test_gap": 0.272,
+      "consistency": 0.456,
+      "top_symbols": {
+        "AVAV": {
+          "wins": 3,
+          "losses": 0,
+          "pnl": 183.13,
+          "avg_days": 2.7,
+          "count": 3
+        },
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 136.38,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 78.09,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 78.08,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 76.73,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -160.25,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -159.83,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -154.04,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.05,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "RIOT": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -66.81,
+          "avg_days": 10.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.25,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.3,
+        "reserve": 0.1
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.15,
+      "train": {
+        "trades": 111,
+        "win_rate": 0.703,
+        "pf": 4.23,
+        "pnl": 5007.32,
+        "composite": 0.822,
+        "sharpe": 0.517,
+        "avg_pnl_pct": 3.16
+      },
+      "test": {
+        "trades": 49,
+        "win_rate": 0.367,
+        "pf": 0.92,
+        "pnl": -113.12,
+        "composite": 0.445,
+        "sharpe": -0.033,
+        "avg_pnl_pct": -0.19,
+        "avg_hold_days": 4.3,
+        "exit_breakdown": {
+          "stop_loss": 27,
+          "take_profit": 3,
+          "trailing_stop": 12,
+          "time_exit": 7
+        },
+        "time_exit_pnl": -94.39,
+        "final_equity": 3537.88,
+        "total_return": -3.1,
+        "max_drawdown": 14.54
+      },
+      "train_test_gap": 0.335,
+      "consistency": 0.329,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 213.66000000000003,
+          "avg_days": 1.5,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 146.61,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 145.39,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 123.65,
+          "avg_days": 2.5,
+          "count": 2
+        },
+        "VST": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 77.94,
+          "avg_days": 2.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -162.2,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -154.68,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -153.28,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -111.03,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -110.92,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.25,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.3,
+        "reserve": 0.1
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.1,
+      "train": {
+        "trades": 111,
+        "win_rate": 0.703,
+        "pf": 4.08,
+        "pnl": 4665.44,
+        "composite": 0.824,
+        "sharpe": 0.532,
+        "avg_pnl_pct": 3.01
+      },
+      "test": {
+        "trades": 51,
+        "win_rate": 0.353,
+        "pf": 0.86,
+        "pnl": -190.14,
+        "composite": 0.439,
+        "sharpe": -0.058,
+        "avg_pnl_pct": -0.36,
+        "avg_hold_days": 4.2,
+        "exit_breakdown": {
+          "stop_loss": 29,
+          "take_profit": 9,
+          "trailing_stop": 7,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -190.56,
+        "final_equity": 3460.86,
+        "total_return": -5.21,
+        "max_drawdown": 13.88
+      },
+      "train_test_gap": 0.35,
+      "consistency": 0.3,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 173.56,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 128.05,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 95.66,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 95.3,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "VST": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 90.47,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -156.78,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -151.33,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -148.16,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.55,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -107.21,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    },
+    {
+      "weights": {
+        "momentum": 0.25,
+        "meanrev": 0.2,
+        "breakout": 0.15,
+        "news": 0.3,
+        "reserve": 0.1
+      },
+      "threshold": 0.25,
+      "tp_pct": 0.08,
+      "train": {
+        "trades": 113,
+        "win_rate": 0.699,
+        "pf": 3.98,
+        "pnl": 4570.96,
+        "composite": 0.824,
+        "sharpe": 0.544,
+        "avg_pnl_pct": 2.91
+      },
+      "test": {
+        "trades": 52,
+        "win_rate": 0.346,
+        "pf": 0.78,
+        "pnl": -293.72,
+        "composite": 0.429,
+        "sharpe": -0.093,
+        "avg_pnl_pct": -0.59,
+        "avg_hold_days": 4.1,
+        "exit_breakdown": {
+          "stop_loss": 30,
+          "take_profit": 13,
+          "trailing_stop": 3,
+          "time_exit": 6
+        },
+        "time_exit_pnl": -185.21,
+        "final_equity": 3357.28,
+        "total_return": -8.04,
+        "max_drawdown": 13.78
+      },
+      "train_test_gap": 0.353,
+      "consistency": 0.294,
+      "top_symbols": {
+        "RDW": {
+          "wins": 2,
+          "losses": 1,
+          "pnl": 136.33999999999997,
+          "avg_days": 2.3,
+          "count": 3
+        },
+        "AVAV": {
+          "wins": 2,
+          "losses": 0,
+          "pnl": 106.93,
+          "avg_days": 2.0,
+          "count": 2
+        },
+        "GRAL": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 74.41,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "FLNC": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 74.39,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "RGTI": {
+          "wins": 1,
+          "losses": 0,
+          "pnl": 73.11,
+          "avg_days": 3.0,
+          "count": 1
+        }
+      },
+      "worst_symbols": {
+        "AGX": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -152.65,
+          "avg_days": 3.0,
+          "count": 1
+        },
+        "QBTS": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -146.78,
+          "avg_days": 1.0,
+          "count": 1
+        },
+        "MP": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -145.13,
+          "avg_days": 6.0,
+          "count": 1
+        },
+        "TSM": {
+          "wins": 0,
+          "losses": 2,
+          "pnl": -110.02000000000001,
+          "avg_days": 3.5,
+          "count": 2
+        },
+        "POWL": {
+          "wins": 0,
+          "losses": 1,
+          "pnl": -104.39,
+          "avg_days": 1.0,
+          "count": 1
+        }
+      }
+    }
+  ]
+}

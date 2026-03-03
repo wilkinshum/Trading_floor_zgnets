@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-02-27T16:55:09.223103-05:00",
+  "timestamp": "2026-03-02T16:55:12.450461-05:00",
   "error": null,
   "hmm": {
     "state_label": "bull",
-    "confidence": 0.6746,
+    "confidence": 0.5294,
     "probabilities": {
-      "bull": 0.6746,
-      "bear": 0.0094,
-      "transition": 0.316
+      "bull": 0.5294,
+      "bear": 0.1041,
+      "transition": 0.3665
     },
-    "transition_risk": 0.0272
+    "transition_risk": 0.1568
   },
   "simple_regime": {
     "spy_trend": "sideways",
@@ -17,82 +17,82 @@
     "label": "sideways_low_vol"
   },
   "btc": {
-    "price": 65542.48,
-    "momentum_10": -0.001459,
+    "price": 69499.78,
+    "momentum_10": 0.003871,
     "trending": "flat"
   },
   "history": [
     {
-      "ts": "2026-02-27T16:00:36.403297-05:00",
+      "ts": "2026-03-02T16:01:02.315840-05:00",
       "label": "bull",
-      "confidence": 0.9649,
-      "bear_prob": 0.0012
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:05:09.765933-05:00",
+      "ts": "2026-03-02T16:05:14.786766-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:10:08.627942-05:00",
+      "ts": "2026-03-02T16:10:13.168815-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:15:41.713017-05:00",
+      "ts": "2026-03-02T16:15:59.014025-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:20:12.923647-05:00",
+      "ts": "2026-03-02T16:20:12.170453-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:25:10.920959-05:00",
+      "ts": "2026-03-02T16:25:14.597720-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:30:49.215981-05:00",
+      "ts": "2026-03-02T16:30:59.753959-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:35:08.650455-05:00",
+      "ts": "2026-03-02T16:35:12.816780-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:40:10.095022-05:00",
+      "ts": "2026-03-02T16:40:13.126634-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:46:09.082609-05:00",
+      "ts": "2026-03-02T16:45:35.808081-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:50:08.953156-05:00",
+      "ts": "2026-03-02T16:50:11.595180-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     },
     {
-      "ts": "2026-02-27T16:55:09.223103-05:00",
+      "ts": "2026-03-02T16:55:12.450461-05:00",
       "label": "bull",
-      "confidence": 0.6746,
-      "bear_prob": 0.0094
+      "confidence": 0.5294,
+      "bear_prob": 0.1041
     }
   ],
   "regime_change": null

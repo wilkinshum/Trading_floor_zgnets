@@ -56,6 +56,8 @@ class SwingStrategy(BaseStrategy):
             {"start": "15:45", "end": "15:55", "bias": "trend_confirmation"},
         ])
         self.exclusions = sc.get("universe_exclude", [])
+        self.sl_cooldown_days = sc.get("sl_cooldown_days", 0)
+        self._sl_cooldown_tracker: Dict[str, datetime] = {}  # symbol -> SL exit datetime
         self.min_shares = cfg.get("broker", {}).get("min_shares", 10)
 
         # Lazily initialized signal agents
@@ -164,6 +166,16 @@ class SwingStrategy(BaseStrategy):
             # Only buy in swing
             if side != "buy":
                 continue
+
+            # SL cooldown — skip if recently stopped out
+            if self.sl_cooldown_days > 0 and sym in self._sl_cooldown_tracker:
+                from datetime import timedelta
+                cooldown_expiry = self._sl_cooldown_tracker[sym] + timedelta(days=self.sl_cooldown_days)
+                if datetime.now(timezone.utc) < cooldown_expiry:
+                    logger.info("SwingStrategy: %s in SL cooldown until %s, skipping", sym, cooldown_expiry.date())
+                    continue
+                else:
+                    del self._sl_cooldown_tracker[sym]
 
             # Sector concentration check
             sec_info = get_sector(sym)
@@ -334,6 +346,9 @@ class SwingStrategy(BaseStrategy):
                     exit_reason = "trail"
 
             if exit_reason:
+                # Track SL cooldown
+                if exit_reason == "sl" and self.sl_cooldown_days > 0:
+                    self._sl_cooldown_tracker[sym] = now
                 qty = abs(alpaca_pos["qty"])
                 result = self.exec_svc.submit(
                     symbol=sym,

@@ -1,0 +1,103 @@
+============================================================
+  🏋️ WEIGHT OPTIMIZER BACKTESTER
+============================================================
+  Universe: 72 symbols
+  Period: 30 days
+  Grid step: 0.05
+  Current weights: {'momentum': 0.5, 'meanrev': 0.0, 'breakout': 0.15, 'news': 0.25, 'reserve': 0.1}
+
+📊 Downloading 30d of 5m data for 72 symbols...
+  [1/72] SPY: 29 signals  [2/72] QQQ: 29 signals  [3/72] MSFT: 29 signals  [4/72] NVDA: 29 signals  [5/72] AMZN: 29 signals  [6/72] GOOGL: 29 signals  [7/72] META: 29 signals  [8/72] GME: 29 signals  [9/72] HUT: 29 signals  [10/72] TSLA: 29 signals  [11/72] ORCL: 29 signals  [12/72] CRWD: 29 signals  [13/72] AMD: 29 signals  [14/72] NBIS: 29 signals  [15/72] IREN: 29 signals  [16/72] TSM: 29 signals  [17/72] ASML: 29 signals  [18/72] RKLB: 29 signals  [19/72] ASTS: 29 signals  [20/72] LUNR: 29 signals  [21/72] RDW: 29 signals  [22/72] GEV: 29 signals  [23/72] CEG: 29 signals  [24/72] ONDS: 29 signals  [25/72] CCJ: 29 signals  [26/72] OKLO: 29 signals  [27/72] VST: 29 signals  [28/72] KTOS: 29 signals  [29/72] AVAV: 29 signals  [30/72] AMTM: 29 signals  [31/72] SYM: 29 signals  [32/72] ISRG: 29 signals  [33/72] TE: 29 signals  [34/72] EOSE: 29 signals  [35/72] ELVA: 29 signals  [36/72] FLNC: 29 signals  [37/72] QBTS: 29 signals  [38/72] IONQ: 29 signals  [39/72] RGTI: 29 signals  [40/72] GH: 29 signals  [41/72] GRAL: 29 signals  [42/72] MIRM: 29 signals  [43/72] VRT: 29 signals  [44/72] ANET: 29 signals  [45/72] CRML: 29 signals  [46/72] TMC: 29 signals  [47/72] IDR: 29 signals  [48/72] MTZ: 29 signals  [49/72] AGX: 29 signals  [50/72] POWL: 29 signals  [51/72] TMQ: 29 signals  [52/72] UUUU: 29 signals  [53/72] UNH: 29 signals  [54/72] QCOM: 29 signals  [55/72] NFLX: 29 signals  [56/72] JPM: 29 signals  [57/72] GS: 29 signals  [58/72] V: 29 signals  [59/72] XYZ: 29 signals  [60/72] COIN: 29 signals  [61/72] COST: 29 signals  [62/72] SBUX: 29 signals  [63/72] NKE: 29 signals  [64/72] FSLR: 29 signals  [65/72] MP: 29 signals  [66/72] PATH: 29 signals  [67/72] PLTR: 29 signals  [68/72] MSTR: 29 signals  [69/72] MARA: 29 signals  [70/72] RIOT: 29 signals  [71/72] CORZ: 29 signals  [72/72] BITF: 29 signals
+✅ Generated 2088 signal events from 72/72 symbols
+
+📅 Walk-forward split:
+  Train: 2026-01-15 → 2026-02-10 (1224 events)
+  Test:  2026-02-11 → 2026-02-27 (864 events)
+
+── TRAIN SET ──
+
+🔍 Grid search: 10625 weight combos × 6 thresholds = 63750 backtests
+  Progress: 5000/63750 (8%)  Progress: 10000/63750 (16%)  Progress: 15000/63750 (24%)  Progress: 20000/63750 (31%)  Progress: 25000/63750 (39%)  Progress: 30000/63750 (47%)  Progress: 35000/63750 (55%)  Progress: 40000/63750 (63%)  Progress: 45000/63750 (71%)  Progress: 50000/63750 (78%)  Progress: 55000/63750 (86%)  Progress: 60000/63750 (94%)
+✅ 45338 valid results (≥5 trades)
+
+── VALIDATING TOP 20 ON TEST SET ──
+
+============================================================
+  📊 TOP 10 WEIGHT COMBOS (walk-forward validated)
+============================================================
+
+  📌 CURRENT CONFIG: {'momentum': 0.5, 'meanrev': 0.0, 'breakout': 0.15, 'news': 0.25, 'reserve': 0.1}
+     Trades: 492 | WR: 38.4% | PF: 0.50 | PnL: $-1123.61
+
+  #1
+     Weights: mom=0.25 mean=0.65 brk=0.05 news=0.0 rsv=0.05
+     Threshold: 0.2
+     Train: 248 trades, WR=61.3%, PF=1.68, PnL=$467.94
+     Test:  134 trades, WR=61.2%, PF=2.00, PnL=$264.62
+     Gap: 0.1%
+
+  #2
+     Weights: mom=0.2 mean=0.45 brk=0.15 news=0.0 rsv=0.2
+     Threshold: 0.15
+     Train: 257 trades, WR=61.9%, PF=1.68, PnL=$482.89
+     Test:  146 trades, WR=61.6%, PF=1.80, PnL=$254.69
+     Gap: 0.2%
+
+  #3
+     Weights: mom=0.1 mean=0.25 brk=0.15 news=0.0 rsv=0.5
+     Threshold: 0.15
+     Train: 236 trades, WR=61.4%, PF=1.68, PnL=$456.26
+     Test:  126 trades, WR=60.3%, PF=1.89, PnL=$231.37
+     Gap: 1.1%
+
+  #4
+     Weights: mom=0.2 mean=0.5 brk=0.05 news=0.0 rsv=0.25
+     Threshold: 0.2
+     Train: 236 trades, WR=61.4%, PF=1.68, PnL=$456.26
+     Test:  126 trades, WR=60.3%, PF=1.89, PnL=$231.37
+     Gap: 1.1%
+
+  #5
+     Weights: mom=0.2 mean=0.5 brk=0.3 news=0.0 rsv=0.0
+     Threshold: 0.15
+     Train: 236 trades, WR=61.4%, PF=1.68, PnL=$456.26
+     Test:  126 trades, WR=60.3%, PF=1.89, PnL=$231.37
+     Gap: 1.1%
+
+  #6
+     Weights: mom=0.15 mean=0.35 brk=0.15 news=0.0 rsv=0.35
+     Threshold: 0.15
+     Train: 247 trades, WR=61.5%, PF=1.66, PnL=$457.11
+     Test:  139 trades, WR=60.4%, PF=1.71, PnL=$225.98
+     Gap: 1.1%
+
+  #7
+     Weights: mom=0.25 mean=0.55 brk=0.1 news=0.05 rsv=0.05
+     Threshold: 0.15
+     Train: 263 trades, WR=62.0%, PF=1.74, PnL=$510.47
+     Test:  149 trades, WR=59.7%, PF=1.64, PnL=$202.32
+     Gap: 2.2%
+
+  #8
+     Weights: mom=0.25 mean=0.65 brk=0.1 news=0.0 rsv=0.0
+     Threshold: 0.2
+     Train: 236 trades, WR=61.4%, PF=1.67, PnL=$452.96
+     Test:  124 trades, WR=59.7%, PF=1.80, PnL=$208.82
+     Gap: 1.8%
+
+  #9
+     Weights: mom=0.35 mean=0.6 brk=0.0 news=0.05 rsv=0.0
+     Threshold: 0.15
+     Train: 234 trades, WR=62.0%, PF=1.68, PnL=$444.81
+     Test:  124 trades, WR=56.5%, PF=1.33, PnL=$90.67
+     Gap: 5.5%
+
+  #10
+     Weights: mom=0.3 mean=0.4 brk=0.05 news=0.05 rsv=0.2
+     Threshold: 0.2
+     Train: 52 trades, WR=67.3%, PF=2.95, PnL=$173.55
+     Test:  20 trades, WR=60.0%, PF=1.85, PnL=$27.88
+     Gap: 7.3%
+
+⏱️  Completed in 227.0s
+💾 Results saved to C:\Users\moltbot\.openclaw\workspace\Trading_floor_zgnets\backtest_results.json

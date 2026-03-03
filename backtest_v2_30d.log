@@ -1,0 +1,142 @@
+============================================================
+  🏋️ WEIGHT OPTIMIZER BACKTESTER v2 (REALISTIC)
+============================================================
+  Universe: 72 symbols
+  Period: 30 days
+  Grid step: 0.05
+  Stop-loss: ATR×2.0 (fallback 2%)
+  Take-profit: 5%
+  Trailing: BE@1.5%, trail@2.5%
+  Slippage: 5bps | Commission: $0.005
+  Max positions/day: 4
+  Challenge threshold: 0.9
+  Min volume: 100,000 | Min price: $5
+  Current weights: {'momentum': 0.5, 'meanrev': 0.0, 'breakout': 0.15, 'news': 0.25, 'reserve': 0.1}
+
+📊 Downloading 30d of 5m data for 72 symbols...
+  [1/72] SPY: 29 signals  [2/72] QQQ: 29 signals  [3/72] MSFT: 29 signals  [4/72] NVDA: 29 signals  [5/72] AMZN: 29 signals  [6/72] GOOGL: 28 signals  [7/72] META: 14 signals  [8/72] GME: 7 signals  [9/72] HUT: 2 signals  [10/72] TSLA: 29 signals  [11/72] ORCL: 29 signals  [12/72] CRWD: 3 signals  [13/72] AMD: 29 signals  [14/72] NBIS: 16 signals  [15/72] IREN: 29 signals  [16/72] TSM: 17 signals  [17/72] ASML: 0 signals  [18/72] RKLB: 23 signals  [19/72] ASTS: 16 signals  [20/72] LUNR: 8 signals  [21/72] RDW: 25 signals  [22/72] GEV: 0 signals  [23/72] CEG: 1 signals  [24/72] ONDS: 29 signals  [25/72] CCJ: 2 signals  [26/72] OKLO: 9 signals  [27/72] VST: 3 signals  [28/72] KTOS: 2 signals  [29/72] AVAV: 0 signals  [30/72] AMTM: 0 signals  [31/72] SYM: 0 signals  [32/72] ISRG: 0 signals  [33/72] TE: 28 signals  [34/72] EOSE: 21 signals  [35/72] ELVA: 0 signals  [36/72] FLNC: 5 signals  [37/72] QBTS: 28 signals  [38/72] IONQ: 27 signals  [39/72] RGTI: 29 signals  [40/72] GH: 0 signals  [41/72] GRAL: 0 signals  [42/72] MIRM: 0 signals  [43/72] VRT: 3 signals  [44/72] ANET: 4 signals  [45/72] CRML: 15 signals  [46/72] TMC: 7 signals  [47/72] IDR: 0 signals  [48/72] MTZ: 0 signals  [49/72] AGX: 0 signals  [50/72] POWL: 0 signals  [51/72] TMQ: 2 signals  [52/72] UUUU: 21 signals  [53/72] UNH: 11 signals  [54/72] QCOM: 4 signals  [55/72] NFLX: 29 signals  [56/72] JPM: 7 signals  [57/72] GS: 0 signals  [58/72] V: 4 signals  [59/72] XYZ: 8 signals  [60/72] COIN: 13 signals  [61/72] COST: 0 signals  [62/72] SBUX: 4 signals  [63/72] NKE: 22 signals  [64/72] FSLR: 1 signals  [65/72] MP: 8 signals  [66/72] PATH: 28 signals  [67/72] PLTR: 29 signals  [68/72] MSTR: 23 signals  [69/72] MARA: 29 signals  [70/72] RIOT: 21 signals  [71/72] CORZ: 6 signals  [72/72] BITF: 0 signals
+✅ Generated 903 signal events from 72/72 symbols
+  📋 Filtered out: 1139 low-volume, 46 under-$5
+
+📅 Walk-forward split:
+  Train: 2026-01-15 → 2026-02-10 (556 events, 17 days)
+  Test:  2026-02-11 → 2026-02-27 (347 events, 12 days)
+
+── TRAIN SET ──
+
+🔍 Grid search: 10625 combos × 6 thresholds = 63750 backtests
+  Progress: 5000/63750 (8%)  Progress: 10000/63750 (16%)  Progress: 15000/63750 (24%)  Progress: 20000/63750 (31%)  Progress: 25000/63750 (39%)  Progress: 30000/63750 (47%)  Progress: 35000/63750 (55%)  Progress: 40000/63750 (63%)  Progress: 45000/63750 (71%)  Progress: 50000/63750 (78%)  Progress: 55000/63750 (86%)  Progress: 60000/63750 (94%)
+✅ 16345 valid results (≥30 trades)
+
+── VALIDATING TOP 20 ON TEST SET ──
+
+============================================================
+  📊 TOP 10 WEIGHT COMBOS (v2 — REALISTIC)
+============================================================
+
+  📌 CURRENT CONFIG: {'momentum': 0.5, 'meanrev': 0.0, 'breakout': 0.15, 'news': 0.25, 'reserve': 0.1} @ threshold=0.25
+     Trades: 64 | WR: 34.4% | PF: 0.70 | PnL: $-128.57
+     Stops: 32 | TPs: 2 | Trailing: 1 | Time-exit: 29
+
+  #1
+     Weights: mom=0.25 mean=0.15 brk=0.0 news=0.0 rsv=0.6
+     Threshold: 0.15
+     Train: 30 trades, WR=60.0%, PF=1.40, PnL=$53.33
+     Test:  15 trades, WR=60.0%, PF=2.86, PnL=$66.88
+     Gap: 0.0%
+     Exits: stop=5 tp=0 trail=2 time=8
+     Best: NBIS($24), ANET($16), EOSE($15)
+     Worst: RIOT($-13), TSLA($-6), ORCL($-6)
+
+  #2
+     Weights: mom=0.5 mean=0.3 brk=0.0 news=0.0 rsv=0.2
+     Threshold: 0.15
+     Train: 30 trades, WR=60.0%, PF=1.40, PnL=$53.33
+     Test:  15 trades, WR=60.0%, PF=2.86, PnL=$66.88
+     Gap: 0.0%
+     Exits: stop=5 tp=0 trail=2 time=8
+     Best: NBIS($24), ANET($16), EOSE($15)
+     Worst: RIOT($-13), TSLA($-6), ORCL($-6)
+
+  #3
+     Weights: mom=0.6 mean=0.35 brk=0.0 news=0.0 rsv=0.05
+     Threshold: 0.15
+     Train: 30 trades, WR=60.0%, PF=1.40, PnL=$53.33
+     Test:  17 trades, WR=58.8%, PF=2.73, PnL=$70.17
+     Gap: 1.2%
+     Exits: stop=5 tp=0 trail=2 time=10
+     Best: NBIS($24), ANET($16), EOSE($15)
+     Worst: RIOT($-13), TSLA($-6), ORCL($-6)
+
+  #4
+     Weights: mom=0.1 mean=0.25 brk=0.05 news=0.0 rsv=0.6
+     Threshold: 0.15
+     Train: 31 trades, WR=48.4%, PF=1.85, PnL=$90.95
+     Test:  20 trades, WR=50.0%, PF=3.55, PnL=$96.95
+     Gap: 1.6%
+     Exits: stop=5 tp=0 trail=0 time=15
+     Best: MARA($33), UUUU($25), RGTI($21)
+     Worst: RKLB($-13), MSTR($-13), AMZN($-5)
+
+  #5
+     Weights: mom=0.2 mean=0.5 brk=0.1 news=0.0 rsv=0.2
+     Threshold: 0.15
+     Train: 31 trades, WR=48.4%, PF=1.85, PnL=$90.95
+     Test:  20 trades, WR=50.0%, PF=3.55, PnL=$96.95
+     Gap: 1.6%
+     Exits: stop=5 tp=0 trail=0 time=15
+     Best: MARA($33), UUUU($25), RGTI($21)
+     Worst: RKLB($-13), MSTR($-13), AMZN($-5)
+
+  #6
+     Weights: mom=0.25 mean=0.55 brk=0.05 news=0.0 rsv=0.15
+     Threshold: 0.15
+     Train: 33 trades, WR=51.5%, PF=1.83, PnL=$98.38
+     Test:  21 trades, WR=57.1%, PF=2.78, PnL=$91.62
+     Gap: 5.6%
+     Exits: stop=6 tp=0 trail=0 time=15
+     Best: MARA($33), UUUU($25), RGTI($21)
+     Worst: TE($-18), RKLB($-13), MSTR($-13)
+
+  #7
+     Weights: mom=0.2 mean=0.6 brk=0.15 news=0.0 rsv=0.05
+     Threshold: 0.15
+     Train: 33 trades, WR=48.5%, PF=1.86, PnL=$95.01
+     Test:  19 trades, WR=47.4%, PF=2.98, PnL=$75.22
+     Gap: 1.1%
+     Exits: stop=5 tp=0 trail=0 time=14
+     Best: MARA($33), UUUU($25), COIN($16)
+     Worst: RKLB($-13), MSTR($-13), AMZN($-5)
+
+  #8
+     Weights: mom=0.2 mean=0.45 brk=0.05 news=0.0 rsv=0.3
+     Threshold: 0.15
+     Train: 33 trades, WR=51.5%, PF=1.83, PnL=$98.38
+     Test:  20 trades, WR=55.0%, PF=2.71, PnL=$88.09
+     Gap: 3.5%
+     Exits: stop=6 tp=0 trail=0 time=14
+     Best: MARA($33), UUUU($25), RGTI($21)
+     Worst: TE($-18), RKLB($-13), MSTR($-13)
+
+  #9
+     Weights: mom=0.3 mean=0.65 brk=0.05 news=0.0 rsv=0.0
+     Threshold: 0.15
+     Train: 33 trades, WR=51.5%, PF=1.83, PnL=$98.38
+     Test:  20 trades, WR=55.0%, PF=2.36, PnL=$70.39
+     Gap: 3.5%
+     Exits: stop=6 tp=0 trail=0 time=14
+     Best: MARA($33), UUUU($25), COIN($16)
+     Worst: TE($-18), RKLB($-13), MSTR($-13)
+
+  #10
+     Weights: mom=0.05 mean=0.1 brk=0.0 news=0.0 rsv=0.85
+     Threshold: 0.15
+     Train: 34 trades, WR=50.0%, PF=1.63, PnL=$81.26
+     Test:  21 trades, WR=57.1%, PF=2.39, PnL=$71.51
+     Gap: 7.1%
+     Exits: stop=6 tp=0 trail=0 time=15
+     Best: MARA($33), UUUU($25), COIN($16)
+     Worst: TE($-18), RKLB($-13), MSTR($-13)
+
+⏱️  Completed in 198.8s
+💾 Results saved to C:\Users\moltbot\.openclaw\workspace\Trading_floor_zgnets\backtest_results.json
