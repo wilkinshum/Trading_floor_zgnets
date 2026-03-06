@@ -57,6 +57,7 @@ class SwingStrategy(BaseStrategy):
         ])
         self.exclusions = sc.get("universe_exclude", [])
         self.sl_cooldown_days = sc.get("sl_cooldown_days", 0)
+        self.signal_alignment_min = sc.get("signal_alignment_min", 0)
         self._sl_cooldown_tracker: Dict[str, datetime] = {}  # symbol -> SL exit datetime
         self.min_shares = cfg.get("broker", {}).get("min_shares", 10)
 
@@ -161,11 +162,14 @@ class SwingStrategy(BaseStrategy):
             if abs(score) < self.threshold:
                 continue
 
-            side = "buy" if score > 0 else "sell"
+            # Signal alignment filter: skip if momentum and meanrev disagree in direction
+            mom_score = raw_scores.get("momentum", 0)
+            mr_score = raw_scores.get("meanrev", 0)
+            if self.signal_alignment_min > 0 and mom_score != 0 and mr_score != 0:
+                if (mom_score > 0) != (mr_score > 0):
+                    continue
 
-            # Only buy in swing
-            if side != "buy":
-                continue
+            side = "buy" if score > 0 else "sell"
 
             # SL cooldown — skip if recently stopped out
             if self.sl_cooldown_days > 0 and sym in self._sl_cooldown_tracker:
@@ -205,6 +209,18 @@ class SwingStrategy(BaseStrategy):
             ))
 
         signals.sort(key=lambda s: abs(s.score), reverse=True)
+
+        # Daily plan integration: boost focus stocks
+        daily_plan = self.load_daily_plan()
+        if daily_plan:
+            focus = set(daily_plan.get("focus_longs", []))
+            logger.info("SwingStrategy: daily_plan loaded (bias=%s, focus=%s)",
+                        daily_plan.get("bias"), list(focus)[:5])
+            for sig in signals:
+                if sig.symbol in focus:
+                    sig.score *= 1.2
+                    sig.metadata["daily_plan_focus"] = True
+
         logger.info("SwingStrategy scan: %d signals", len(signals))
         return signals
 
@@ -215,6 +231,14 @@ class SwingStrategy(BaseStrategy):
         results = []
         open_count = self._open_position_count()
 
+        # Macro risk: scale position sizes
+        daily_plan = self.load_daily_plan()
+        macro_scale = self.get_macro_position_scale(daily_plan)
+        if macro_scale < 1.0:
+            macro_risk = daily_plan.get("macro", {}).get("risk_level", "unknown") if daily_plan else "unknown"
+            logger.info("SwingStrategy: macro %s → position size scaled to %.0f%%",
+                        macro_risk, macro_scale * 100)
+
         for sig in signals:
             if open_count >= self.max_positions:
                 results.append({"status": "rejected", "reason": "max_positions",
@@ -222,32 +246,40 @@ class SwingStrategy(BaseStrategy):
                 continue
 
             price = sig.metadata.get("price", 0.0)
-            if price <= 0:
+            import math
+            if not math.isfinite(price) or price <= 0:
                 results.append({"status": "rejected", "reason": "no_price",
                                 "symbol": sig.symbol})
                 continue
 
             available = self.budgeter.get_available(STRATEGY_NAME)
             cost = min(available, self.budget / self.max_positions)
+            cost *= macro_scale  # Apply macro risk scaling
             if cost <= 0:
                 results.append({"status": "rejected", "reason": "no_budget",
                                 "symbol": sig.symbol})
                 continue
 
             qty = int(cost // price)
-            if qty < self.min_shares:
+            min_qty = self.dynamic_min_shares(price)
+            if qty < min_qty:
                 results.append({"status": "rejected", "reason": "min_shares",
-                                "symbol": sig.symbol, "qty": qty})
+                                "symbol": sig.symbol, "qty": qty, "min_qty": min_qty})
                 continue
 
             estimated_cost = qty * price
-            sl_price = round(price * (1 - self.sl_pct), 2)
+            if sig.side == "buy":
+                sl_price = round(price * (1 - self.sl_pct), 2)
+                tp_price = round(price * (1 + self.tp_pct), 2)
+            else:  # short
+                sl_price = round(price * (1 + self.sl_pct), 2)
+                tp_price = round(price * (1 - self.tp_pct), 2)
 
             pos_id = self._create_position_meta(sig, price, qty, sl_price)
 
             ts = int(datetime.now(timezone.utc).timestamp() * 1000)
 
-            # Submit market order for entry + stop-market for SL
+            # Submit market order for entry
             result = self.exec_svc.submit(
                 symbol=sig.symbol,
                 qty=qty,
@@ -259,23 +291,68 @@ class SwingStrategy(BaseStrategy):
             )
 
             if result.get("status") == "submitted":
-                # Also submit stop-loss order
+                # Place OCO order (TP + SL) on Alpaca as broker-level protection
                 try:
-                    self.exec_svc.submit(
-                        symbol=sig.symbol,
-                        qty=qty,
-                        side="sell",
-                        strategy=STRATEGY_NAME,
-                        order_type="stop",
-                        stop_price=sl_price,
-                        position_meta_id=pos_id,
-                    )
+                    self._place_oco_exit(sig.symbol, qty, sig.side, tp_price, sl_price)
+                    logger.info("SwingStrategy: OCO exit placed for %s — TP=$%.2f SL=$%.2f",
+                                sig.symbol, tp_price, sl_price)
                 except Exception as e:
-                    logger.warning("SwingStrategy: stop order failed for %s: %s", sig.symbol, e)
+                    logger.warning("SwingStrategy: OCO exit failed for %s: %s — 5min cron will cover",
+                                   sig.symbol, e)
                 open_count += 1
 
             results.append(result)
         return results
+
+    # ── broker-level OCO exits ───────────────────────────────
+
+    def _place_oco_exit(self, symbol: str, qty: int, entry_side: str,
+                         tp_price: float, sl_price: float):
+        """Place an OCO order on Alpaca: limit (TP) + stop (SL).
+
+        One-cancels-other ensures broker-level protection with zero gap.
+        The 5-min exit cron handles trailing adjustments and can cancel/replace
+        these orders when tightening stops.
+        """
+        from alpaca.trading.client import TradingClient
+        from alpaca.trading.requests import OrderRequest, TakeProfitRequest, StopLossRequest
+        from alpaca.trading.enums import OrderSide, TimeInForce, OrderClass, OrderType
+        import os
+
+        api_key = os.environ.get('ALPACA_API_KEY', '')
+        api_secret = os.environ.get('ALPACA_API_SECRET', '')
+        client = TradingClient(api_key, api_secret, paper=True)
+
+        exit_side = OrderSide.SELL if entry_side == "buy" else OrderSide.BUY
+
+        client.submit_order(OrderRequest(
+            symbol=symbol,
+            qty=qty,
+            side=exit_side,
+            type=OrderType.LIMIT,
+            time_in_force=TimeInForce.GTC,
+            order_class=OrderClass.OCO,
+            take_profit=TakeProfitRequest(limit_price=tp_price),
+            stop_loss=StopLossRequest(stop_price=sl_price),
+        ))
+
+    def _cancel_open_orders_for(self, symbol: str):
+        """Cancel all open orders for a given symbol on Alpaca."""
+        from alpaca.trading.client import TradingClient
+        from alpaca.trading.requests import GetOrdersRequest
+        from alpaca.trading.enums import QueryOrderStatus
+        import os
+
+        api_key = os.environ.get('ALPACA_API_KEY', '')
+        api_secret = os.environ.get('ALPACA_API_SECRET', '')
+        client = TradingClient(api_key, api_secret, paper=True)
+
+        orders = client.get_orders(filter=GetOrdersRequest(
+            status=QueryOrderStatus.OPEN, symbols=[symbol]
+        ))
+        for order in orders:
+            client.cancel_order_by_id(order.id)
+            logger.info("SwingStrategy: cancelled %s order %s for %s", order.type, order.id, symbol)
 
     # ── manage_exits ─────────────────────────────────────────
 
@@ -321,15 +398,15 @@ class SwingStrategy(BaseStrategy):
 
             exit_reason = None
 
-            # 1. TP check (15%)
+            # 1. TP check
             if gain_pct >= self.tp_pct:
                 exit_reason = "tp"
 
-            # 2. SL verify (should be caught by stop order, but double-check)
+            # 2. SL verify (should be caught by OCO stop, but double-check)
             elif gain_pct <= -self.sl_pct:
                 exit_reason = "sl"
 
-            # 3. Max hold (10 days)
+            # 3. Max hold
             elif days_held >= self.max_hold_days:
                 exit_reason = "time"
 
@@ -340,12 +417,46 @@ class SwingStrategy(BaseStrategy):
                     trail_pct = self.time_decay_pct  # tighten to 2.5%
 
                 # Calculate trail stop from high water mark
-                # For simplicity, use current gain as proxy
                 trail_stop_pct = gain_pct - trail_pct
                 if trail_stop_pct <= 0:
                     exit_reason = "trail"
+                else:
+                    # Tighten the broker-level SL via OCO replacement
+                    new_sl = round(current_price * (1 - trail_pct), 2)
+                    tp_price = round(entry_price * (1 + self.tp_pct), 2)
+                    # Only ratchet UP — never lower the trailing stop
+                    existing_sl = pos.get("stop_price", 0) or 0
+                    if new_sl <= existing_sl:
+                        logger.info("SwingStrategy: skip trail for %s — new SL $%.2f <= existing $%.2f",
+                                    sym, new_sl, existing_sl)
+                        continue
+                    try:
+                        self._cancel_open_orders_for(sym)
+                        self._place_oco_exit(sym, abs(alpaca_pos["qty"]),
+                                              pos.get("side", "buy"), tp_price, new_sl)
+                        logger.info("SwingStrategy: trailing SL tightened for %s — new SL=$%.2f (trail=%.1f%%)",
+                                    sym, new_sl, trail_pct * 100)
+                        # Persist new stop_price so ratchet guard works next cycle
+                        try:
+                            conn = self.db._get_conn()
+                            conn.execute("UPDATE position_meta SET stop_price=? WHERE id=?", (new_sl, pos_id))
+                            conn.commit()
+                            conn.close()
+                        except Exception as db_e:
+                            logger.warning("SwingStrategy: failed to persist trail SL for %s: %s", sym, db_e)
+                        actions.append({
+                            "symbol": sym, "action": "trail_tighten",
+                            "new_sl": new_sl, "gain_pct": gain_pct, "days_held": days_held,
+                        })
+                    except Exception as e:
+                        logger.warning("SwingStrategy: trail SL update failed for %s: %s", sym, e)
 
             if exit_reason:
+                # Cancel any existing OCO orders before market exit
+                try:
+                    self._cancel_open_orders_for(sym)
+                except Exception as e:
+                    logger.warning("SwingStrategy: failed to cancel orders for %s before exit: %s", sym, e)
                 # Track SL cooldown
                 if exit_reason == "sl" and self.sl_cooldown_days > 0:
                     self._sl_cooldown_tracker[sym] = now
@@ -434,7 +545,10 @@ class SwingStrategy(BaseStrategy):
 
     def _create_position_meta(self, sig: Signal, price: float, qty: int,
                                sl_price: float) -> int:
-        tp_price = round(price * (1 + self.tp_pct), 2)
+        if sig.side == "buy":
+            tp_price = round(price * (1 + self.tp_pct), 2)
+        else:  # short
+            tp_price = round(price * (1 - self.tp_pct), 2)
         sector = sig.metadata.get("sector", "Unknown")
         conn = self.db._get_conn()
         try:

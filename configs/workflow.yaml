@@ -1,6 +1,6 @@
-universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, TSLA, ORCL, CRWD, AMD, NBIS, IREN, TSM, ASML, ASTS, LUNR, RDW, GEV, CEG, CCJ, OKLO, VST, KTOS, AVAV, AMTM, SYM, ISRG, TE, EOSE, ELVA, FLNC, QBTS, IONQ, RGTI, GH, GRAL, MIRM, VRT, ANET, CRML, TMC, IDR, MTZ, AGX, POWL, TMQ, UUUU, UNH, QCOM, NFLX, JPM, GS, V, XYZ, COIN, COST, SBUX, NKE, FSLR, MP, PATH, PLTR, MSTR, MARA, RIOT, CORZ, BITF]
+universe: [SPY, QQQ, MSFT, NVDA, AMZN, GOOGL, META, GME, TSLA, ORCL, CRWD, AMD, NBIS, IREN, TSM, ASML, ASTS, LUNR, RDW, GEV, CEG, CCJ, OKLO, VST, KTOS, AVAV, AMTM, SYM, ISRG, TE, EOSE, ELVA, FLNC, QBTS, IONQ, RGTI, GH, GRAL, MIRM, VRT, ANET, CRML, TMC, IDR, MTZ, AGX, POWL, TMQ, UUUU, UNH, QCOM, NFLX, JPM, GS, V, XYZ, COIN, COST, SBUX, NKE, FSLR, MP, PATH, PLTR, MSTR, MARA, RIOT, CORZ, BITF, XOM, CVX, OXY, COP, SLB, LMT, RTX, NOC, GD, GLD, NEM, GOLD, DAL, UAL, AAL, ZIM, NEE, DUK, SO, LLY, ABBV, T, VZ, MOS, ADM]
 # Excluded: RKLB, ONDS, HUT — persistent losers across all backtest configs (v3.1 analysis)
-scout_top_n: 5
+scout_top_n: 15
 min_avg_volume: 100000
 hours:
   tz: America/New_York
@@ -58,11 +58,11 @@ signals:
   sizing_method: volatility          # volatility | kelly | fixed_fractional
   fixed_fraction: 0.02               # for fixed_fractional sizing
   weights:
-    momentum: 0.50
-    meanrev: 0.00
-    breakout: 0.15
-    news: 0.25
-    reserve: 0.10
+    momentum: 0.55
+    meanrev: 0.35
+    breakout: 0.00
+    news: 0.10
+    reserve: 0.00
 
 alpaca:
   # DO NOT commit secrets here. Use env vars instead:
@@ -112,18 +112,20 @@ shadow_mode:
 broker:
   provider: alpaca
   mode: paper
-  starting_equity: 5000
+  starting_equity: 26000
+  trading_capital: 5000      # Self-imposed: only trade with $5k, rest is PDT buffer
+  compound_interval_days: 60 # Every 2 months, compound gains into trading capital
   min_shares: 10
 
 strategies:
   intraday:
-    enabled: true
+    enabled: false
     budget: 2000
     max_positions: 3
-    weights: {momentum: 0.65, meanrev: 0.00, breakout: 0.00, news: 0.25}
-    threshold: 0.30
-    take_profit: 0.035
-    stop_loss_atr: 2.0
+    weights: {momentum: 0.25, meanrev: 0.00, breakout: 0.45, news: 0.20}
+    threshold: 0.65
+    take_profit: 0.015
+    stop_loss_atr: 4.0
     close_by: "15:45"
     universe_exclude: [RKLB, ONDS, HUT, AVAV, MP, POWL]
 
@@ -137,7 +139,7 @@ strategies:
     take_profit: 0.09
     stop_loss: 0.08
     max_hold_days: 10
-    trailing_trigger: 0.08
+    trailing_trigger: 0.04
     trailing_pct: 0.04
     time_decay_trail_after_day: 5
     time_decay_trail_pct: 0.025
@@ -146,6 +148,7 @@ strategies:
       - {start: "15:45", end: "15:55", bias: "trend_confirmation"}
     universe_exclude: [RKLB, ONDS, HUT, IONQ, RGTI, AVAV, MP, POWL]
     sl_cooldown_days: 5  # block re-entry after SL for N trading days
+    signal_alignment_min: 0.6  # require momentum and meanrev to agree in direction
 
 self_learning:
   enabled: true
@@ -172,8 +175,8 @@ self_learning:
     min_weight_floor: 0.02
     attribution: spy_adjusted
     baselines:
-      directional: {momentum: 0.60, meanrev: 0.20, breakout: 0.00, news: 0.15, reserve: 0.05}
-      non_directional: {momentum: 0.40, meanrev: 0.40, breakout: 0.00, news: 0.15, reserve: 0.05}
+      directional: {momentum: 0.55, meanrev: 0.35, breakout: 0.00, news: 0.10, reserve: 0.00}
+      non_directional: {momentum: 0.45, meanrev: 0.35, breakout: 0.00, news: 0.15, reserve: 0.05}
   safety:
     revert_after_consecutive_losing_days: 5
     revert_after_cumulative_loss: 50
