@@ -112,7 +112,7 @@ shadow_mode:
 broker:
   provider: alpaca
   mode: paper
-  starting_equity: 26000
+  starting_equity: 30000
   trading_capital: 5000      # Self-imposed: only trade with $5k, rest is PDT buffer
   compound_interval_days: 60 # Every 2 months, compound gains into trading capital
   min_shares: 10
@@ -123,7 +123,7 @@ strategies:
     budget: 2000
     max_positions: 3
     weights: {momentum: 0.25, meanrev: 0.00, breakout: 0.45, news: 0.20}
-    threshold: 0.65
+    threshold: 0.25
     take_profit: 0.015
     stop_loss_atr: 4.0
     close_by: "15:45"
@@ -144,11 +144,18 @@ strategies:
     time_decay_trail_after_day: 5
     time_decay_trail_pct: 0.025
     entry_windows:
-      - {start: "09:35", end: "10:00", bias: "gap_continuation"}
-      - {start: "15:45", end: "15:55", bias: "trend_confirmation"}
+      - {start: "09:35", end: "11:00", bias: "gap_continuation"}
     universe_exclude: [RKLB, ONDS, HUT, IONQ, RGTI, AVAV, MP, POWL]
     sl_cooldown_days: 5  # block re-entry after SL for N trading days
     signal_alignment_min: 0.6  # require momentum and meanrev to agree in direction
+
+  orb:
+    enabled: true
+    budget: 3000
+    max_positions: 2
+    max_per_sector: 1
+    close_by: "11:30"
+    universe_exclude: []  # ORB uses scanner, not static universe
 
 self_learning:
   enabled: true

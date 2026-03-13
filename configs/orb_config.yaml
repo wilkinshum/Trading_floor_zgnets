@@ -1,0 +1,147 @@
+# ORB Trading Desk Configuration
+# Version: 1.0.0 | Phase 1
+# DO NOT EDIT without updating docs/orb_hypothesis_log.md
+
+orb:
+  # Capital ($30K total: $25K PDT floor + $3K ORB + $2K swing)
+  capital: 3000
+  max_risk_pct: 0.02          # 2% of capital = $60/trade
+  max_notional_pct: 0.50      # 50% of capital = $1,500 max position
+  daily_loss_cap: 120         # 2 full losses then stop (finance agent rec)
+
+  # Range
+  range_timeframe_min: 15
+  range_start: "09:30"
+  range_end: "09:45"
+
+  # Scanner (pre-market)
+  scanner:
+    gap_min_pct: 2.0
+    gap_max_pct: 5.0
+    premarket_vol_min: 300000
+    atr_min: 1.50
+    price_min: 10
+    price_max: 500
+    avg_daily_vol_min: 1000000
+    max_candidates: 8
+    vol_acceleration_threshold: 2.0
+    exclude_earnings_today: true
+
+  # Entry
+  entry:
+    consolidation:
+      min_candles: 3
+      range_contraction_threshold: 0.90
+      band_max_pct_of_mm: 0.35
+      band_max_pct_of_price: 0.006
+      location_pct: 0.30
+    breakout:
+      min_extension_pct: 0.10
+      min_vol_multiple: 1.2
+    retest:
+      proximity_pct_price: 0.005
+      proximity_pct_mm_min: 0.20
+      proximity_pct_mm_max: 0.25
+      body_ratio_min: 0.60
+    max_retries: 1
+    gap_direction_only: true
+    spread_max_pct: 0.003
+    data_freshness_sec: 15
+    max_wave1_time: "10:30"
+    max_wave23_time: "11:00"
+    wave3_min_minutes_to_close: 45
+
+  # Exit
+  exit:
+    partial_pct: 0.50
+    partial_target_pct_of_mm: 0.50
+    trailing_stop_atr_multiple: 0.5
+    trailing_stop_floor_pct: 0.0075
+    time_stop: "11:30"
+    breakeven_tighten_time: "10:45"
+    tight_trail_time: "11:00"
+    tight_trail_pct: 0.003
+    target_scale:
+      - {before: "09:55", scale: 1.00}
+      - {before: "10:15", scale: 0.80}
+      - {before: "10:30", scale: 0.60}
+      - {after: "10:30", scale: 0.50}
+
+  # Risk
+  risk:
+    flash_crash_cap: 400
+    max_positions: 2
+    max_total_positions: 5    # floor-wide: 2 ORB + 3 swing
+    max_waves_per_stock: 3
+    max_per_sector: 1
+    circuit_breakers:
+      - {drawdown_pct: 0.10, balance: 2700, action: "reduce_75"}
+      - {drawdown_pct: 0.20, balance: 2400, action: "reduce_50"}
+      - {drawdown_pct: 0.30, balance: 2100, action: "full_stop"}
+
+  # Regime
+  regime:
+    states:
+      trending_low_vol:  {vix_max: 18, adx_min: 25, size_pct: 1.0, max_waves: 3}
+      trending_high_vol: {vix_min: 18, vix_max: 25, adx_min: 25, size_pct: 0.75, max_waves: 3}
+      choppy_low_vol:    {vix_max: 18, adx_max: 20, size_pct: 0.75, max_waves: 1}
+      choppy_high_vol:   {vix_min: 18, vix_max: 25, adx_max: 20, size_pct: 0.50, max_waves: 1}
+      crash:             {vix_min: 30, size_pct: 0.0, max_waves: 0}
+    special_days: [FOMC, CPI, NFP, OPEX]
+    special_day_size_pct: 0.50
+    spy_orb_low_conviction_pct: 0.003
+
+  # Monitor
+  monitor:
+    poll_intervals:
+      watching_consolidation: 30
+      watching_breakout: 15
+      watching_retest: 10
+      in_position: 10
+    heartbeat_timeout_sec: 120
+    state_file: "web/orb_state.json"
+    log_dir: "logs"
+
+  # Self-learning (ORB-specific signals)
+  self_learning:
+    signals:
+      - breakout_quality
+      - retest_quality
+      - measured_move_hit
+      - gap_alignment
+      - sector_sentiment
+      - consolidation_duration
+      - volume_profile_at_entry
+      - time_of_entry
+    weights:
+      breakout_quality: 0.20
+      retest_quality: 0.20
+      measured_move_hit: 0.15
+      gap_alignment: 0.10
+      sector_sentiment: 0.10
+      consolidation_duration: 0.10
+      volume_profile_at_entry: 0.10
+      time_of_entry: 0.05
+    auto_apply: false
+    eta: 0.10
+    max_drift: 0.10
+    min_weight_floor: 0.02
+
+  # Alpha decay
+  alpha_decay:
+    sharpe_windows: [20, 60, 120]
+    win_rate_window: 20
+    min_trades_for_alert: 30
+    auto_throttle:
+      - {condition: "sharpe_20d_declining_2w", action: "alert"}
+      - {condition: "sharpe_20d_below_60d", action: "reduce_50"}
+      - {condition: "all_sharpe_declining", action: "reduce_25"}
+      - {condition: "wr_below_35_30trades", action: "pause"}
+
+  # Execution
+  execution:
+    order_type: "limit"
+    time_in_force: "day"
+    entry_slip_cents: 3
+    confirm_timeout_sec: 30
+    confirm_poll_sec: 5
