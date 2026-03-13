@@ -96,7 +96,9 @@ class TestOrbConfig(unittest.TestCase):
 
     def test_regime_state_json(self):
         data = self._load_json(self.regime_state_path)
-        self.assertIn('regime', data)
+        # Live regime monitor writes 'hmm' key (not 'regime')
+        self.assertTrue('regime' in data or 'hmm' in data,
+                        "Expected 'regime' or 'hmm' key in regime_state.json")
         if 'orb_size_pct' in data:
             self.assertGreaterEqual(data['orb_size_pct'], 0.0)
             self.assertLessEqual(data['orb_size_pct'], 1.0)

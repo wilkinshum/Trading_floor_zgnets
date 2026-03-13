@@ -36,18 +36,27 @@ class TestOrbConfigSchema(unittest.TestCase):
 
     def test_time_strings_format(self):
         data = self._load_yaml(self.orb_config_path)
+        # Only check keys that are actual time-of-day fields, not arbitrary strings
+        TIME_KEYS = {'time_breakeven', 'time_tight', 'time_force_close',
+                     'wave1_start', 'wave1_end', 'wave2_start', 'wave2_end',
+                     'dead_zone_start', 'dead_zone_end', 'scan_time', 'range_time'}
         for path, value in self._walk(data):
-            if isinstance(value, str):
-                key = path[-1].lower() if path else ''
-                if ':' in value or 'time' in key:
+            if isinstance(value, str) and path:
+                key = path[-1].lower()
+                if key in TIME_KEYS:
                     self.assertRegex(value, TIME_RE, msg=f"Invalid time format at {'.'.join(path)}: {value}")
 
     def test_percentage_values_between_zero_and_one(self):
         data = self._load_yaml(self.orb_config_path)
+        # Some _pct fields are actual percentages (e.g. gap_min_pct: 2.0 = 2%)
+        # Only enforce 0-1 range on fields that are true ratios
+        RATIO_KEYS = {'partial_pct', 'partial_target_pct', 'trailing_min_pct',
+                      'stop_mm_pct', 'time_tight_pct', 'spread_max_pct',
+                      'drawdown_pct', 'size_pct'}
         for path, value in self._walk(data):
-            if isinstance(value, (int, float)):
-                key = path[-1].lower() if path else ''
-                if 'pct' in key or 'percent' in key:
+            if isinstance(value, (int, float)) and path:
+                key = path[-1].lower()
+                if key in RATIO_KEYS:
                     self.assertGreaterEqual(value, 0.0, msg=f"{'.'.join(path)} below 0")
                     self.assertLessEqual(value, 1.0, msg=f"{'.'.join(path)} above 1")
 
